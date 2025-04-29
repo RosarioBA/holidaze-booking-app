@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import VenuesPage from '../pages/venue/VenuesPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const AppRoutes = () => {
@@ -12,6 +13,11 @@ const AppRoutes = () => {
       <Route path="/" element={
         <Layout>
           <HomePage />
+        </Layout>
+      } />
+      <Route path="/venues" element={
+        <Layout>
+          <VenuesPage />
         </Layout>
       } />
       <Route path="/login" element={
