@@ -1,13 +1,22 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Profile } from '../types/user';
+
+interface User {
+  name: string;
+  email: string;
+  avatar?: {
+    url: string;
+    alt: string;
+  };
+  venueManager: boolean;
+}
 
 interface AuthContextType {
-  user: Profile | null;
+  user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isVenueManager: boolean;
-  login: (token: string, userProfile: Profile) => void;
+  login: (token: string, userData: User) => void;
   logout: () => void;
 }
 
@@ -26,30 +35,42 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<Profile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   
-  // Check if user is already logged in on component mount
+  // Load user data from localStorage on initial render
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
     
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+    if (storedToken && storedUser) {
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        // If there's an error parsing the user data, clear the storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
   }, []);
   
-  const login = (newToken: string, userProfile: Profile) => {
+  const login = (newToken: string, userData: User) => {
+    // Save to localStorage
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userProfile));
+    localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Update state
     setToken(newToken);
-    setUser(userProfile);
+    setUser(userData);
   };
   
   const logout = () => {
+    // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Update state
     setToken(null);
     setUser(null);
   };

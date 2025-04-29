@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
-  const { isAuthenticated, isVenueManager, user, logout } = useAuth();
+  const { isAuthenticated, isVenueManager, logout } = useAuth();
   
   return (
     <header className="bg-white shadow-md">
