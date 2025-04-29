@@ -1,8 +1,15 @@
 // src/types/user.ts
-export interface Profile {
+export interface MediaObject {
+    url: string;
+    alt: string;
+  }
+  
+  export interface Profile {
     name: string;
     email: string;
-    avatar?: string;
+    bio?: string;
+    avatar?: MediaObject;
+    banner?: MediaObject;
     venueManager: boolean;
   }
   
@@ -10,7 +17,9 @@ export interface Profile {
     name: string;
     email: string;
     password: string;
-    avatar?: string;
+    bio?: string;
+    avatar?: MediaObject;
+    banner?: MediaObject;
     venueManager: boolean;
   }
   
@@ -23,6 +32,8 @@ export interface Profile {
     accessToken: string;
     name: string;
     email: string;
-    avatar?: string;
+    bio?: string;
+    avatar?: MediaObject;
+    banner?: MediaObject;
     venueManager: boolean;
   }

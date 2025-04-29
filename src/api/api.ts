@@ -7,31 +7,33 @@ export async function fetchFromApi<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  console.log(`Making API request to: ${url}`);
+  
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const error = {
-      status: response.status,
-      message: `API error: ${response.statusText}`,
-    };
+    const data = await response.json();
     
-    try {
-      const errorData = await response.json();
-      error.message = errorData.message || error.message;
-    } catch {
-      // If JSON parsing fails, use the default error message
+    if (!response.ok) {
+      console.error('API error response:', data);
+      throw {
+        status: response.status,
+        message: data.message || `API error: ${response.statusText}`,
+        data
+      };
     }
-    
+
+    return data as T;
+  } catch (error) {
+    console.error('API request failed:', error);
     throw error;
   }
-
-  return response.json() as Promise<T>;
 }

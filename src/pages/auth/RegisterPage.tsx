@@ -1,51 +1,79 @@
 // src/pages/auth/RegisterPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../../api/authService';
-import { useForm } from '../../hooks/useForm';
-import { RegisterData } from '../../types/user';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isVenueManager, setIsVenueManager] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { values, errors, handleChange, handleSubmit, setValues } = useForm<RegisterData>({
-    name: '',
-    email: '',
-    password: '',
-    avatar: '',
-    venueManager: false,
-  });
-  
-  const handleCheckboxChange = () => {
-    setValues({
-      ...values,
-      venueManager: !values.venueManager,
-    });
-  };
-  
-  const onSubmit = async () => {
+  const [apiError, setApiError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Validate email domain
+    if (!email.endsWith('@stud.noroff.no')) {
+      setApiError('Email must be a valid stud.noroff.no address');
+      return;
+    }
+    
+    // Validate password length
+    if (password.length < 8) {
+      setApiError('Password must be at least 8 characters');
+      return;
+    }
+    
     try {
       setIsLoading(true);
-      setApiError(null);
+      setApiError('');
       
-      await register(values);
+      // Create a minimal payload without avatar or banner fields
+      const requestPayload = {
+        name,
+        email,
+        password,
+        venueManager: isVenueManager
+      };
       
-      // Redirect to login page after successful registration
-      navigate('/login', { 
-        state: { 
-          message: 'Registration successful! Please log in with your new account.' 
-        } 
+      const response = await fetch('https://v2.api.noroff.dev/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestPayload)
       });
-    } catch (error) {
-      console.error('Registration failed:', error);
-      setApiError('Registration failed. Please check your information and try again.');
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorMessages = data.errors.map((err: any) => {
+            if (typeof err === 'object' && err !== null) {
+              return err.message || JSON.stringify(err);
+            }
+            return String(err);
+          }).join(', ');
+          throw new Error(errorMessages);
+        }
+        
+        throw new Error(data.message || "Registration failed");
+      }
+      
+      // If successful, redirect to login
+      navigate('/login', { 
+        state: { message: 'Registration successful! Please log in with your new account.' } 
+      });
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setApiError(error.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="max-w-md mx-auto my-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6 text-center">Create an Account</h1>
@@ -56,7 +84,7 @@ const RegisterPage = () => {
         </div>
       )}
       
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
             Name
@@ -64,16 +92,12 @@ const RegisterPage = () => {
           <input
             type="text"
             id="name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-lg ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg border-gray-300"
             placeholder="Your Name"
             required
           />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-          )}
         </div>
         
         <div className="mb-4">
@@ -83,16 +107,13 @@ const RegisterPage = () => {
           <input
             type="email"
             id="email"
-            name="email"
-            value={values.email}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-lg ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg border-gray-300"
             placeholder="your.email@stud.noroff.no"
             required
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-          )}
+          <p className="text-sm text-gray-600 mt-1">Must be a valid stud.noroff.no email address</p>
         </div>
         
         <div className="mb-4">
@@ -102,39 +123,20 @@ const RegisterPage = () => {
           <input
             type="password"
             id="password"
-            name="password"
-            value={values.password}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-lg ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg border-gray-300"
             required
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
-        
-        <div className="mb-4">
-          <label htmlFor="avatar" className="block text-gray-700 font-medium mb-2">
-            Avatar URL (optional)
-          </label>
-          <input
-            type="url"
-            id="avatar"
-            name="avatar"
-            value={values.avatar}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            placeholder="https://example.com/avatar.jpg"
-          />
+          <p className="text-sm text-gray-600 mt-1">Must be at least 8 characters</p>
         </div>
         
         <div className="mb-6 flex items-center">
           <input
             type="checkbox"
             id="venueManager"
-            name="venueManager"
-            checked={values.venueManager}
-            onChange={handleCheckboxChange}
+            checked={isVenueManager}
+            onChange={(e) => setIsVenueManager(e.target.checked)}
             className="mr-2"
           />
           <label htmlFor="venueManager" className="text-gray-700">
