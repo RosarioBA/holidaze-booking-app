@@ -1,18 +1,23 @@
 // src/pages/venue/VenueDetailPage.tsx
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVenueById } from '../../api/venueService';
-import { Venue } from '../../types/venue';
+import { createBooking } from '../../api/bookingService';
+import { Venue, Booking } from '../../types/venue';
 import { useAuth } from '../../contexts/AuthContext';
 import ImageGallery from '../../components/venue/ImageGallery';
 import AmenityIcon from '../../components/venue/AmenityIcon';
+import BookingCalendar from '../../components/venue/BookingCalendar';
 
 const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
+  const navigate = useNavigate();
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVenue = async () => {
@@ -20,8 +25,8 @@ const VenueDetailPage = () => {
       
       try {
         setLoading(true);
-        // Include owner details when fetching the venue
-        const venueData = await getVenueById(id, true, false);
+        // Include owner and bookings details when fetching the venue
+        const venueData = await getVenueById(id, true, true);
         setVenue(venueData);
         setError(null);
       } catch (err) {
@@ -34,6 +39,35 @@ const VenueDetailPage = () => {
 
     fetchVenue();
   }, [id]);
+
+  const handleBookingSubmit = async (from: Date, to: Date, guests: number) => {
+    if (!id || !token) return;
+    
+    try {
+      setBookingError(null);
+      setBookingSuccess(false);
+      
+      const bookingData = {
+        dateFrom: from.toISOString(),
+        dateTo: to.toISOString(),
+        guests,
+        venueId: id
+      };
+      
+      await createBooking(bookingData, token);
+      setBookingSuccess(true);
+      
+      // Refresh venue data to update booking information
+      const updatedVenue = await getVenueById(id, true, true);
+      setVenue(updatedVenue);
+      
+      // Scroll to the top to show the success message
+      window.scrollTo(0, 0);
+    } catch (err) {
+      console.error('Error creating booking:', err);
+      setBookingError('Failed to create booking. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -68,11 +102,26 @@ const VenueDetailPage = () => {
     rating,
     location,
     meta,
-    owner
+    owner,
+    bookings
   } = venue;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Success Message */}
+      {bookingSuccess && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded mb-6">
+          Booking created successfully! You can view your bookings in your profile.
+        </div>
+      )}
+      
+      {/* Error Message */}
+      {bookingError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded mb-6">
+          {bookingError}
+        </div>
+      )}
+      
       {/* Back Button */}
       <Link to="/venues" className="text-blue-600 hover:underline flex items-center mb-6">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -195,53 +244,38 @@ const VenueDetailPage = () => {
           )}
         </div>
 
-        {/* Right Column - Booking Information */}
+        {/* Right Column - Booking Calendar */}
         <div className="lg:w-1/3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <span className="text-2xl font-bold">${price}</span>
-                <span className="text-gray-600"> / night</span>
-              </div>
-              {rating > 0 && (
-                <div className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  <span>{rating.toFixed(1)}</span>
+          <div className="sticky top-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className="text-2xl font-bold">${price}</span>
+                  <span className="text-gray-600"> / night</span>
                 </div>
-              )}
-            </div>
+                {rating > 0 && (
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span>{rating.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
 
-            <div className="mb-4">
-              <p className="text-gray-600 mb-1">Max guests: {maxGuests}</p>
-            </div>
-
-            {/* Calendar will go here - placeholder for now */}
-            <div className="border border-gray-200 rounded-lg p-4 mb-4">
-              <h3 className="font-medium mb-2">Check Availability</h3>
-              <div className="h-48 bg-gray-100 rounded flex items-center justify-center">
-                <p className="text-gray-500">Calendar view coming soon</p>
+              <div className="mb-4">
+                <p className="text-gray-600 mb-1">Max guests: {maxGuests}</p>
               </div>
             </div>
 
-            {isAuthenticated ? (
-              <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200">
-                Book This Venue
-              </button>
-            ) : (
-              <div>
-                <Link to="/login" className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-center mb-2">
-                  Login to Book
-                </Link>
-                <p className="text-sm text-gray-600 text-center">
-                  Need an account?{' '}
-                  <Link to="/register" className="text-blue-600 hover:underline">
-                    Register here
-                  </Link>
-                </p>
-              </div>
-            )}
+            {/* Booking Calendar Component */}
+            <BookingCalendar
+              venueId={id || ''}
+              maxGuests={maxGuests}
+              bookings={bookings}
+              price={price}
+              onBookingSubmit={handleBookingSubmit}
+            />
           </div>
         </div>
       </div>
