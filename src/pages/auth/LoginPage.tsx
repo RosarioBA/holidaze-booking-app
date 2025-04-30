@@ -1,17 +1,28 @@
 // src/pages/auth/LoginPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface LocationState {
+  message?: string;
+  from?: {
+    pathname: string;
+  };
+}
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
   
-  // Display success message if redirected from registration
-  const successMessage = location.state?.message || '';
+  // Get message from location state (if redirected from register)
+  const state = location.state as LocationState;
+  const successMessage = state?.message || '';
+  const from = state?.from?.pathname || '/';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,17 +64,16 @@ const LoginPage = () => {
         throw new Error(data.message || "Login failed");
       }
       
-      // Store auth data in localStorage
-      localStorage.setItem('token', data.accessToken);
-      localStorage.setItem('user', JSON.stringify({
-        name: data.name,
-        email: data.email,
-        avatar: data.avatar,
-        venueManager: data.venueManager
-      }));
+      // Login successful
+      login(data.data.accessToken, {
+        name: data.data.name,
+        email: data.data.email,
+        avatar: data.data.avatar,
+        venueManager: data.data.venueManager
+      });
       
-      // Redirect to home page or previous page
-      navigate('/');
+      // Redirect to home or previous page
+      navigate(from);
     } catch (error: any) {
       console.error("Login error:", error);
       setApiError(error.message || "Login failed. Please check your credentials and try again.");
@@ -73,66 +83,74 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-10 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6 text-center">Login to Holidaze</h1>
-      
-      {successMessage && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
-          {successMessage}
-        </div>
-      )}
-      
-      {apiError && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          {apiError}
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg border-gray-300"
-            placeholder="your.email@stud.noroff.no"
-            required
-          />
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-2 text-xs uppercase tracking-wide text-gray-600">HOLIDAZE</div>
         
-        <div className="mb-6">
-          <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg border-gray-300"
-            required
-          />
+        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold">HOLIDAZE</h1>
+            <h2 className="text-sm font-bold">BOOK YOUR ESCAPE</h2>
+          </div>
+          
+          <h3 className="text-lg font-semibold mb-1">Welcome Back</h3>
+          <p className="text-xs text-gray-500 mb-6">Sign in to continue your journey with Holidaze</p>
+          
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-50 text-green-700 rounded text-sm">
+              {successMessage}
+            </div>
+          )}
+          
+          {apiError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm">
+              {apiError}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition duration-200"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </button>
+          </form>
+          
+          <p className="mt-4 text-xs text-gray-500 text-center">
+            Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Create one</Link>
+          </p>
         </div>
-        
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-      
-      <p className="mt-4 text-center text-gray-600">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-blue-600 hover:underline">
-          Register here
-        </Link>
-      </p>
+      </div>
     </div>
   );
 };

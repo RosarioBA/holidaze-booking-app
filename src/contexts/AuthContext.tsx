@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface User {
+interface Profile {
   name: string;
   email: string;
   avatar?: {
@@ -12,11 +12,11 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: Profile | null;
   token: string | null;
   isAuthenticated: boolean;
   isVenueManager: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, userProfile: Profile) => void;
   logout: () => void;
 }
 
@@ -35,7 +35,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Profile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   
   // Load user data from localStorage on initial render
@@ -55,14 +55,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
   
-  const login = (newToken: string, userData: User) => {
+  const login = (newToken: string, userProfile: Profile) => {
     // Save to localStorage
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userProfile));
     
     // Update state
     setToken(newToken);
-    setUser(userData);
+    setUser(userProfile);
   };
   
   const logout = () => {
