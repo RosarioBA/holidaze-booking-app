@@ -5,6 +5,7 @@ import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import VenuesPage from '../pages/venue/VenuesPage';
+import VenueDetailPage from '../pages/venue/VenueDetailPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const AppRoutes = () => {
@@ -18,6 +19,11 @@ const AppRoutes = () => {
       <Route path="/venues" element={
         <Layout>
           <VenuesPage />
+        </Layout>
+      } />
+      <Route path="/venues/:id" element={
+        <Layout>
+          <VenueDetailPage />
         </Layout>
       } />
       <Route path="/login" element={
