@@ -52,12 +52,12 @@ const HomePage = () => {
               </div>
               
               <div className="self-end">
-                <button 
-                  type="submit"
-                  className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded font-medium hover:bg-blue-700"
+                <Link 
+                  to={`/venues${searchLocation ? `?search=${searchLocation}` : ''}`}
+                  className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded font-medium hover:bg-blue-700 inline-block text-center"
                 >
                   Search
-                </button>
+                </Link>
               </div>
             </div>
           </form>
