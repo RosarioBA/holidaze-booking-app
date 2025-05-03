@@ -2,6 +2,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import HomePage from '../pages/HomePage';
+import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 const AppRoutes = () => {
@@ -10,6 +12,16 @@ const AppRoutes = () => {
       <Route path="/" element={
         <Layout>
           <HomePage />
+        </Layout>
+      } />
+      <Route path="/login" element={
+        <Layout>
+          <LoginPage />
+        </Layout>
+      } />
+      <Route path="/register" element={
+        <Layout>
+          <RegisterPage />
         </Layout>
       } />
       {/* Add more routes as needed */}
