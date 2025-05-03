@@ -1,6 +1,7 @@
 // src/pages/auth/RegisterPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -8,8 +9,19 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isVenueManager, setIsVenueManager] = useState(false);
+  const [isCustomer, setIsCustomer] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+
+  const handleAccountTypeChange = (type: 'customer' | 'venueManager') => {
+    if (type === 'customer') {
+      setIsCustomer(true);
+      setIsVenueManager(false);
+    } else {
+      setIsCustomer(false);
+      setIsVenueManager(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,20 +42,17 @@ const RegisterPage = () => {
       setIsLoading(true);
       setApiError('');
       
-      // Create a minimal payload without avatar or banner fields
-      const requestPayload = {
-        name,
-        email,
-        password,
-        venueManager: isVenueManager
-      };
-      
       const response = await fetch('https://v2.api.noroff.dev/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(requestPayload)
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          venueManager: isVenueManager
+        })
       });
       
       const data = await response.json();
@@ -75,90 +84,116 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-10 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6 text-center">Create an Account</h1>
-      
-      {apiError && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          {apiError}
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-gray-700 font-medium mb-2">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg border-gray-300"
-            placeholder="Your Name"
-            required
-          />
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-2 text-xs uppercase tracking-wide text-gray-600">HOLIDAZE</div>
         
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg border-gray-300"
-            placeholder="your.email@stud.noroff.no"
-            required
-          />
-          <p className="text-sm text-gray-600 mt-1">Must be a valid stud.noroff.no email address</p>
+        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-bold">HOLIDAZE</h1>
+            <h2 className="text-sm font-bold">BOOK YOUR ESCAPE</h2>
+          </div>
+          
+          <h3 className="text-lg font-semibold mb-4">Create an Account</h3>
+          <p className="text-xs text-gray-500 mb-6">Join Holidaze to discover venues across Norway</p>
+          
+          {apiError && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm">
+              {apiError}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="your.email@stud.noroff.no"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account type
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  className={`border rounded py-2 px-3 text-sm ${
+                    isCustomer
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 text-gray-700'
+                  }`}
+                  onClick={() => handleAccountTypeChange('customer')}
+                >
+                  <span className="font-medium">Customer</span>
+                  <p className="text-xs text-gray-500 mt-1">Book amazing venues</p>
+                </button>
+                
+                <button
+                  type="button"
+                  className={`border rounded py-2 px-3 text-sm ${
+                    isVenueManager
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 text-gray-700'
+                  }`}
+                  onClick={() => handleAccountTypeChange('venueManager')}
+                >
+                  <span className="font-medium">Venue Manager</span>
+                  <p className="text-xs text-gray-500 mt-1">List & manage properties</p>
+                </button>
+              </div>
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition duration-200"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating Account...' : 'Create An Account'}
+            </button>
+          </form>
+          
+          <p className="mt-4 text-xs text-gray-500 text-center">
+            Have an account? <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
+          </p>
         </div>
-        
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg border-gray-300"
-            required
-          />
-          <p className="text-sm text-gray-600 mt-1">Must be at least 8 characters</p>
-        </div>
-        
-        <div className="mb-6 flex items-center">
-          <input
-            type="checkbox"
-            id="venueManager"
-            checked={isVenueManager}
-            onChange={(e) => setIsVenueManager(e.target.checked)}
-            className="mr-2"
-          />
-          <label htmlFor="venueManager" className="text-gray-700">
-            Register as a Venue Manager
-          </label>
-        </div>
-        
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Creating Account...' : 'Register'}
-        </button>
-      </form>
-      
-      <p className="mt-4 text-center text-gray-600">
-        Already have an account?{' '}
-        <Link to="/login" className="text-blue-600 hover:underline">
-          Login here
-        </Link>
-      </p>
+      </div>
     </div>
   );
 };
