@@ -1,4 +1,5 @@
 // src/routes/AppRoutes.tsx
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/layout/Layout';
@@ -9,21 +10,21 @@ import VenuesPage from '../pages/venue/VenuesPage';
 import VenueDetailPage from '../pages/venue/VenueDetailPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
 import MyTripsPage from '../pages/dashboard/MyTripsPage';
+import BookingDetailPage from '../pages/booking/BookingDetailPage';
 import SavedVenuesPage from '../pages/dashboard/SavedVenuesPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
 import NotFoundPage from '../pages/NotFoundPage';
 
 // Protected route component
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated } = useAuth();
-    
-    if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
-    }
-    
-    return <>{children}</>;
-  };
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
@@ -74,6 +75,11 @@ const AppRoutes = () => {
       <Route path="/my-trips" element={
         <ProtectedRoute>
           <MyTripsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/bookings/:id" element={
+        <ProtectedRoute>
+          <BookingDetailPage />
         </ProtectedRoute>
       } />
       <Route path="/saved" element={
