@@ -1,8 +1,8 @@
-// src/routes/AppRoutes.tsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/layout/Layout';
+import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
@@ -26,6 +26,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Conditional layout component
+const ConditionalLayout = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (isAuthenticated) {
+    return <AuthenticatedLayout>{children}</AuthenticatedLayout>;
+  }
+  
+  return <Layout>{children}</Layout>;
+};
+
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
   
@@ -46,14 +57,14 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route path="/" element={<HomePageComponent />} />
       <Route path="/venues" element={
-        <Layout>
+        <ConditionalLayout>
           <VenuesPage />
-        </Layout>
+        </ConditionalLayout>
       } />
       <Route path="/venues/:id" element={
-        <Layout>
+        <ConditionalLayout>
           <VenueDetailPage />
-        </Layout>
+        </ConditionalLayout>
       } />
       <Route path="/login" element={
         <Layout>
@@ -95,9 +106,9 @@ const AppRoutes = () => {
       
       {/* 404 route */}
       <Route path="*" element={
-        <Layout>
+        <ConditionalLayout>
           <NotFoundPage />
-        </Layout>
+        </ConditionalLayout>
       } />
     </Routes>
   );
