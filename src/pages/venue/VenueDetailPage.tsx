@@ -12,8 +12,7 @@ import BookingCalendar from '../../components/venue/BookingCalendar';
 
 const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, token } = useAuth();
-  const navigate = useNavigate();
+  const { token } = useAuth();
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,7 +126,7 @@ const VenueDetailPage = () => {
     media,
     price,
     maxGuests,
-    rating,
+    rating = 0,
     location,
     meta,
     owner,
@@ -177,7 +176,7 @@ const VenueDetailPage = () => {
                 {[location.city, location.country].filter(Boolean).join(', ') || 'Location not specified'}
               </span>
             </div>
-            {rating > 0 && (
+            {(rating ?? 0) > 0 && (
               <div className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -209,20 +208,20 @@ const VenueDetailPage = () => {
             <section className="mb-10">
               <h2 className="text-2xl font-bold mb-4">Amenities</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className={`flex items-center ${meta.wifi ? 'text-gray-800' : 'text-gray-400'}`}>
-                  <AmenityIcon type="wifi" active={meta.wifi} />
+                <div className={`flex items-center ${meta?.wifi ? 'text-gray-800' : 'text-gray-400'}`}>
+                  <AmenityIcon type="wifi" active={meta?.wifi || false} />
                   <span className="ml-2">WiFi</span>
                 </div>
-                <div className={`flex items-center ${meta.parking ? 'text-gray-800' : 'text-gray-400'}`}>
-                  <AmenityIcon type="parking" active={meta.parking} />
+                <div className={`flex items-center ${(meta?.parking ?? false) ? 'text-gray-800' : 'text-gray-400'}`}>
+                  <AmenityIcon type="parking" active={meta?.parking ?? false} />
                   <span className="ml-2">Parking</span>
                 </div>
-                <div className={`flex items-center ${meta.breakfast ? 'text-gray-800' : 'text-gray-400'}`}>
-                  <AmenityIcon type="breakfast" active={meta.breakfast} />
+                <div className={`flex items-center ${(meta?.breakfast ?? false) ? 'text-gray-800' : 'text-gray-400'}`}>
+                  <AmenityIcon type="breakfast" active={meta?.breakfast ?? false} />
                   <span className="ml-2">Breakfast</span>
                 </div>
-                <div className={`flex items-center ${meta.pets ? 'text-gray-800' : 'text-gray-400'}`}>
-                  <AmenityIcon type="pets" active={meta.pets} />
+                <div className={`flex items-center ${(meta?.pets ?? false) ? 'text-gray-800' : 'text-gray-400'}`}>
+                  <AmenityIcon type="pets" active={meta?.pets ?? false} />
                   <span className="ml-2">Pets Allowed</span>
                 </div>
               </div>

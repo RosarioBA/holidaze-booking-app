@@ -4,7 +4,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { parseISO } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
-import { Booking } from '../../types/types';
+import { Booking } from '../../types/venue';
+import { updateBooking } from '../../api/bookingService';
 
 interface BookingUpdateFormProps {
   booking: Booking;
@@ -60,29 +61,16 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
         guests
       };
       
-      const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${booking.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update booking');
-      }
-      
-      const data = await response.json();
+      // Use the bookingService function instead of direct API call
+      const updatedBooking = await updateBooking(booking.id, updateData, token);
       
       // Add the venue data back to the response since the API doesn't return it
-      const updatedBooking = {
-        ...data.data,
+      const completeUpdatedBooking = {
+        ...updatedBooking,
         venue: booking.venue
       };
       
-      onSuccess(updatedBooking);
+      onSuccess(completeUpdatedBooking);
     } catch (err: any) {
       console.error('Error updating booking:', err);
       setError(err.message || 'Failed to update booking. Please try again.');

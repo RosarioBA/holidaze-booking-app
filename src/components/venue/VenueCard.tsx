@@ -7,7 +7,7 @@ interface VenueCardProps {
 }
 
 const VenueCard = ({ venue }: VenueCardProps) => {
-  const { id, name, media, price, location, maxGuests, rating } = venue;
+  const { id, name, media, price, location, maxGuests, rating = 0 } = venue;
   
   // Get first image, or use placeholder if no images
   const imageUrl = media && media.length > 0 ? media[0].url : 'https://placehold.co/600x400?text=No+Image';
@@ -46,22 +46,22 @@ const VenueCard = ({ venue }: VenueCardProps) => {
           <p className="text-gray-600 text-sm mt-1">{locationText}</p>
           
           <div className="mt-2 flex flex-wrap gap-2">
-            {venue.meta.wifi && (
+            {venue.meta?.wifi && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 WiFi
               </span>
             )}
-            {venue.meta.parking && (
+            {venue.meta?.parking && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 Parking
               </span>
             )}
-            {venue.meta.breakfast && (
+            {venue.meta?.breakfast && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 Breakfast
               </span>
             )}
-            {venue.meta.pets && (
+            {venue.meta?.pets && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
                 Pets allowed
               </span>

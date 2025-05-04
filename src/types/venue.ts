@@ -1,11 +1,11 @@
 // src/types/venue.ts
 
-export interface VenueMedia {
+export interface Media {
     url: string;
-    alt: string;
+    alt?: string;
   }
   
-  export interface VenueLocation {
+  export interface Location {
     address?: string;
     city?: string;
     zip?: string;
@@ -15,25 +15,19 @@ export interface VenueMedia {
     lng?: number;
   }
   
-  export interface VenueMeta {
-    wifi: boolean;
-    parking: boolean;
-    breakfast: boolean;
-    pets: boolean;
+  export interface Meta {
+    wifi?: boolean;
+    parking?: boolean;
+    breakfast?: boolean;
+    pets?: boolean;
   }
   
-  export interface UserProfile {
+  export interface Owner {
     name: string;
-    email: string;
+    email?: string;
     bio?: string;
-    avatar?: {
-      url: string;
-      alt: string;
-    };
-    banner?: {
-      url: string;
-      alt: string;
-    };
+    avatar?: Media;
+    banner?: Media;
   }
   
   export interface Booking {
@@ -41,29 +35,34 @@ export interface VenueMedia {
     dateFrom: string;
     dateTo: string;
     guests: number;
-    created: string;
-    updated: string;
-    customer?: UserProfile;
+    created?: string;
+    updated?: string;
+    venue?: Venue;
+    customer?: {
+      name: string;
+      email?: string;
+      bio?: string;
+      avatar?: Media;
+    };
   }
   
   export interface Venue {
     id: string;
     name: string;
     description: string;
-    media: VenueMedia[];
+    media: Media[];
     price: number;
     maxGuests: number;
-    rating: number;
-    created: string;
-    updated: string;
-    meta: VenueMeta;
-    location: VenueLocation;
-    owner?: UserProfile;
-    bookings?: Booking[];
+    rating?: number;
+    created?: string;
+    updated?: string;
+    meta: Meta;
+    location: Location;
+    owner?: Owner;
+    bookings?: Booking[]; // Add this line to include bookings property
   }
   
   export interface VenueFilters {
-    search?: string;
     minPrice?: number;
     maxPrice?: number;
     maxGuests?: number;

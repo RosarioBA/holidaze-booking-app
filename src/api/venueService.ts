@@ -1,7 +1,6 @@
 // src/api/venueService.ts
 import { Venue, VenueFilters } from '../types/venue';
-
-const API_BASE_URL = 'https://v2.api.noroff.dev';
+import { fetchFromApi } from './api';
 
 interface ApiResponse<T> {
   data: T;
@@ -19,22 +18,11 @@ interface ApiResponse<T> {
 // Function to get all venues with optional pagination
 export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrder = 'desc'): Promise<{venues: Venue[], meta: any}> => {
   try {
-    const url = new URL(`${API_BASE_URL}/holidaze/venues`);
-    url.searchParams.append('page', page.toString());
-    url.searchParams.append('limit', limit.toString());
-    url.searchParams.append('sort', sort);
-    url.searchParams.append('sortOrder', sortOrder);
+    const response = await fetchFromApi<ApiResponse<Venue[]>>(`/holidaze/venues?page=${page}&limit=${limit}&sort=${sort}&sortOrder=${sortOrder}`);
     
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.statusText}`);
-    }
-    
-    const result: ApiResponse<Venue[]> = await response.json();
     return {
-      venues: result.data,
-      meta: result.meta
+      venues: response.data,
+      meta: response.meta
     };
   } catch (error) {
     console.error('Error fetching venues:', error);
@@ -45,24 +33,23 @@ export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrd
 // Function to get a single venue by ID
 export const getVenueById = async (id: string, includeOwner = false, includeBookings = false): Promise<Venue> => {
   try {
-    const url = new URL(`${API_BASE_URL}/holidaze/venues/${id}`);
+    let endpoint = `/holidaze/venues/${id}`;
+    const queryParams = [];
     
     if (includeOwner) {
-      url.searchParams.append('_owner', 'true');
+      queryParams.push('_owner=true');
     }
     
     if (includeBookings) {
-      url.searchParams.append('_bookings', 'true');
+      queryParams.push('_bookings=true');
     }
     
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.statusText}`);
+    if (queryParams.length > 0) {
+      endpoint += `?${queryParams.join('&')}`;
     }
     
-    const result: ApiResponse<Venue> = await response.json();
-    return result.data;
+    const response = await fetchFromApi<ApiResponse<Venue>>(endpoint);
+    return response.data;
   } catch (error) {
     console.error(`Error fetching venue with ID ${id}:`, error);
     throw error;
@@ -72,17 +59,8 @@ export const getVenueById = async (id: string, includeOwner = false, includeBook
 // Function to search venues
 export const searchVenues = async (query: string): Promise<Venue[]> => {
   try {
-    const url = new URL(`${API_BASE_URL}/holidaze/venues/search`);
-    url.searchParams.append('q', query);
-    
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.statusText}`);
-    }
-    
-    const result: ApiResponse<Venue[]> = await response.json();
-    return result.data;
+    const response = await fetchFromApi<ApiResponse<Venue[]>>(`/holidaze/venues/search?q=${encodeURIComponent(query)}`);
+    return response.data;
   } catch (error) {
     console.error('Error searching venues:', error);
     throw error;
@@ -107,19 +85,19 @@ export const filterVenues = (venues: Venue[], filters: VenueFilters): Venue[] =>
     }
     
     // Filter by amenities
-    if (filters.wifi !== undefined && venue.meta.wifi !== filters.wifi) {
+    if (filters.wifi !== undefined && venue.meta?.wifi !== filters.wifi) {
       return false;
     }
     
-    if (filters.parking !== undefined && venue.meta.parking !== filters.parking) {
+    if (filters.parking !== undefined && venue.meta?.parking !== filters.parking) {
       return false;
     }
     
-    if (filters.breakfast !== undefined && venue.meta.breakfast !== filters.breakfast) {
+    if (filters.breakfast !== undefined && venue.meta?.breakfast !== filters.breakfast) {
       return false;
     }
     
-    if (filters.pets !== undefined && venue.meta.pets !== filters.pets) {
+    if (filters.pets !== undefined && venue.meta?.pets !== filters.pets) {
       return false;
     }
     
@@ -130,22 +108,15 @@ export const filterVenues = (venues: Venue[], filters: VenueFilters): Venue[] =>
 // Function to create a new venue (for venue managers)
 export const createVenue = async (venueData: Omit<Venue, 'id' | 'created' | 'updated'>, token: string): Promise<Venue> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/holidaze/venues`, {
+    const response = await fetchFromApi<ApiResponse<Venue>>('/holidaze/venues', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(venueData)
     });
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `API error: ${response.statusText}`);
-    }
-    
-    const result: ApiResponse<Venue> = await response.json();
-    return result.data;
+    return response.data;
   } catch (error) {
     console.error('Error creating venue:', error);
     throw error;
@@ -155,22 +126,15 @@ export const createVenue = async (venueData: Omit<Venue, 'id' | 'created' | 'upd
 // Function to update a venue (for venue managers)
 export const updateVenue = async (id: string, venueData: Partial<Venue>, token: string): Promise<Venue> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/holidaze/venues/${id}`, {
+    const response = await fetchFromApi<ApiResponse<Venue>>(`/holidaze/venues/${id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(venueData)
     });
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `API error: ${response.statusText}`);
-    }
-    
-    const result: ApiResponse<Venue> = await response.json();
-    return result.data;
+    return response.data;
   } catch (error) {
     console.error(`Error updating venue with ID ${id}:`, error);
     throw error;
@@ -180,17 +144,12 @@ export const updateVenue = async (id: string, venueData: Partial<Venue>, token: 
 // Function to delete a venue (for venue managers)
 export const deleteVenue = async (id: string, token: string): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/holidaze/venues/${id}`, {
+    await fetchFromApi(`/holidaze/venues/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `API error: ${response.statusText}`);
-    }
   } catch (error) {
     console.error(`Error deleting venue with ID ${id}:`, error);
     throw error;

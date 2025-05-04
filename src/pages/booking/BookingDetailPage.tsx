@@ -6,7 +6,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
 import BookingUpdateForm from '../../components/booking/BookingUpdateForm';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import { Booking } from '../../types/types';
+import { getBookingById, deleteBooking } from '../../api/bookingService';
+import { Booking } from '../../types/venue'; // Import from the updated types file
 
 const BookingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,18 +30,9 @@ const BookingDetailPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${id}?_venue=true`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch booking details');
-        }
-        
-        const result = await response.json();
-        setBooking(result.data);
+        // Use the bookingService function instead of making a direct API call
+        const bookingData = await getBookingById(id, token);
+        setBooking(bookingData);
       } catch (err) {
         console.error('Error fetching booking:', err);
         setError('Failed to load booking details. Please try again later.');
@@ -69,16 +61,8 @@ const BookingDetailPage: React.FC = () => {
     try {
       setIsDeleting(true);
       
-      const response = await fetch(`https://v2.api.noroff.dev/holidaze/bookings/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete booking');
-      }
+      // Use the bookingService function instead of making a direct API call
+      await deleteBooking(id, token);
       
       // Navigate to My Trips page after successful deletion
       navigate('/my-trips', { state: { message: 'Booking cancelled successfully' } });
@@ -257,11 +241,11 @@ const BookingDetailPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-gray-600 block">Booked On</span>
-                  <span className="font-medium">{format(parseISO(booking.created), 'MMM d, yyyy')}</span>
+                  <span className="font-medium">{booking.created ? format(parseISO(booking.created), 'MMM d, yyyy') : 'N/A'}</span>
                 </div>
                 <div>
                   <span className="text-gray-600 block">Last Updated</span>
-                  <span className="font-medium">{format(parseISO(booking.updated), 'MMM d, yyyy')}</span>
+                  <span className="font-medium">{format(parseISO(booking.updated ?? ''), 'MMM d, yyyy')}</span>
                 </div>
                 {booking.venue && (
                   <div>
