@@ -94,29 +94,25 @@ const VenueDetailPage = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-        </div>
-      </Layout>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
     );
   }
 
   if (error || !venue) {
     return (
-      <Layout>
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded mb-6">
-            {error || 'Venue not found'}
-          </div>
-          <Link to="/venues" className="text-blue-600 hover:underline flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back to Venues
-          </Link>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded mb-6">
+          {error || 'Venue not found'}
         </div>
-      </Layout>
+        <Link to="/venues" className="text-blue-600 hover:underline flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Back to Venues
+        </Link>
+      </div>
     );
   }
 
@@ -134,7 +130,6 @@ const VenueDetailPage = () => {
   } = venue;
 
   return (
-    <Layout>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Success Message */}
         {bookingSuccess && (
@@ -314,7 +309,6 @@ const VenueDetailPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
