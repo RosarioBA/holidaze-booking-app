@@ -5,7 +5,6 @@ import { getVenueById } from '../../api/venueService';
 import { createBooking } from '../../api/bookingService';
 import { Venue } from '../../types/venue';
 import { useAuth } from '../../contexts/AuthContext';
-import Layout from '../../components/layout/Layout';
 import ImageGallery from '../../components/venue/ImageGallery';
 import AmenityIcon from '../../components/venue/AmenityIcon';
 import BookingCalendar from '../../components/venue/BookingCalendar';
@@ -45,24 +44,50 @@ const VenueDetailPage = () => {
   }, [id]);
 
   // Add venue to recently viewed in localStorage
-  const addToRecentlyViewed = (venue: Venue) => {
-    try {
-      const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-      
-      // Remove if already exists
-      const filtered = recentlyViewed.filter((v: Venue) => v.id !== venue.id);
-      
-      // Add to beginning of array
-      filtered.unshift(venue);
-      
-      // Keep only the last 5
-      const limited = filtered.slice(0, 5);
-      
-      localStorage.setItem('recentlyViewed', JSON.stringify(limited));
-    } catch (error) {
-      console.error('Error saving to recently viewed:', error);
+  // Add venue to recently viewed in localStorage
+const addToRecentlyViewed = (venue: Venue) => {
+  try {
+    console.log("Adding to recently viewed:", venue.id, venue.name);
+    
+    // Get existing recently viewed IDs or initialize empty array
+    const recentlyViewedString = localStorage.getItem('recentlyViewed');
+    let recentlyViewedIds: string[] = [];
+    
+    if (recentlyViewedString) {
+      try {
+        const parsed = JSON.parse(recentlyViewedString);
+        // Check if it's an array of strings (IDs) or an array of objects (old format)
+        if (Array.isArray(parsed)) {
+          if (parsed.length > 0 && typeof parsed[0] === 'string') {
+            // It's already the correct format - array of IDs
+            recentlyViewedIds = parsed;
+          } else if (parsed.length > 0 && typeof parsed[0] === 'object') {
+            // Old format - array of venue objects
+            recentlyViewedIds = parsed.map((v: any) => v.id || '').filter(Boolean);
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing recently viewed:', error);
+      }
     }
-  };
+    
+    console.log("Current recently viewed IDs:", recentlyViewedIds);
+    
+    // Remove this venue ID if it already exists
+    recentlyViewedIds = recentlyViewedIds.filter(id => id !== venue.id);
+    
+    // Add to beginning of array
+    recentlyViewedIds.unshift(venue.id);
+    
+    // Keep only the last 5
+    const limited = recentlyViewedIds.slice(0, 5);
+    
+    console.log("Updated recently viewed IDs:", limited);
+    localStorage.setItem('recentlyViewed', JSON.stringify(limited));
+  } catch (error) {
+    console.error('Error saving to recently viewed:', error);
+  }
+};
 
   const handleBookingSubmit = async (from: Date, to: Date, guests: number) => {
     if (!id || !token) return;

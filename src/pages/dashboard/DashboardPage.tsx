@@ -15,63 +15,84 @@ const DashboardPage: React.FC = () => {
   const [recentlyViewed, setRecentlyViewed] = useState<Venue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch user bookings for upcoming trips
-        if (token) {
-          const bookings = await getUserBookings(token);
-          const now = new Date();
-          
-          // Filter for upcoming bookings (where check-in date is in the future)
-          const upcoming = bookings.filter(booking => {
-            const checkInDate = new Date(booking.dateFrom);
-            return checkInDate > now;
-          });
-          
-          setUpcomingTrips(upcoming.slice(0, 3)); // Show only the first 3
-        }
+ // In DashboardPage.tsx, update the useEffect hook
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch user bookings for upcoming trips
+      if (token) {
+        const bookings = await getUserBookings(token);
+        const now = new Date();
         
-        // Fetch all venues
-        const allVenues = await getVenues();
-        console.log("DEBUG Dashboard: Current favorites IDs:", favorites);
+        // Filter for upcoming bookings (where check-in date is in the future)
+        const upcoming = bookings.filter(booking => {
+          const checkInDate = new Date(booking.dateFrom);
+          return checkInDate > now;
+        });
         
-        // Filter for saved venues based on favorites
-        const favoriteVenues = allVenues.venues.filter(venue => 
-          favorites.includes(venue.id)
-        );
-        console.log("DEBUG Dashboard: Filtered favorite venues:", favoriteVenues.map(v => ({id: v.id, name: v.name})));
-        setSavedVenues(favoriteVenues.slice(0, 3)); // Show only first 3
-        
-        // Get recently viewed venues from localStorage
+        setUpcomingTrips(upcoming.slice(0, 3)); // Show only the first 3
+      }
+      
+      // Fetch all venues
+      const allVenues = await getVenues();
+      
+      // Filter for saved venues based on favorites
+      const favoriteVenues = allVenues.venues.filter(venue => 
+        favorites.includes(venue.id)
+      );
+      setSavedVenues(favoriteVenues.slice(0, 3)); // Show only first 3
+      
+      // Get recently viewed venues from localStorage
+      const recentlyViewedString = localStorage.getItem('recentlyViewed');
+      console.log("DEBUG Dashboard: Recently viewed from localStorage:", recentlyViewedString);
+      
+      if (recentlyViewedString) {
         try {
-          const recentlyViewedData = localStorage.getItem('recentlyViewed');
-          if (recentlyViewedData) {
-            const recentlyViewedIds = JSON.parse(recentlyViewedData);
+          const recentlyViewedIds = JSON.parse(recentlyViewedString);
+          console.log("DEBUG Dashboard: Recently viewed IDs:", recentlyViewedIds);
+          
+          if (Array.isArray(recentlyViewedIds) && recentlyViewedIds.length > 0) {
+            // Filter venues to only include those in recently viewed list
             const recentVenues = allVenues.venues.filter(venue => 
               recentlyViewedIds.includes(venue.id)
             );
-            setRecentlyViewed(recentVenues.slice(0, 2));
+            console.log("DEBUG Dashboard: Recent venues found:", recentVenues.map(v => v.name));
+            
+            // Sort them according to the order in recentlyViewedIds
+            const orderedRecentVenues = [];
+            for (const id of recentlyViewedIds) {
+              const venue = allVenues.venues.find(v => v.id === id);
+              if (venue) {
+                orderedRecentVenues.push(venue);
+              }
+            }
+            
+            setRecentlyViewed(orderedRecentVenues.slice(0, 2));
           } else {
-            // Fallback to random venues if no recently viewed
+            // Fallback to random venues if recently viewed is empty
+            console.log("DEBUG Dashboard: No recently viewed IDs found, using random venues");
             setRecentlyViewed(allVenues.venues.slice(3, 5));
           }
         } catch (error) {
           console.error('Error parsing recently viewed:', error);
           setRecentlyViewed(allVenues.venues.slice(3, 5));
         }
-        
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // No recently viewed in localStorage, use random venues
+        console.log("DEBUG Dashboard: No recently viewed in localStorage, using random venues");
+        setRecentlyViewed(allVenues.venues.slice(3, 5));
       }
-    };
-    
-    fetchDashboardData();
-  }, [token, favorites]);
-
+      
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  fetchDashboardData();
+}, [token, favorites]);
   // Rest of your component remains the same...
 
   // Venue card for displaying venues in saved and recently viewed sections
