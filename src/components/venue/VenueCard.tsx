@@ -1,8 +1,8 @@
 // src/components/venue/VenueCard.tsx
 import { Link } from 'react-router-dom';
 import { Venue } from '../../types/venue';
-import { useFavorites } from '../../contexts/FavoritesContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFavorites } from '../../contexts/FavoritesContext';
 
 interface VenueCardProps {
   venue: Venue;
@@ -13,8 +13,8 @@ const VenueCard = ({ venue }: VenueCardProps) => {
   const { isAuthenticated } = useAuth();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   
-  // Check if this venue is in favorites
-  const favorite = isFavorite(id);
+  // Check if this venue is favorited
+  const isFavorited = isFavorite(id);
   
   // Get first image, or use placeholder if no images
   const imageUrl = media && media.length > 0 ? media[0].url : 'https://placehold.co/600x400?text=No+Image';
@@ -26,11 +26,12 @@ const VenueCard = ({ venue }: VenueCardProps) => {
     location?.country
   ].filter(Boolean).join(', ') || 'Location not specified';
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating to venue detail
+  // Handle favorite toggle
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
     e.stopPropagation();
     
-    if (favorite) {
+    if (isFavorited) {
       removeFavorite(id);
     } else {
       addFavorite(id);
@@ -41,17 +42,17 @@ const VenueCard = ({ venue }: VenueCardProps) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative">
       {isAuthenticated && (
         <button
-          onClick={handleFavoriteClick}
-          className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 p-1 rounded-full"
-          aria-label={favorite ? "Remove from saved" : "Save venue"}
+          onClick={handleFavoriteToggle}
+          className="absolute top-2 right-2 z-10 bg-white bg-opacity-80 p-1.5 rounded-full shadow-sm hover:bg-opacity-100"
+          aria-label={isFavorited ? "Remove from saved" : "Save venue"}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className={`h-5 w-5 ${favorite ? 'text-red-500' : 'text-gray-400'}`} 
+            className={`h-5 w-5 ${isFavorited ? 'text-red-500' : 'text-gray-400'}`} 
             viewBox="0 0 20 20" 
-            fill={favorite ? 'currentColor' : 'none'}
+            fill={isFavorited ? 'currentColor' : 'none'}
             stroke="currentColor"
-            strokeWidth={favorite ? '0' : '1.5'}
+            strokeWidth={isFavorited ? '0' : '1.5'}
           >
             <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
           </svg>

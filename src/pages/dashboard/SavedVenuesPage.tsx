@@ -7,13 +7,19 @@ import { getVenueById } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
 
 const SavedVenuesPage: React.FC = () => {
-  const { favorites, removeFavorite } = useFavorites();
+  const { favorites } = useFavorites();
   const [savedVenues, setSavedVenues] = useState<Venue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSavedVenues = async () => {
+      if (favorites.length === 0) {
+        setSavedVenues([]);
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         setIsLoading(true);
         setError(null);

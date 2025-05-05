@@ -6,6 +6,7 @@ import AppRoutes from './routes/AppRoutes';
 import './index.css';
 
 function App() {
+  console.log('DEBUG: App component rendering');
   return (
     <AuthProvider>
       <FavoritesProvider>

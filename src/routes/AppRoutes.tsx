@@ -1,5 +1,6 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+// src/routes/AppRoutes.tsx
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/layout/Layout';
 import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
@@ -18,9 +19,11 @@ import NotFoundPage from '../pages/NotFoundPage';
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   
+  // Redirect to login if not authenticated, preserving the intended destination
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
   return <>{children}</>;
@@ -39,6 +42,12 @@ const ConditionalLayout = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  
+  // For debugging: log authentication state on route changes
+  useEffect(() => {
+    console.log('Route changed, authenticated:', isAuthenticated);
+  }, [location.pathname, isAuthenticated]);
   
   // If user is logged in, redirect from home page to dashboard
   const HomePageComponent = () => {
@@ -67,52 +76,54 @@ const AppRoutes = () => {
         </ConditionalLayout>
       } />
       <Route path="/login" element={
+        isAuthenticated ? <Navigate to="/dashboard" replace /> :
         <Layout>
           <LoginPage />
         </Layout>
       } />
       <Route path="/register" element={
+        isAuthenticated ? <Navigate to="/dashboard" replace /> :
         <Layout>
           <RegisterPage />
         </Layout>
       } />
       
-        {/* Protected routes */}
-    <Route path="/dashboard" element={
-      <ProtectedRoute>
-        <AuthenticatedLayout>
-          <DashboardPage />
-        </AuthenticatedLayout>
-      </ProtectedRoute>
-    } />
-    <Route path="/my-trips" element={
-      <ProtectedRoute>
-        <AuthenticatedLayout>
-          <MyTripsPage />
-        </AuthenticatedLayout>
-      </ProtectedRoute>
-    } />
-    <Route path="/bookings/:id" element={
-      <ProtectedRoute>
-        <AuthenticatedLayout>
-          <BookingDetailPage />
-        </AuthenticatedLayout>
-      </ProtectedRoute>
-    } />
-    <Route path="/saved" element={
-      <ProtectedRoute>
-        <AuthenticatedLayout>
-          <SavedVenuesPage />
-        </AuthenticatedLayout>
-      </ProtectedRoute>
-    } />
-    <Route path="/settings" element={
-      <ProtectedRoute>
-        <AuthenticatedLayout>
-          <SettingsPage />
-        </AuthenticatedLayout>
-      </ProtectedRoute>
-    } />
+      {/* Protected routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <DashboardPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/my-trips" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <MyTripsPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/bookings/:id" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <BookingDetailPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/saved" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <SavedVenuesPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <SettingsPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
       
       {/* 404 route */}
       <Route path="*" element={
