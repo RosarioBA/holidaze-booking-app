@@ -105,16 +105,13 @@ const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <AuthenticatedLayout>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
-      </AuthenticatedLayout>
     );
   }
 
   return (
-    <AuthenticatedLayout>
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Welcome back, {user?.name}</h1>
         <p className="text-gray-600 mb-8">Ready to plan your next adventure?</p>
@@ -175,7 +172,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </section>
       </div>
-    </AuthenticatedLayout>
   );
 };
 

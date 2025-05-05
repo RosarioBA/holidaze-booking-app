@@ -77,32 +77,42 @@ const AppRoutes = () => {
         </Layout>
       } />
       
-      {/* Protected routes */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
+        {/* Protected routes */}
+    <Route path="/dashboard" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
           <DashboardPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/my-trips" element={
-        <ProtectedRoute>
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
+    <Route path="/my-trips" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
           <MyTripsPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/bookings/:id" element={
-        <ProtectedRoute>
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
+    <Route path="/bookings/:id" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
           <BookingDetailPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/saved" element={
-        <ProtectedRoute>
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
+    <Route path="/saved" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
           <SavedVenuesPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/settings" element={
-        <ProtectedRoute>
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
+    <Route path="/settings" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
           <SettingsPage />
-        </ProtectedRoute>
-      } />
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
       
       {/* 404 route */}
       <Route path="*" element={
