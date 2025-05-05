@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { Venue } from '../../types/venue';
-import { getVenueById } from '../../api/venueService';
+import { getVenues } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
 
 const SavedVenuesPage: React.FC = () => {
@@ -14,21 +14,25 @@ const SavedVenuesPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSavedVenues = async () => {
-      if (favorites.length === 0) {
-        setSavedVenues([]);
-        setIsLoading(false);
-        return;
-      }
-      
       try {
         setIsLoading(true);
         setError(null);
 
-        // Fetch each venue by ID from our favorites list
-        const venuePromises = favorites.map(id => getVenueById(id));
-        const venues = await Promise.all(venuePromises);
+        console.log("DEBUG: Current favorites IDs:", favorites);
+
+        // Get all venues
+        const result = await getVenues();
+        console.log("DEBUG: All venues count:", result.venues.length);
         
-        setSavedVenues(venues);
+        // Filter venues to only include those in favorites
+        const filteredVenues = result.venues.filter(venue => 
+          favorites.includes(venue.id)
+        );
+        
+        console.log("DEBUG: Filtered venues count:", filteredVenues.length);
+        console.log("DEBUG: Filtered venues:", filteredVenues.map(v => ({id: v.id, name: v.name})));
+        
+        setSavedVenues(filteredVenues);
       } catch (err) {
         console.error('Error fetching saved venues:', err);
         setError('Failed to load your saved venues. Please try again later.');

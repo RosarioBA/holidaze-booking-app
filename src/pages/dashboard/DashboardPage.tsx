@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
+import { useFavorites } from '../../contexts/FavoritesContext';
 import { Venue } from '../../types/venue';
 import { getVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
 
 const DashboardPage: React.FC = () => {
   const { user, token } = useAuth();
+  const { favorites } = useFavorites();
   const [upcomingTrips, setUpcomingTrips] = useState<any[]>([]);
   const [savedVenues, setSavedVenues] = useState<Venue[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<Venue[]>([]);
@@ -18,9 +19,8 @@ const DashboardPage: React.FC = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Placeholder data - in a real app, you would fetch from your API
+        // Fetch user bookings for upcoming trips
         if (token) {
-          // Fetch user bookings for upcoming trips
           const bookings = await getUserBookings(token);
           const now = new Date();
           
@@ -33,14 +33,34 @@ const DashboardPage: React.FC = () => {
           setUpcomingTrips(upcoming.slice(0, 3)); // Show only the first 3
         }
         
-        // For demo purposes, fetch some venues and use them as saved/recently viewed
+        // Fetch all venues
         const allVenues = await getVenues();
+        console.log("DEBUG Dashboard: Current favorites IDs:", favorites);
         
-        // In a real app, you'd fetch actual saved venues from your API
-        setSavedVenues(allVenues.venues.slice(0, 3));
+        // Filter for saved venues based on favorites
+        const favoriteVenues = allVenues.venues.filter(venue => 
+          favorites.includes(venue.id)
+        );
+        console.log("DEBUG Dashboard: Filtered favorite venues:", favoriteVenues.map(v => ({id: v.id, name: v.name})));
+        setSavedVenues(favoriteVenues.slice(0, 3)); // Show only first 3
         
-        // In a real app, you'd fetch actual recently viewed venues from local storage or API
-        setRecentlyViewed(allVenues.venues.slice(3, 5));
+        // Get recently viewed venues from localStorage
+        try {
+          const recentlyViewedData = localStorage.getItem('recentlyViewed');
+          if (recentlyViewedData) {
+            const recentlyViewedIds = JSON.parse(recentlyViewedData);
+            const recentVenues = allVenues.venues.filter(venue => 
+              recentlyViewedIds.includes(venue.id)
+            );
+            setRecentlyViewed(recentVenues.slice(0, 2));
+          } else {
+            // Fallback to random venues if no recently viewed
+            setRecentlyViewed(allVenues.venues.slice(3, 5));
+          }
+        } catch (error) {
+          console.error('Error parsing recently viewed:', error);
+          setRecentlyViewed(allVenues.venues.slice(3, 5));
+        }
         
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -50,7 +70,9 @@ const DashboardPage: React.FC = () => {
     };
     
     fetchDashboardData();
-  }, [token]);
+  }, [token, favorites]);
+
+  // Rest of your component remains the same...
 
   // Venue card for displaying venues in saved and recently viewed sections
   const VenueCard = ({ venue }: { venue: Venue }) => (
