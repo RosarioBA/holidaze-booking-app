@@ -26,7 +26,7 @@ const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
 const BANNER_STORAGE_KEY = 'holidaze_banner_url';
 
 const ProfilePage: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +55,14 @@ const ProfilePage: React.FC = () => {
               url: savedAvatarUrl,
               alt: `${user.name}'s avatar`
             };
+            
+            // Also update the auth context
+            updateUser({
+              avatar: {
+                url: savedAvatarUrl,
+                alt: `${user.name}'s avatar`
+              }
+            });
           }
           
           if (savedBannerUrl && (!parsedProfile.banner || parsedProfile.banner.url !== savedBannerUrl)) {
@@ -111,7 +119,7 @@ const ProfilePage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, updateUser]);
 
   // Update profile function
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -143,6 +151,14 @@ const ProfilePage: React.FC = () => {
         
         // Save avatar URL separately for persistence across sessions
         localStorage.setItem(AVATAR_STORAGE_KEY, formAvatarUrl.trim());
+        
+        // Update auth context with new avatar
+        updateUser({
+          avatar: {
+            url: formAvatarUrl.trim(),
+            alt: `${user.name}'s avatar`
+          }
+        });
       }
       
       // Only add banner if URL provided

@@ -123,7 +123,7 @@ const VenuesPage = () => {
   
   return (
     <div className="space-y-8">
-      <section className="bg-blue-600 text-white p-6 rounded-lg">
+      <section className="bg-[#0081A7] text-white p-6 rounded-lg">
         <h1 className="text-3xl font-bold mb-6">Explore Venues</h1>
         
         <form onSubmit={handleSearch} className="space-y-4">
@@ -141,21 +141,21 @@ const VenuesPage = () => {
             <button 
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="md:w-auto bg-blue-700 hover:bg-blue-800 text-white py-3 px-6 rounded font-medium"
+              className="md:w-auto bg-[#13262F] hover:bg-opacity-90 text-white py-3 px-6 rounded font-medium"
             >
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
             
             <button 
               type="submit"
-              className="md:w-auto bg-white hover:bg-gray-100 text-blue-600 py-3 px-6 rounded font-medium"
+              className="md:w-auto bg-white hover:bg-gray-100 text-[#0081A7] py-3 px-6 rounded font-medium"
             >
               Search
             </button>
           </div>
           
           {showFilters && (
-            <div className="bg-blue-700 p-4 rounded grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#13262F] p-4 rounded grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="minPrice" className="block text-sm font-medium mb-1">
                   Min Price ($)
@@ -205,14 +205,14 @@ const VenuesPage = () => {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="bg-transparent hover:bg-blue-800 text-white py-2 px-4 border border-white rounded mr-2"
+                  className="bg-transparent hover:bg-[#13262F] text-white py-2 px-4 border border-white rounded mr-2"
                 >
                   Clear
                 </button>
                 <button
                   type="button"
                   onClick={applyFilters}
-                  className="bg-white hover:bg-gray-100 text-blue-600 py-2 px-4 rounded"
+                  className="bg-white hover:bg-gray-100 text-[#0081A7] py-2 px-4 rounded"
                 >
                   Apply Filters
                 </button>
@@ -224,7 +224,7 @@ const VenuesPage = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0081A7]"></div>
         </div>
       ) : error ? (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -235,7 +235,7 @@ const VenuesPage = () => {
           <p className="text-xl text-gray-600">No venues found matching your search</p>
           <button
             onClick={clearFilters}
-            className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="mt-4 bg-[#0081A7] text-white py-2 px-4 rounded hover:bg-[#13262F]"
           >
             Clear Filters
           </button>

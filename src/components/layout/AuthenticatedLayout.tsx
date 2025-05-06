@@ -1,5 +1,5 @@
 // src/components/layout/AuthenticatedLayout.tsx
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -7,11 +7,43 @@ interface AuthenticatedLayoutProps {
   children: ReactNode;
 }
 
+const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
+
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
+
+  // Check for saved avatar URL whenever the component renders
+  useEffect(() => {
+    const checkForAvatar = () => {
+      const savedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
+      if (savedAvatarUrl) {
+        setCurrentAvatarUrl(savedAvatarUrl);
+      } else if (user?.avatar?.url) {
+        setCurrentAvatarUrl(user.avatar.url);
+      } else {
+        setCurrentAvatarUrl(undefined);
+      }
+    };
+    
+    checkForAvatar();
+    
+    // Setup an event listener for localStorage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === AVATAR_STORAGE_KEY) {
+        checkForAvatar();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -175,14 +207,18 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
             <Link to="/profile" className="flex items-center hover:text-[#0081A7]">
               <span className="mr-2">{user?.name}</span>
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700">
-                {user?.avatar ? (
+                {currentAvatarUrl ? (
                   <img 
-                    src={user.avatar.url} 
-                    alt={user.name}
+                    src={currentAvatarUrl} 
+                    alt={user?.name || "User avatar"}
                     className="w-8 h-8 rounded-full object-cover" 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://placehold.co/200x200?text=' + (user?.name?.charAt(0).toUpperCase() || 'U');
+                    }}
                   />
                 ) : (
-                  user?.name.charAt(0).toUpperCase()
+                  user?.name?.charAt(0).toUpperCase() || 'U'
                 )}
               </div>
             </Link>
