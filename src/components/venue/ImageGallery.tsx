@@ -1,6 +1,11 @@
 // src/components/venue/ImageGallery.tsx
 import React, { useState } from 'react';
-import { VenueMedia } from '../../types/venue';
+
+// Define the VenueMedia interface here if it's not exported
+interface VenueMedia {
+  url: string;
+  alt?: string;
+}
 
 interface ImageGalleryProps {
   images: VenueMedia[];
@@ -64,7 +69,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
           {galleryImages.slice(0, 4).map((image, index) => (
             <div 
               key={index} 
-              className={`aspect-w-1 aspect-h-1 overflow-hidden rounded ${index === 0 ? 'border-2 border-blue-500' : ''}`}
+              className={`aspect-w-1 aspect-h-1 overflow-hidden rounded ${index === 0 ? 'border-2 border-[#0081A7]' : ''}`}
             >
               <img
                 src={image.url}

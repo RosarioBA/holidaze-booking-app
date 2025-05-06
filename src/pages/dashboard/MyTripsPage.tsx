@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
 import { getUserBookings } from '../../api/bookingService';
 
 const MyTripsPage: React.FC = () => {

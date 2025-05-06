@@ -1,7 +1,7 @@
 // src/pages/dashboard/SettingsPage.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
+
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();

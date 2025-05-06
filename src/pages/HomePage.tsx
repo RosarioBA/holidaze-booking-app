@@ -15,7 +15,7 @@ const HomePage = () => {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="bg-gray-600 text-white py-10 rounded-lg">
+      <section className="bg-[#8F754F] text-white py-10 rounded-lg">
         <div className="max-w-4xl mx-auto px-6">
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">
             Find your perfect stay in Norway
@@ -54,7 +54,7 @@ const HomePage = () => {
               <div className="self-end">
                 <Link 
                   to={`/venues${searchLocation ? `?search=${searchLocation}` : ''}`}
-                  className="w-full md:w-auto bg-blue-600 text-white py-2 px-6 rounded font-medium hover:bg-blue-700 inline-block text-center"
+                  className="w-full md:w-auto bg-[#0081A7] text-white py-2 px-6 rounded font-medium hover:bg-[#13262F] inline-block text-center"
                 >
                   Search
                 </Link>
@@ -65,7 +65,7 @@ const HomePage = () => {
       </section>
       
       {/* Featured Properties Section */}
-      <section className="bg-yellow-50 py-10 px-4 rounded-lg">
+      <section className="bg-[#F5F7DC] py-10 px-4 rounded-lg">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 text-center">Featured Properties</h2>
           
@@ -80,7 +80,7 @@ const HomePage = () => {
                   <p className="font-semibold">$120 / night</p>
                   <Link 
                     to="/venues/1" 
-                    className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
+                    className="bg-[#0081A7] text-white px-4 py-1 rounded text-sm"
                   >
                     View
                   </Link>
@@ -98,7 +98,7 @@ const HomePage = () => {
                   <p className="font-semibold">$95 / night</p>
                   <Link 
                     to="/venues/2" 
-                    className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
+                    className="bg-[#0081A7] text-white px-4 py-1 rounded text-sm"
                   >
                     View
                   </Link>
@@ -116,7 +116,7 @@ const HomePage = () => {
                   <p className="font-semibold">$150 / night</p>
                   <Link 
                     to="/venues/3" 
-                    className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
+                    className="bg-[#0081A7] text-white px-4 py-1 rounded text-sm"
                   >
                     View
                   </Link>
@@ -134,8 +134,8 @@ const HomePage = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-[#F5F7DC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -144,8 +144,8 @@ const HomePage = () => {
             </div>
             
             <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-[#F5F7DC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -154,8 +154,8 @@ const HomePage = () => {
             </div>
             
             <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-[#F5F7DC] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -167,13 +167,13 @@ const HomePage = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="bg-blue-600 text-white py-10 px-4 rounded-lg">
+      <section className="bg-[#0081A7] text-white py-10 px-4 rounded-lg">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Own a Property? Become a Host Today!</h2>
           <p className="mb-6">List your property on Holidaze and start earning income.</p>
           <Link 
             to="/register" 
-            className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
+            className="inline-block bg-white text-[#0081A7] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
           >
             Register as a Venue Manager
           </Link>

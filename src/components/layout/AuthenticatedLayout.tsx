@@ -19,7 +19,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   };
 
   const isActive = (path: string) => {
-    return location.pathname === path ? 'bg-blue-800' : '';
+    return location.pathname === path ? 'bg-[#13262F]' : '';
   };
 
   return (
@@ -49,40 +49,40 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
       </div>
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-gray-900 text-white">
+      <aside className="hidden md:flex flex-col w-64 bg-[#13262F] text-white">
         <div className="px-6 py-4 border-b border-gray-800">
           <h2 className="text-sm font-bold tracking-widest uppercase">HOLIDAZE</h2>
         </div>
         <nav className="flex-1 py-4">
           <Link 
             to="/venues" 
-            className={`block py-3 px-6 mb-1 ${isActive('/venues')} hover:bg-blue-800 transition duration-200`}
+            className={`block py-3 px-6 mb-1 ${isActive('/venues')} hover:bg-[#13262F] transition duration-200`}
           >
-            <div className="w-full bg-blue-600 text-white py-2 text-center font-medium rounded">
+            <div className="w-full bg-[#0081A7] text-white py-2 text-center font-medium rounded">
               EXPLORE VENUES
             </div>
           </Link>
           <Link 
             to="/dashboard" 
-            className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-blue-800 transition duration-200`}
+            className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-[#13262F] transition duration-200`}
           >
             Dashboard
           </Link>
           <Link 
             to="/my-trips" 
-            className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-blue-800 transition duration-200`}
+            className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-[#13262F] transition duration-200`}
           >
             My Trips
           </Link>
           <Link 
             to="/saved" 
-            className={`block py-3 px-6 ${isActive('/saved')} hover:bg-blue-800 transition duration-200`}
+            className={`block py-3 px-6 ${isActive('/saved')} hover:bg-[#13262F] transition duration-200`}
           >
             Saved
           </Link>
           <Link 
             to="/settings" 
-            className={`block py-3 px-6 ${isActive('/settings')} hover:bg-blue-800 transition duration-200`}
+            className={`block py-3 px-6 ${isActive('/settings')} hover:bg-[#13262F] transition duration-200`}
           >
             Settings
           </Link>
@@ -90,7 +90,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
         <div className="p-6">
           <button 
             onClick={handleLogout}
-            className="w-full bg-orange-500 text-white py-2 px-4 rounded font-medium hover:bg-orange-600 transition duration-200"
+            className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200"
           >
             LOGOUT
           </button>
@@ -100,44 +100,44 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
       {/* Sidebar - Mobile */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-20 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
-          <aside className="w-64 h-full bg-gray-900 text-white transform transition-transform duration-300">
+          <aside className="w-64 h-full bg-[#13262F] text-white transform transition-transform duration-300">
             <div className="px-6 py-4 border-b border-gray-800">
               <h2 className="text-sm font-bold tracking-widest uppercase">HOLIDAZE</h2>
             </div>
             <nav className="flex-1 py-4">
               <Link 
                 to="/venues" 
-                className={`block py-3 px-6 mb-1 ${isActive('/venues')} hover:bg-blue-800 transition duration-200`}
+                className={`block py-3 px-6 mb-1 ${isActive('/venues')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="w-full bg-blue-600 text-white py-2 text-center font-medium rounded">
+                <div className="w-full bg-[#0081A7] text-white py-2 text-center font-medium rounded">
                   EXPLORE VENUES
                 </div>
               </Link>
               <Link 
                 to="/dashboard" 
-                className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-blue-800 transition duration-200`}
+                className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
               <Link 
                 to="/my-trips" 
-                className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-blue-800 transition duration-200`}
+                className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 My Trips
               </Link>
               <Link 
                 to="/saved" 
-                className={`block py-3 px-6 ${isActive('/saved')} hover:bg-blue-800 transition duration-200`}
+                className={`block py-3 px-6 ${isActive('/saved')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Saved
               </Link>
               <Link 
                 to="/settings" 
-                className={`block py-3 px-6 ${isActive('/settings')} hover:bg-blue-800 transition duration-200`}
+                className={`block py-3 px-6 ${isActive('/settings')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Settings
@@ -146,7 +146,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
             <div className="p-6">
               <button 
                 onClick={handleLogout}
-                className="w-full bg-orange-500 text-white py-2 px-4 rounded font-medium hover:bg-orange-600 transition duration-200"
+                className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200"
               >
                 LOGOUT
               </button>

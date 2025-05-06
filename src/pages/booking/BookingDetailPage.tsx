@@ -77,17 +77,14 @@ const BookingDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <AuthenticatedLayout>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
-      </AuthenticatedLayout>
     );
   }
 
   if (error || !booking) {
     return (
-      <AuthenticatedLayout>
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             {error || 'Booking not found'}
@@ -99,7 +96,6 @@ const BookingDetailPage: React.FC = () => {
             Back to My Trips
           </Link>
         </div>
-      </AuthenticatedLayout>
     );
   }
 
