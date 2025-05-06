@@ -14,6 +14,7 @@ import MyTripsPage from '../pages/dashboard/MyTripsPage';
 import BookingDetailPage from '../pages/booking/BookingDetailPage';
 import SavedVenuesPage from '../pages/dashboard/SavedVenuesPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
+import ProfilePage from '../pages/profile/ProfilePage'; // Import the ProfilePage
 import NotFoundPage from '../pages/NotFoundPage';
 
 // Protected route component
@@ -121,6 +122,14 @@ const AppRoutes = () => {
         <ProtectedRoute>
           <AuthenticatedLayout>
             <SettingsPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      {/* Add Profile Route */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <ProfilePage />
           </AuthenticatedLayout>
         </ProtectedRoute>
       } />

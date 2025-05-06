@@ -1,4 +1,4 @@
-// src/pages/profile/ProfilePage.tsx (with fixes for avatar updating)
+// src/pages/profile/ProfilePage.tsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,8 @@ interface Profile {
 }
 
 const PROFILE_STORAGE_KEY = 'holidaze_profile';
+const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
+const BANNER_STORAGE_KEY = 'holidaze_banner_url';
 
 const ProfilePage: React.FC = () => {
   const { user, token } = useAuth();
@@ -38,15 +40,37 @@ const ProfilePage: React.FC = () => {
     if (!user) return;
     
     try {
+      // Check for saved avatar and banner URLs
+      const savedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
+      const savedBannerUrl = localStorage.getItem(BANNER_STORAGE_KEY);
+      
       const storedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
       if (storedProfile) {
         const parsedProfile = JSON.parse(storedProfile);
         // Only use stored profile if it matches current user
         if (parsedProfile.name === user.name) {
+          // Apply saved avatar and banner if they exist
+          if (savedAvatarUrl && (!parsedProfile.avatar || parsedProfile.avatar.url !== savedAvatarUrl)) {
+            parsedProfile.avatar = {
+              url: savedAvatarUrl,
+              alt: `${user.name}'s avatar`
+            };
+          }
+          
+          if (savedBannerUrl && (!parsedProfile.banner || parsedProfile.banner.url !== savedBannerUrl)) {
+            parsedProfile.banner = {
+              url: savedBannerUrl,
+              alt: `${user.name}'s banner`
+            };
+          }
+          
           setProfile(parsedProfile);
           setFormBio(parsedProfile.bio || '');
-          setFormAvatarUrl(parsedProfile.avatar?.url || '');
-          setFormBannerUrl(parsedProfile.banner?.url || '');
+          setFormAvatarUrl(parsedProfile.avatar?.url || savedAvatarUrl || '');
+          setFormBannerUrl(parsedProfile.banner?.url || savedBannerUrl || '');
+          
+          // Save the updated profile back to localStorage
+          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(parsedProfile));
           return; // Exit early if we have a stored profile
         }
       }
@@ -56,18 +80,13 @@ const ProfilePage: React.FC = () => {
         name: user.name,
         email: user.email,
         venueManager: user.venueManager || false,
-        avatar: user.avatar,
         bio: '',
+        avatar: undefined,
         _count: {
           bookings: 0,
           venues: 0
         }
       };
-      
-      setProfile(defaultProfile);
-      setFormBio(defaultProfile.bio || '');
-      setFormAvatarUrl(defaultProfile.avatar?.url || '');
-      setFormBannerUrl('');
       
       // Also save this default profile to localStorage
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(defaultProfile));
@@ -121,6 +140,9 @@ const ProfilePage: React.FC = () => {
           url: formAvatarUrl.trim(),
           alt: `${user.name}'s avatar`
         };
+        
+        // Save avatar URL separately for persistence across sessions
+        localStorage.setItem(AVATAR_STORAGE_KEY, formAvatarUrl.trim());
       }
       
       // Only add banner if URL provided
@@ -129,18 +151,14 @@ const ProfilePage: React.FC = () => {
           url: formBannerUrl.trim(),
           alt: `${user.name}'s banner`
         };
+        
+        // Save banner URL separately for persistence across sessions
+        localStorage.setItem(BANNER_STORAGE_KEY, formBannerUrl.trim());
       }
       
       // Update state and localStorage
       setProfile(updatedProfile);
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updatedProfile));
-      
-      // Update auth context avatar if needed
-      if (user && formAvatarUrl.trim() && (!user.avatar || user.avatar.url !== formAvatarUrl.trim())) {
-        // If your AuthContext provides a way to update the user, use it here
-        // For example: updateUser({ ...user, avatar: { url: formAvatarUrl, alt: `${user.name}'s avatar` } });
-        console.log("Avatar URL updated but not synced to auth context");
-      }
       
       setUpdateSuccess(true);
       

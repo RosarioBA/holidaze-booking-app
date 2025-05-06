@@ -18,6 +18,7 @@ interface AuthContextType {
   isVenueManager: boolean;
   login: (token: string, userProfile: Profile) => void;
   logout: () => void;
+  updateUser: (updatedUserData: Partial<Profile>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,6 +135,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     console.log('Logout complete, auth state cleared');
   };
   
+  // Add the updateUser function
+  const updateUser = (updatedUserData: Partial<Profile>) => {
+    if (!user) return; // Can't update if no user exists
+    
+    // Create an updated user object by merging current user with updates
+    const updatedUser = { ...user, ...updatedUserData };
+    
+    // Save to localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update state
+    setUser(updatedUser);
+    console.log('User data updated successfully');
+  };
+  
   const value = {
     user,
     token,
@@ -141,6 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isVenueManager: user?.venueManager || false,
     login,
     logout,
+    updateUser, // Include updateUser in the context value
   };
   
   // Don't render children until we've tried to load from localStorage

@@ -86,6 +86,12 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
           >
             Settings
           </Link>
+          <Link 
+            to="/profile" 
+            className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
+          >
+            Profile
+          </Link>
         </nav>
         <div className="p-6">
           <button 
@@ -142,6 +148,13 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
               >
                 Settings
               </Link>
+              <Link 
+                to="/profile" 
+                className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Profile
+              </Link>
             </nav>
             <div className="p-6">
               <button 
@@ -159,18 +172,20 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
       <main className="flex-1 p-4 md:p-8 mt-14 md:mt-0">
         <div className="flex justify-end mb-4">
           <div className="flex items-center">
-            <span className="mr-2">{user?.name}</span>
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700">
-              {user?.avatar ? (
-                <img 
-                  src={user.avatar.url} 
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full object-cover" 
-                />
-              ) : (
-                user?.name.charAt(0).toUpperCase()
-              )}
-            </div>
+            <Link to="/profile" className="flex items-center hover:text-[#0081A7]">
+              <span className="mr-2">{user?.name}</span>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700">
+                {user?.avatar ? (
+                  <img 
+                    src={user.avatar.url} 
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full object-cover" 
+                  />
+                ) : (
+                  user?.name.charAt(0).toUpperCase()
+                )}
+              </div>
+            </Link>
           </div>
         </div>
         {children}
