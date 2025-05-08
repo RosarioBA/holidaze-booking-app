@@ -1,29 +1,20 @@
-// src/components/layout/AuthenticatedLayout.tsx
+// src/components/layout/CustomerLayout.tsx
 import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface AuthenticatedLayoutProps {
+interface CustomerLayoutProps {
   children: ReactNode;
 }
 
 const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
 
-const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
-  // Set this to false for production
-  const forceVenueManager = false; 
-  
-  const { user, logout } = useAuth();
+const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
+  const { user, logout, isVenueManager } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
-
-  // Add debugging logs
-  console.log("Current user in AuthenticatedLayout:", user);
-  console.log("Is venue manager:", user?.venueManager);
-  console.log("Venue manager type:", typeof user?.venueManager);
-  console.log("Force venue manager mode:", forceVenueManager);
 
   // Check for saved avatar URL whenever the component renders
   useEffect(() => {
@@ -60,17 +51,19 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   };
 
   const isActive = (path: string) => {
-    return location.pathname === path ? 'bg-[#13262F]' : '';
+    return location.pathname.startsWith(path) ? 'bg-[#13262F]' : '';
   };
 
-  // Check if user is a venue manager (with force option for testing)
-  const isVenueManager = user?.venueManager === true || forceVenueManager;
+  // Switch to venue manager dashboard
+  const switchToVenueManager = () => {
+    navigate('/venue-manager/dashboard');
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Mobile menu toggle */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-md p-4 flex justify-between items-center">
-        <Link to="/" className="font-bold text-lg">HOLIDAZE</Link>
+        <Link to="/customer/dashboard" className="font-bold text-lg">HOLIDAZE</Link>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="text-gray-600 focus:outline-none"
@@ -107,48 +100,31 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
             </div>
           </Link>
           <Link 
-            to="/dashboard" 
-            className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-[#13262F] transition duration-200`}
+            to="/customer/dashboard" 
+            className={`block py-3 px-6 ${isActive('/customer/dashboard')} hover:bg-[#13262F] transition duration-200`}
           >
             Dashboard
           </Link>
-          
-          {/* Venue Manager specific menu items */}
-          {isVenueManager && (
-            <>
-              <div className="px-6 py-2 mt-4 text-xs uppercase tracking-wide text-gray-400">
-                Venue Manager
-              </div>
-              <Link 
-                to="/venue-manager/venues" 
-                className={`block py-3 px-6 ${isActive('/venue-manager/venues')} hover:bg-[#13262F] transition duration-200`}
-              >
-                My Venues
-              </Link>
-              <Link 
-                to="/venue-manager/bookings" 
-                className={`block py-3 px-6 ${isActive('/venue-manager/bookings')} hover:bg-[#13262F] transition duration-200`}
-              >
-                Bookings
-              </Link>
-            </>
-          )}
-          
-          {/* Regular user menu items */}
-          <div className="px-6 py-2 mt-4 text-xs uppercase tracking-wide text-gray-400">
-            User
-          </div>
           <Link 
-            to="/my-trips" 
-            className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-[#13262F] transition duration-200`}
+            to="/customer/trips" 
+            className={`block py-3 px-6 ${isActive('/customer/trips')} hover:bg-[#13262F] transition duration-200`}
           >
             My Trips
           </Link>
           <Link 
-            to="/saved" 
-            className={`block py-3 px-6 ${isActive('/saved')} hover:bg-[#13262F] transition duration-200`}
+            to="/customer/saved" 
+            className={`block py-3 px-6 ${isActive('/customer/saved')} hover:bg-[#13262F] transition duration-200`}
           >
-            Saved
+            Saved Venues
+          </Link>
+          
+          <div className="my-4 border-t border-gray-700"></div>
+          
+          <Link 
+            to="/profile" 
+            className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
+          >
+            Profile
           </Link>
           <Link 
             to="/settings" 
@@ -156,17 +132,16 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
           >
             Settings
           </Link>
-          <Link 
-            to="/profile" 
-            className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
-          >
-            Profile
-          </Link>
           
-          {/* Debug info about venue manager status */}
-          <div className="px-6 py-2 text-gray-400 text-xs">
-            Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
-          </div>
+          {/* Only show the switch button if user is a venue manager */}
+          {isVenueManager && (
+            <button
+              onClick={switchToVenueManager}
+              className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
+            >
+              Switch to Venue Manager
+            </button>
+          )}
         </nav>
         <div className="p-6">
           <button 
@@ -181,7 +156,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
       {/* Sidebar - Mobile */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-20 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
-          <aside className="w-64 h-full bg-[#13262F] text-white transform transition-transform duration-300">
+          <aside className="w-64 h-full bg-[#13262F] text-white transform transition-transform duration-300 overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-800">
               <h2 className="text-sm font-bold tracking-widest uppercase">HOLIDAZE</h2>
             </div>
@@ -196,53 +171,35 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
                 </div>
               </Link>
               <Link 
-                to="/dashboard" 
-                className={`block py-3 px-6 ${isActive('/dashboard')} hover:bg-[#13262F] transition duration-200`}
+                to="/customer/dashboard" 
+                className={`block py-3 px-6 ${isActive('/customer/dashboard')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
-              
-              {/* Venue Manager specific menu items - Mobile */}
-              {isVenueManager && (
-                <>
-                  <div className="px-6 py-2 mt-4 text-xs uppercase tracking-wide text-gray-400">
-                    Venue Manager
-                  </div>
-                  <Link 
-                    to="/venue-manager/venues" 
-                    className={`block py-3 px-6 ${isActive('/venue-manager/venues')} hover:bg-[#13262F] transition duration-200`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    My Venues
-                  </Link>
-                  <Link 
-                    to="/venue-manager/bookings" 
-                    className={`block py-3 px-6 ${isActive('/venue-manager/bookings')} hover:bg-[#13262F] transition duration-200`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Bookings
-                  </Link>
-                </>
-              )}
-              
-              {/* Regular user menu items - Mobile */}
-              <div className="px-6 py-2 mt-4 text-xs uppercase tracking-wide text-gray-400">
-                User
-              </div>
               <Link 
-                to="/my-trips" 
-                className={`block py-3 px-6 ${isActive('/my-trips')} hover:bg-[#13262F] transition duration-200`}
+                to="/customer/trips" 
+                className={`block py-3 px-6 ${isActive('/customer/trips')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 My Trips
               </Link>
               <Link 
-                to="/saved" 
-                className={`block py-3 px-6 ${isActive('/saved')} hover:bg-[#13262F] transition duration-200`}
+                to="/customer/saved" 
+                className={`block py-3 px-6 ${isActive('/customer/saved')} hover:bg-[#13262F] transition duration-200`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Saved
+                Saved Venues
+              </Link>
+              
+              <div className="my-4 border-t border-gray-700"></div>
+              
+              <Link 
+                to="/profile" 
+                className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Profile
               </Link>
               <Link 
                 to="/settings" 
@@ -251,13 +208,19 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
               >
                 Settings
               </Link>
-              <Link 
-                to="/profile" 
-                className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#13262F] transition duration-200`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Profile
-              </Link>
+              
+              {/* Only show the switch button if user is a venue manager */}
+              {isVenueManager && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    switchToVenueManager();
+                  }}
+                  className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
+                >
+                  Switch to Venue Manager
+                </button>
+              )}
             </nav>
             <div className="p-6">
               <button 
@@ -301,4 +264,4 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   );
 };
 
-export default AuthenticatedLayout;
+export default CustomerLayout;
