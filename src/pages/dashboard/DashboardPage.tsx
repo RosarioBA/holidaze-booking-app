@@ -1,4 +1,4 @@
-// src/pages/dashboard/DashboardPage.tsx
+/* // src/pages/dashboard/DashboardPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -157,63 +157,63 @@ const DashboardPage: React.FC = () => {
         <h1 className="text-2xl font-bold mb-6">Welcome back, {user?.name}</h1>
         <p className="text-gray-600 mb-8">Ready to plan your next adventure?</p>
         
-        {/* Upcoming Trips Section */}
-        <section className="mb-10">
-          <h2 className="text-lg font-bold mb-4">Your Upcoming Trips</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcomingTrips.length > 0 ? (
-              upcomingTrips.map((booking) => (
-                <TripCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <div className="col-span-2 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <p className="text-gray-600 text-center">No upcoming trips. Time to plan your next getaway!</p>
-                <div className="flex justify-center mt-2">
-                  <Link 
-                    to="/venues" 
-                    className="bg-[#0081A7] text-white text-sm px-4 py-2 rounded hover:bg-[#13262F]"
-                  >
-                    Explore Venues
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+       // {/* Upcoming Trips Section */
+        //<section className="mb-10">
+         // <h2 className="text-lg font-bold mb-4">Your Upcoming Trips</h2>
+         // <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         //   {upcomingTrips.length > 0 ? (
+          //    upcomingTrips.map((booking) => (
+         //       <TripCard key={booking.id} booking={booking} />
+          //    ))
+          //  ) : (
+         //     <div className="col-span-2 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          //      <p className="text-gray-600 text-center">No upcoming trips. Time to plan your next getaway!</p>
+           //     <div className="flex justify-center mt-2">
+           //       <Link 
+            //        to="/venues" 
+                //    className="bg-[#0081A7] text-white text-sm px-4 py-2 rounded hover:bg-[#13262F]"
+                //  >
+                //    Explore Venues
+                //  </Link>
+               // </div>
+            //  </div>
+           // )}
+         // </div>
+       // </section>
         
-        {/* Places You've Saved Section */}
-        <section className="mb-10">
-          <h2 className="text-lg font-bold mb-4">Places You've Saved</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {savedVenues.length > 0 ? (
-              savedVenues.map((venue) => (
-                <VenueCard key={venue.id} venue={venue} />
-              ))
-            ) : (
-              <div className="col-span-3 bg-[#F5F7DC] p-4 rounded-lg">
-                <p className="text-gray-600 text-center">You haven't saved any places yet.</p>
-              </div>
-            )}
-          </div>
-        </section>
+       // {/* Places You've Saved Section */}
+      //  <section className="mb-10">
+      //    <h2 className="text-lg font-bold mb-4">Places You've Saved</h2>
+      //    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+       //     {savedVenues.length > 0 ? (
+       //       savedVenues.map((venue) => (
+        //        <VenueCard key={venue.id} venue={venue} />
+         //     ))
+         //   ) : (
+         //     <div className="col-span-3 bg-[#F5F7DC] p-4 rounded-lg">
+         //       <p className="text-gray-600 text-center">You haven't saved any places yet.</p>
+          //    </div>
+         //   )}
+        //  </div>
+       // </section>
         
-        {/* Recently Viewed Section */}
-        <section>
-          <h2 className="text-lg font-bold mb-4">Recently Viewed</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recentlyViewed.length > 0 ? (
-              recentlyViewed.map((venue) => (
-                <VenueCard key={venue.id} venue={venue} />
-              ))
-            ) : (
-              <div className="col-span-2 bg-[#F5F7DC] p-4 rounded-lg">
-                <p className="text-gray-600 text-center">No recently viewed venues.</p>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-  );
-};
+     //   {/* Recently Viewed Section */}
+       // <section>
+       //   <h2 className="text-lg font-bold mb-4">Recently Viewed</h2>
+      //    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       //     {recentlyViewed.length > 0 ? (
+        //      recentlyViewed.map((venue) => (
+        //        <VenueCard key={venue.id} venue={venue} />
+          //    ))
+          //  ) : (
+           //   <div className="col-span-2 bg-[#F5F7DC] p-4 rounded-lg">
+             //   <p className="text-gray-600 text-center">No recently viewed venues.</p>
+            //  </div>
+        //    )}
+        //  </div>
+       // </section>
+      //</div>
+ // );
+//};
 
-export default DashboardPage;
+//export default DashboardPage;  */

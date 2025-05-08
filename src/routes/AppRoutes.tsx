@@ -42,6 +42,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Component that chooses the correct layout based on authentication status
+const ConditionalLayout = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useAuth();
+  
+  if (isAuthenticated) {
+    // If user is authenticated, use the appropriate layout based on user type
+    if (user?.venueManager) {
+      return <VenueManagerLayout>{children}</VenueManagerLayout>;
+    } else {
+      return <CustomerLayout>{children}</CustomerLayout>;
+    }
+  }
+  
+  // If not authenticated, use the default layout
+  return <Layout>{children}</Layout>;
+};
+
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
@@ -74,16 +91,17 @@ const AppRoutes = () => {
         </Layout>
       } />
       
+      {/* Use ConditionalLayout for Venues pages */}
       <Route path="/venues" element={
-        <Layout>
+        <ConditionalLayout>
           <VenuesPage />
-        </Layout>
+        </ConditionalLayout>
       } />
       
       <Route path="/venues/:id" element={
-        <Layout>
+        <ConditionalLayout>
           <VenueDetailPage />
-        </Layout>
+        </ConditionalLayout>
       } />
       
       <Route path="/login" element={
@@ -203,9 +221,9 @@ const AppRoutes = () => {
       
       {/* 404 route */}
       <Route path="*" element={
-        <Layout>
+        <ConditionalLayout>
           <NotFoundPage />
-        </Layout>
+        </ConditionalLayout>
       } />
     </Routes>
   );

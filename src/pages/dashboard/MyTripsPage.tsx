@@ -1,5 +1,5 @@
 // src/pages/dashboard/MyTripsPage.tsx
-import React, { useState, useEffect } from 'react';
+/* import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserBookings } from '../../api/bookingService';
@@ -101,114 +101,114 @@ const MyTripsPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Upcoming trips section */}
-            <section className="mb-10">
-              <h2 className="text-xl font-semibold mb-4">Upcoming Trips</h2>
+            {/* Upcoming trips section */
+           // <section className="mb-10">
+          //    <h2 className="text-xl font-semibold mb-4">Upcoming Trips</h2>
               
-              {upcomingBookings.length === 0 ? (
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <p className="text-gray-600">No upcoming trips scheduled.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {upcomingBookings.map(booking => (
-                    <div 
-                      key={booking.id} 
-                      className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row"
-                    >
-                      <div className="md:w-48 h-32 bg-gray-200 rounded overflow-hidden mb-4 md:mb-0 md:mr-4 flex-shrink-0">
-                        {booking.venue?.media && booking.venue.media.length > 0 ? (
-                          <img 
-                            src={booking.venue.media[0].url} 
-                            alt={booking.venue.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = 'https://placehold.co/600x400?text=No+Image';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            No image available
-                          </div>
-                        )}
-                      </div>
+            //  {upcomingBookings.length === 0 ? (
+              //  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                //  <p className="text-gray-600">No upcoming trips scheduled.</p>
+                // </div>
+              // ) : (
+               // <div className="space-y-4">
+                 // {upcomingBookings.map(booking => (
+                   // <div 
+                     // key={booking.id} 
+                      //className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row"
+                    // >
+                     // <div className="md:w-48 h-32 bg-gray-200 rounded overflow-hidden mb-4 md:mb-0 md:mr-4 flex-shrink-0">
+                       // {booking.venue?.media && booking.venue.media.length > 0 ? (
+                         // <img 
+                           // src={booking.venue.media[0].url} 
+                           // alt={booking.venue.name}
+                            //className="w-full h-full object-cover"
+                            //onError={(e) => {
+                              //const target = e.target as HTMLImageElement;
+                              //target.src = 'https://placehold.co/600x400?text=No+Image';
+                           // }}
+                         // />
+                        //) : (
+                          //<div className="w-full h-full flex items-center justify-center text-gray-400">
+                            //No image available
+                         // </div>
+                       // )}
+                      //</div>
                       
-                      <div className="flex-grow">
-                        <h3 className="font-bold text-lg">{booking.venue?.name || 'Venue'}</h3>
-                        <div className="flex flex-col md:flex-row md:items-center text-sm text-gray-600 mt-1 mb-3">
-                          <span className="mr-4">{formatDateRange(booking.dateFrom, booking.dateTo)}</span>
-                          <span>{calculateNights(booking.dateFrom, booking.dateTo)} nights · {booking.guests} guests</span>
-                        </div>
+                      //<div className="flex-grow">
+                        //<h3 className="font-bold text-lg">{booking.venue?.name || 'Venue'}</h3>
+                       // <div className="flex flex-col md:flex-row md:items-center text-sm text-gray-600 mt-1 mb-3">
+                       //   <span className="mr-4">{formatDateRange(booking.dateFrom, booking.dateTo)}</span>
+                         // <span>{calculateNights(booking.dateFrom, booking.dateTo)} nights · {booking.guests} guests</span>
+                       // </div>
                         
-                        <div className="flex justify-end mt-2">
-                          <Link 
-                            to={`/bookings/${booking.id}`}
-                            className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
-                          >
-                            View Details
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                       // <div className="flex justify-end mt-2">
+                         // <Link 
+                           // to={`/bookings/${booking.id}`}
+                           // className="bg-blue-600 text-white px-4 py-1 rounded text-sm"
+                         // >
+                           // View Details
+                        //  </Link>
+                       // </div>
+                      //</div>
+                   // </div>
+                 // ))}
+                //</div>
+              //)}
+           // </section>
             
-            {/* Past trips section */}
-            {pastBookings.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold mb-4">Past Trips</h2>
-                <div className="space-y-4">
-                  {pastBookings.map(booking => (
-                    <div 
-                      key={booking.id} 
-                      className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row"
-                    >
-                      <div className="md:w-48 h-32 bg-gray-200 rounded overflow-hidden mb-4 md:mb-0 md:mr-4 flex-shrink-0">
-                        {booking.venue?.media && booking.venue.media.length > 0 ? (
-                          <img 
-                            src={booking.venue.media[0].url} 
-                            alt={booking.venue.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = 'https://placehold.co/600x400?text=No+Image';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            No image available
-                          </div>
-                        )}
-                      </div>
+           // {/* Past trips section */}
+           // {pastBookings.length > 0 && (
+             // <section>
+               // <h2 className="text-xl font-semibold mb-4">Past Trips</h2>
+               // <div className="space-y-4">
+                 // {pastBookings.map(booking => (
+                   // <div 
+                     // key={booking.id} 
+                     // className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row"
+                   // >
+                     // <div className="md:w-48 h-32 bg-gray-200 rounded overflow-hidden mb-4 md:mb-0 md:mr-4 flex-shrink-0">
+                       // {booking.venue?.media && booking.venue.media.length > 0 ? (
+                         // <img 
+                           // src={booking.venue.media[0].url} 
+                            //alt={booking.venue.name}
+                           // className="w-full h-full object-cover"
+                           // onError={(e) => {
+                             // const target = e.target as HTMLImageElement;
+                             // target.src = 'https://placehold.co/600x400?text=No+Image';
+                           // }}
+                         // />
+                       // ) : (
+                         // <div className="w-full h-full flex items-center justify-center text-gray-400">
+                         //   No image available
+                         // </div>
+                       // )}
+                     // </div>
                       
-                      <div className="flex-grow">
-                        <h3 className="font-bold text-lg">{booking.venue?.name || 'Venue'}</h3>
-                        <div className="flex flex-col md:flex-row md:items-center text-sm text-gray-600 mt-1 mb-3">
-                          <span className="mr-4">{formatDateRange(booking.dateFrom, booking.dateTo)}</span>
-                          <span>{calculateNights(booking.dateFrom, booking.dateTo)} nights · {booking.guests} guests</span>
-                        </div>
+                     // <div className="flex-grow">
+                       // <h3 className="font-bold text-lg">{booking.venue?.name || 'Venue'}</h3>
+                       // <div className="flex flex-col md:flex-row md:items-center text-sm text-gray-600 mt-1 mb-3">
+//                          <span className="mr-4">{formatDateRange(booking.dateFrom, booking.dateTo)}</span>
+  //                        <span>{calculateNights(booking.dateFrom, booking.dateTo)} nights · {booking.guests} guests</span>
+    //                    </div>
                         
-                        <div className="flex justify-end mt-2">
-                          <Link 
-                            to={`/bookings/${booking.id}`}
-                            className="bg-gray-600 text-white px-4 py-1 rounded text-sm"
-                          >
-                            View Details
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
-        )}
-      </div>
-  );
-};
+      //                  <div className="flex justify-end mt-2">
+        //                  <Link 
+          //                  to={`/bookings/${booking.id}`}
+            //                className="bg-gray-600 text-white px-4 py-1 rounded text-sm"
+                //          >
+              //              View Details
+                  //        </Link>
+                    //    </div>
+                   //   </div>
+                  //  </div>
+               //   ))}
+              //  </div>
+       //       </section>
+         //   )}
+       //   </>
+       // )}
+   //   </div>
+ // );
+//};
 
-export default MyTripsPage;
+//export default MyTripsPage; */

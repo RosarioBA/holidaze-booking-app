@@ -1,4 +1,4 @@
-// src/pages/dashboard/SavedVenuesPage.tsx
+/* // src/pages/dashboard/SavedVenuesPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -84,4 +84,4 @@ const SavedVenuesPage: React.FC = () => {
   );
 };
 
-export default SavedVenuesPage;
+export default SavedVenuesPage; */
