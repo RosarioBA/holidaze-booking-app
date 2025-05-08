@@ -1,5 +1,6 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getUsernameFromToken } from '../api/api';
 
 interface Profile {
   name: string;
@@ -9,6 +10,7 @@ interface Profile {
     alt: string;
   };
   venueManager: boolean;
+  bio?: string;
 }
 
 interface AuthContextType {
@@ -41,11 +43,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   
   // Helper function to check if token is valid
-  // This is a simple check - adjust according to your token format
   const isTokenValid = (token: string): boolean => {
-    // If your API uses JWT tokens, you can validate them here
-    // For basic validation, just check if the token exists and has a valid format
-    return !!token && token.length > 10; // Simple validation example
+    try {
+      // Basic check that token is in JWT format
+      const parts = token.split('.');
+      if (parts.length !== 3) return false;
+      
+      // Try to decode the token payload
+      const payload = JSON.parse(atob(parts[1]));
+      
+      // Check token expiration if it has an expiry
+      if (payload.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp < now) return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
   };
   
   // Load user data from localStorage on initial render
@@ -65,9 +82,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           if (isTokenValid(storedToken)) {
             const parsedUser = JSON.parse(storedUser);
+            
+            // Ensure venueManager is properly typed as boolean
+            const normalizedUser = {
+              ...parsedUser,
+              venueManager: parsedUser.venueManager === true // Force boolean value
+            };
+            
             setToken(storedToken);
-            setUser(parsedUser);
+            setUser(normalizedUser);
             console.log('Auth state restored successfully');
+            console.log('Venue Manager status:', normalizedUser.venueManager);
           } else {
             console.warn('Stored token is invalid or expired');
             localStorage.removeItem('token');
@@ -104,26 +129,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
   
   const login = (newToken: string, userProfile: Profile) => {
-    console.log('Logging in with new token');
+    console.log('Login called with profile:', userProfile);
     
-    // Validate the token before saving
-    if (!isTokenValid(newToken)) {
-      console.error('Invalid token provided to login');
-      return;
-    }
+    // Ensure venueManager is a proper boolean
+    const normalizedProfile: Profile = {
+      ...userProfile,
+      venueManager: userProfile.venueManager === true // Force boolean value
+    };
+    
+    console.log('Logging in with venueManager status:', normalizedProfile.venueManager);
     
     // Save to localStorage
     localStorage.setItem('token', newToken);
- // In your AuthContext.tsx, when saving to localStorage:
-    localStorage.setItem('user', JSON.stringify({
-      ...userProfile,
-      venueManager: userProfile.venueManager === true // Force boolean value
-    }));
+    localStorage.setItem('user', JSON.stringify(normalizedProfile));
     
     // Update state
     setToken(newToken);
-    setUser(userProfile);
-    console.log('Login successful, auth state updated');
+    setUser(normalizedProfile);
+    console.log('Login successful, auth state updated with venueManager:', normalizedProfile.venueManager);
   };
   
   const logout = () => {
@@ -139,34 +162,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     console.log('Logout complete, auth state cleared');
   };
   
-  // Add the updateUser function
   const updateUser = (updatedUserData: Partial<Profile>) => {
     if (!user) return; // Can't update if no user exists
     
+    // Ensure venueManager is properly typed as boolean if it's being updated
+    const normalizedUpdates = {
+      ...updatedUserData
+    };
+    
+    if (updatedUserData.venueManager !== undefined) {
+      normalizedUpdates.venueManager = updatedUserData.venueManager === true;
+    }
+    
     // Create an updated user object by merging current user with updates
-    const updatedUser = { ...user, ...updatedUserData };
+    const updatedUser = { ...user, ...normalizedUpdates };
     
     // Save to localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
     // Update state
     setUser(updatedUser);
-    console.log('User data updated successfully');
+    console.log('User data updated successfully with venueManager:', updatedUser.venueManager);
   };
   
   const value = {
     user,
     token,
     isAuthenticated: !!token,
-    isVenueManager: user?.venueManager || false,
+    isVenueManager: user?.venueManager === true, // Explicit boolean conversion
     login,
     logout,
-    updateUser, // Include updateUser in the context value
+    updateUser,
   };
   
   // Don't render children until we've tried to load from localStorage
   if (loading) {
-    return null; // Or a loading spinner if you prefer
+    return null; // Or a loading spinner
   }
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -56,6 +56,24 @@ export const getVenueById = async (id: string, includeOwner = false, includeBook
   }
 };
 
+// Function to get venues for the current venue manager
+export const getVenueManagerVenues = async (profileName: string, token: string): Promise<Venue[]> => {
+  try {
+    // First check if the user's venues are in the API
+    const response = await fetchFromApi<ApiResponse<Venue[]>>(`/holidaze/profiles/${profileName}/venues`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    console.log(`Found ${response.data.length} venues for profile ${profileName}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching venues for venue manager ${profileName}:`, error);
+    throw error;
+  }
+};
+
 // Function to search venues
 export const searchVenues = async (query: string): Promise<Venue[]> => {
   try {

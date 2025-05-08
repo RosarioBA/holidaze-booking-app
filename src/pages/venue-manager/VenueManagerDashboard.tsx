@@ -1,14 +1,15 @@
 // src/pages/venue-manager/VenueManagerDashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Venue } from '../../types/venue';
-import { getVenues, deleteVenue } from '../../api/venueService';
+// Import your API functions as needed
 
 const VenueManagerDashboard: React.FC = () => {
-  // Force venue manager mode for testing
-  const forceVenueManager = true;
+  // IMPORTANT: This should be false in production!
+  const forceVenueManager = false; 
   
+  const navigate = useNavigate();
   const { user, token, isVenueManager } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -16,8 +17,13 @@ const VenueManagerDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  // Use the forced value
+  // Use the actual isVenueManager value from auth context, with option to force for testing
   const isUserVenueManager = isVenueManager || forceVenueManager;
+  
+  console.log("VenueManagerDashboard - isVenueManager from context:", isVenueManager);
+  console.log("VenueManagerDashboard - forceVenueManager:", forceVenueManager);
+  console.log("VenueManagerDashboard - isUserVenueManager:", isUserVenueManager);
+  console.log("VenueManagerDashboard - venueManager from user:", user?.venueManager);
 
   // Calculate stats
   const totalVenues = venues.length;
@@ -39,30 +45,60 @@ const VenueManagerDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!token || !isUserVenueManager) return;
+      if (!token) {
+        navigate('/login'); // Redirect to login if not authenticated
+        return;
+      }
+      
+      if (!isUserVenueManager) {
+        console.log("User is not a venue manager, skipping data fetch");
+        return; // Don't fetch data if not a venue manager
+      }
       
       setIsLoading(true);
       try {
+        console.log("Fetching venues for user:", user?.name);
+        
         // Fetch venues managed by this user
-        const result = await getVenues();
-        // Filter venues owned by the current user
-        const userVenues = result.venues.filter(venue => 
-          venue.owner?.name === user?.name
-        );
+        const response = await fetch(`https://api.noroff.dev/api/v1/holidaze/profiles/${user?.name}/venues`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to fetch venues: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const userVenues = data.data || [];
+        
+        console.log(`Found ${userVenues.length} venues for user ${user?.name}`);
         setVenues(userVenues);
         
         // Fetch bookings for all managed venues
         const allBookings: any[] = [];
         for (const venue of userVenues) {
           try {
-            const venueBookings = await fetch(`https://api.noroff.dev/api/v1/holidaze/venues/${venue.id}?_bookings=true`, {
+            console.log(`Fetching bookings for venue ${venue.id}`);
+            
+            const bookingsResponse = await fetch(`https://api.noroff.dev/api/v1/holidaze/venues/${venue.id}?_bookings=true`, {
               headers: {
                 'Authorization': `Bearer ${token}`
               }
-            }).then(res => res.json());
+            });
             
-            if (venueBookings.data?.bookings) {
-              allBookings.push(...venueBookings.data.bookings);
+            if (!bookingsResponse.ok) {
+              console.error(`Failed to fetch bookings for venue ${venue.id}: ${bookingsResponse.status}`);
+              continue;
+            }
+            
+            const bookingsData = await bookingsResponse.json();
+            
+            if (bookingsData.data?.bookings) {
+              console.log(`Found ${bookingsData.data.bookings.length} bookings for venue ${venue.id}`);
+              allBookings.push(...bookingsData.data.bookings);
             }
           } catch (err) {
             console.error(`Error fetching bookings for venue ${venue.id}:`, err);
@@ -71,43 +107,65 @@ const VenueManagerDashboard: React.FC = () => {
         
         setBookings(allBookings);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching venue manager data:', err);
-        setError('Failed to load your venues. Please try again.');
+        setError(err.message || 'Failed to load your venues. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [token, isUserVenueManager, user?.name]);
+  }, [token, isUserVenueManager, user?.name, navigate]);
 
   const handleDeleteVenue = async (venueId: string) => {
-    if (!token) return;
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     
     try {
       setIsLoading(true);
-      await deleteVenue(venueId, token);
+      
+      const response = await fetch(`https://api.noroff.dev/api/v1/holidaze/venues/${venueId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to delete venue: ${response.status}`);
+      }
       
       // Remove the venue from state
       setVenues(prevVenues => prevVenues.filter(venue => venue.id !== venueId));
+      
+      // Also remove any bookings for this venue
+      setBookings(prevBookings => prevBookings.filter(booking => booking.venue?.id !== venueId));
+      
       setDeleteConfirm(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting venue:', err);
-      setError('Failed to delete venue. Please try again.');
+      setError(err.message || 'Failed to delete venue. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Redirect non-venue managers
+  // Redirect non-venue managers to become venue managers
   if (!isUserVenueManager) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
-          You need to be a venue manager to access this page.
+          <p className="font-medium">You need to be a venue manager to access this page.</p>
+          <p className="mt-2">Would you like to become a venue manager?</p>
         </div>
-        <Link to="/settings" className="text-[#0081A7] hover:underline">
+        <Link 
+          to="/settings" 
+          className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
+        >
           Become a Venue Manager
         </Link>
       </div>

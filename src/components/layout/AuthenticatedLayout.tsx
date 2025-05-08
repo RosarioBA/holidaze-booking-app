@@ -10,8 +10,8 @@ interface AuthenticatedLayoutProps {
 const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
 
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
-  // Debugging variable - uncomment to force enable venue manager features
-  const forceVenueManager = true; // Uncomment this line to force enable venue manager mode
+  // Disable forced venue manager mode for production
+  const forceVenueManager = false; // Change to false when testing actual functionality
   
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -137,18 +137,19 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
             Profile
           </Link>
           
-          {/* Debug - Always show venue manager status */}
+          {/* Debug info about venue manager status */}
           <div className="px-6 py-2 text-gray-400 text-xs">
             Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
           </div>
           
+          {/* Only show venue manager menu items if the user is a venue manager */}
           {isVenueManager && (
-          <Link 
-          to="/venue-manager/dashboard" 
-          className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#13262F] transition duration-200`}
-        >
-          Manage Venues
-        </Link>
+            <Link 
+              to="/venue-manager/dashboard" 
+              className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#13262F] transition duration-200`}
+            >
+              Manage Venues
+            </Link>
           )}
         </nav>
         <div className="p-6">
@@ -219,6 +220,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
                 Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
               </div>
               
+              {/* Only show venue manager options if the user is a venue manager */}
               {isVenueManager && (
                 <Link 
                   to="/venue-manager/dashboard" 

@@ -26,6 +26,9 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // Add debugging
+    console.log("Registering with account type:", isVenueManager ? "Venue Manager" : "Customer");
+    
     // Validate email domain
     if (!email.endsWith('@stud.noroff.no')) {
       setApiError('Email must be a valid stud.noroff.no address');
@@ -42,21 +45,25 @@ const RegisterPage = () => {
       setIsLoading(true);
       setApiError('');
       
+      // Log the registration data being sent
+      const registrationData = {
+        name,
+        email,
+        password,
+        venueManager: isVenueManager // Make sure this is a boolean
+      };
+      console.log("Sending registration data:", registrationData);
+      
       const response = await fetch('https://v2.api.noroff.dev/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-   // In your RegisterPage.tsx, when sending the registration data:
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          venueManager: isVenueManager === true // Force boolean conversion
-        })
+        body: JSON.stringify(registrationData)
       });
       
       const data = await response.json();
+      console.log("Registration response:", data);
       
       if (!response.ok) {
         if (data.errors && Array.isArray(data.errors)) {
@@ -72,9 +79,20 @@ const RegisterPage = () => {
         throw new Error(data.message || "Registration failed");
       }
       
+      // If the user selected venue manager, store this preference
+      // This will be used in the login page to override the API value if needed
+      if (isVenueManager) {
+        console.log("User registered as venue manager. Storing preference.");
+        localStorage.setItem('registered_as_venue_manager', 'true');
+        localStorage.setItem('registered_venue_manager_name', name);
+      }
+      
       // If successful, redirect to login
       navigate('/login', { 
-        state: { message: 'Registration successful! Please log in with your new account.' } 
+        state: { 
+          message: 'Registration successful! Please log in with your new account.',
+          accountType: isVenueManager ? 'venueManager' : 'customer'
+        } 
       });
     } catch (error: any) {
       console.error("Registration error:", error);

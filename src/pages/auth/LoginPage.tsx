@@ -1,10 +1,11 @@
 // src/pages/auth/LoginPage.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface LocationState {
   message?: string;
+  accountType?: 'customer' | 'venueManager';
   from?: {
     pathname: string;
   };
@@ -23,6 +24,23 @@ const LoginPage = () => {
   const state = location.state as LocationState;
   const successMessage = state?.message || '';
   const from = state?.from?.pathname || '/';
+  const accountType = state?.accountType;
+  
+  // Check if there's registered venue manager info
+  const [registeredAsVenueManager, setRegisteredAsVenueManager] = useState(false);
+  const [registeredName, setRegisteredName] = useState('');
+  
+  useEffect(() => {
+    // Check if the user registered as a venue manager
+    const isVenueManager = localStorage.getItem('registered_as_venue_manager') === 'true';
+    const name = localStorage.getItem('registered_venue_manager_name');
+    
+    if (isVenueManager && name) {
+      console.log(`Found registered venue manager info for: ${name}`);
+      setRegisteredAsVenueManager(true);
+      setRegisteredName(name);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,17 +82,35 @@ const LoginPage = () => {
         throw new Error(data.message || "Login failed");
       }
       
+      // Log full response for debugging
+      console.log("Full login response data:", data.data);
+      
+      // Get the venue manager status from the API
+      let venueManagerStatus = data.data.venueManager === true;
+      
+      // Check if this is the user who registered as a venue manager
+      const isRegisteredUser = registeredAsVenueManager && 
+                             registeredName === data.data.name;
+      
+      // If so, override the venue manager status
+      if (isRegisteredUser && !venueManagerStatus) {
+        console.log("User registered as venue manager but API didn't set it. Overriding locally.");
+        venueManagerStatus = true;
+        
+        // Clear the registration flag since we've used it
+        localStorage.removeItem('registered_as_venue_manager');
+        localStorage.removeItem('registered_venue_manager_name');
+      }
+      
+      console.log("Final venueManager status:", venueManagerStatus);
+      
       // Login successful
       login(data.data.accessToken, {
         name: data.data.name,
         email: data.data.email,
         avatar: data.data.avatar,
-        venueManager: data.data.venueManager === true // Force boolean conversion
+        venueManager: venueManagerStatus // Use our potentially overridden value
       });
-      
-      // Also add a console log to see what's coming from the API
-      console.log("Login response:", data.data);
-      console.log("Venue manager from API:", data.data.venueManager);
       
       // Redirect to home or previous page
       navigate(from);
@@ -103,6 +139,12 @@ const LoginPage = () => {
           {successMessage && (
             <div className="mb-4 p-3 bg-green-50 text-green-700 rounded text-sm">
               {successMessage}
+            </div>
+          )}
+          
+          {registeredAsVenueManager && (
+            <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded text-sm">
+              You registered as a venue manager. You'll be able to create and manage venues after login.
             </div>
           )}
           
