@@ -16,6 +16,11 @@ import SavedVenuesPage from '../pages/dashboard/SavedVenuesPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
 import ProfilePage from '../pages/profile/ProfilePage'; // Import the ProfilePage
 import NotFoundPage from '../pages/NotFoundPage';
+import VenueManagerDashboard from '../pages/venue-manager/VenueManagerDashboard';
+import CreateVenuePage from '../pages/venue-manager/CreateVenuePage';
+// Import these when you create them
+// import EditVenuePage from '../pages/venue-manager/EditVenuePage';
+// import VenueBookingsPage from '../pages/venue-manager/VenueBookingsPage';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -133,15 +138,51 @@ const AppRoutes = () => {
           </AuthenticatedLayout>
         </ProtectedRoute>
       } />
-      
-      {/* 404 route */}
-      <Route path="*" element={
-        <ConditionalLayout>
-          <NotFoundPage />
-        </ConditionalLayout>
+
+   
+      {/* Venue Manager Routes */}
+      <Route path="/venue-manager/dashboard" element={
+      <ProtectedRoute>
+        <AuthenticatedLayout>
+          <VenueManagerDashboard />
+        </AuthenticatedLayout>
+      </ProtectedRoute>
+    } />
+      <Route path="/venue-manager/create" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <CreateVenuePage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
       } />
-    </Routes>
-  );
-};
+
+      {/* Temporarily comment these out until you create the components */}
+      {/* 
+      <Route path="/venue-manager/edit/:id" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <EditVenuePage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/venue-manager/bookings/:id" element={
+        <ProtectedRoute>
+          <AuthenticatedLayout>
+            <VenueBookingsPage />
+          </AuthenticatedLayout>
+        </ProtectedRoute>
+      } />
+      */}
+            
+            {/* 404 route */}
+            <Route path="*" element={
+              <ConditionalLayout>
+                <NotFoundPage />
+              </ConditionalLayout>
+            } />
+          </Routes>
+        );
+      };
 
 export default AppRoutes;

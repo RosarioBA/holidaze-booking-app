@@ -114,7 +114,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Save to localStorage
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(userProfile));
+ // In your AuthContext.tsx, when saving to localStorage:
+    localStorage.setItem('user', JSON.stringify({
+      ...userProfile,
+      venueManager: userProfile.venueManager === true // Force boolean value
+    }));
     
     // Update state
     setToken(newToken);

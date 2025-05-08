@@ -47,11 +47,12 @@ const RegisterPage = () => {
         headers: {
           'Content-Type': 'application/json'
         },
+   // In your RegisterPage.tsx, when sending the registration data:
         body: JSON.stringify({
           name,
           email,
           password,
-          venueManager: isVenueManager
+          venueManager: isVenueManager === true // Force boolean conversion
         })
       });
       

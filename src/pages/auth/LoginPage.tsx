@@ -69,8 +69,12 @@ const LoginPage = () => {
         name: data.data.name,
         email: data.data.email,
         avatar: data.data.avatar,
-        venueManager: data.data.venueManager
+        venueManager: data.data.venueManager === true // Force boolean conversion
       });
+      
+      // Also add a console log to see what's coming from the API
+      console.log("Login response:", data.data);
+      console.log("Venue manager from API:", data.data.venueManager);
       
       // Redirect to home or previous page
       navigate(from);

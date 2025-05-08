@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { getUserBookings } from '../../api/bookingService';
 
 interface ProfileMedia {
   url: string;
@@ -34,6 +35,8 @@ const ProfilePage: React.FC = () => {
   const [formAvatarUrl, setFormAvatarUrl] = useState('');
   const [formBannerUrl, setFormBannerUrl] = useState('');
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
 
   // Load profile from localStorage first
   useEffect(() => {
@@ -121,6 +124,39 @@ const ProfilePage: React.FC = () => {
     }
   }, [user, updateUser]);
 
+  // Fetch user bookings directly from the API
+  // Modify the useEffect for fetching bookings to properly type the updatedProfile
+useEffect(() => {
+    const fetchUserBookings = async () => {
+      if (!token) return;
+      
+      setBookingsLoading(true);
+      try {
+        const bookings = await getUserBookings(token);
+        setUserBookings(bookings);
+        
+        // Also update the profile's booking count
+        if (profile) {
+          const updatedProfile: Profile = {
+            ...profile,
+            _count: {
+              venues: profile._count?.venues || 0,
+              bookings: bookings.length
+            }
+          };
+          setProfile(updatedProfile);
+          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updatedProfile));
+        }
+      } catch (error) {
+        console.error('Error fetching user bookings:', error);
+      } finally {
+        setBookingsLoading(false);
+      }
+    };
+    
+    fetchUserBookings();
+  }, [token, profile?.name]);
+  
   // Update profile function
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +173,7 @@ const ProfilePage: React.FC = () => {
         venueManager: user.venueManager || false,
         bio: formBio,
         _count: profile?._count || {
-          bookings: 0,
+          bookings: userBookings.length,
           venues: 0
         }
       };
@@ -226,6 +262,9 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Calculate bookings count from fetched bookings rather than relying on profile._count
+  const bookingsCount = userBookings.length;
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       {updateSuccess && (
@@ -304,7 +343,11 @@ const ProfilePage: React.FC = () => {
             <div>
               <span className="text-gray-600 block text-sm">Bookings</span>
               <span className="font-medium">
-                {profile._count?.bookings || 0}
+                {bookingsLoading ? (
+                  <span className="text-gray-400">Loading...</span>
+                ) : (
+                  bookingsCount
+                )}
               </span>
             </div>
             {profile.venueManager && (
@@ -404,7 +447,12 @@ const ProfilePage: React.FC = () => {
           </Link>
         </div>
         
-        {!profile._count || profile._count.bookings === 0 ? (
+        {bookingsLoading ? (
+          <div className="text-center p-3">
+            <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#0081A7]"></div>
+            <span className="ml-2 text-gray-600">Loading bookings...</span>
+          </div>
+        ) : !bookingsCount || bookingsCount === 0 ? (
           <div className="text-center p-6 bg-gray-50 rounded-lg">
             <p className="text-gray-600 mb-3">You don't have any bookings yet.</p>
             <Link 
@@ -416,7 +464,7 @@ const ProfilePage: React.FC = () => {
           </div>
         ) : (
           <p className="text-gray-600">
-            You have {profile._count.bookings} {profile._count.bookings === 1 ? 'booking' : 'bookings'}.
+            You have {bookingsCount} {bookingsCount === 1 ? 'booking' : 'bookings'}.
             <br />
             Visit the My Trips page to view your bookings.
           </p>

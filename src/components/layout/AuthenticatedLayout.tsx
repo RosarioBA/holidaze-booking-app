@@ -10,11 +10,20 @@ interface AuthenticatedLayoutProps {
 const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
 
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
+  // Debugging variable - uncomment to force enable venue manager features
+  const forceVenueManager = true; // Uncomment this line to force enable venue manager mode
+  
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
+
+  // Add debugging logs
+  console.log("Current user in AuthenticatedLayout:", user);
+  console.log("Is venue manager:", user?.venueManager);
+  console.log("Venue manager type:", typeof user?.venueManager);
+  console.log("Force venue manager mode:", forceVenueManager);
 
   // Check for saved avatar URL whenever the component renders
   useEffect(() => {
@@ -53,6 +62,9 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   const isActive = (path: string) => {
     return location.pathname === path ? 'bg-[#13262F]' : '';
   };
+
+  // Check if user is a venue manager (with force option for testing)
+  const isVenueManager = user?.venueManager === true || forceVenueManager;
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -124,6 +136,20 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
           >
             Profile
           </Link>
+          
+          {/* Debug - Always show venue manager status */}
+          <div className="px-6 py-2 text-gray-400 text-xs">
+            Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
+          </div>
+          
+          {isVenueManager && (
+          <Link 
+          to="/venue-manager/dashboard" 
+          className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#13262F] transition duration-200`}
+        >
+          Manage Venues
+        </Link>
+          )}
         </nav>
         <div className="p-6">
           <button 
@@ -187,6 +213,21 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
               >
                 Profile
               </Link>
+              
+              {/* Debug - Always show venue manager status */}
+              <div className="px-6 py-2 text-gray-400 text-xs">
+                Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
+              </div>
+              
+              {isVenueManager && (
+                <Link 
+                  to="/venue-manager/dashboard" 
+                  className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#13262F] transition duration-200`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Manage Venues
+                </Link>
+              )}
             </nav>
             <div className="p-6">
               <button 
