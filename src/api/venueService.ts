@@ -3,8 +3,9 @@ import { Venue, VenueFilters } from '../types/venue';
 import { fetchFromApi } from './api';
 
 interface ApiResponse<T> {
-  data: T;
-  meta: {
+  data?: T;
+  venues?: T;
+  meta?: {
     isFirstPage?: boolean;
     isLastPage?: boolean;
     currentPage?: number;
@@ -16,14 +17,51 @@ interface ApiResponse<T> {
 }
 
 // Function to get all venues with optional pagination
-export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrder = 'desc'): Promise<{venues: Venue[], meta: any}> => {
+export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrder = 'desc') => {
   try {
-    const response = await fetchFromApi<ApiResponse<Venue[]>>(`/holidaze/venues?page=${page}&limit=${limit}&sort=${sort}&sortOrder=${sortOrder}`);
+    // Ensure page is a valid number
+    const validPage = isNaN(Number(page)) ? 1 : Number(page);
     
-    return {
-      venues: response.data,
-      meta: response.meta
+    const response = await fetchFromApi(
+      `/holidaze/venues?page=${validPage}&limit=${limit}&sort=${sort}&sortOrder=${sortOrder}`
+    );
+    
+    // Log the response structure for debugging
+    console.log("Venue service received data:", response);
+    
+    // Handle different response formats
+    let result: any = {
+      venues: [],
+      meta: {
+        currentPage: 1,
+        pageCount: 1,
+        isFirstPage: true,
+        isLastPage: true
+      }
     };
+    
+    // Check for various response structures and normalize them
+    if (Array.isArray(response)) {
+      // If response is directly an array of venues
+      result.venues = response;
+    } else if (typeof response === 'object' && response !== null && 'data' in response) {
+      // If response has data property
+      if (Array.isArray(response.data)) {
+        result.venues = response.data;
+      } else {
+        result.venues = [response.data];
+      }
+      
+      // If response has meta, use it
+      if ('meta' in response && response.meta) {
+        result.meta = response.meta;
+      }
+    } else if (typeof response === 'object' && response !== null && 'venues' in response && Array.isArray((response as any).venues)) {
+      // If response has venues property
+      result = response;
+    }
+    
+    return result;
   } catch (error) {
     console.error('Error fetching venues:', error);
     throw error;
@@ -49,7 +87,16 @@ export const getVenueById = async (id: string, includeOwner = false, includeBook
     }
     
     const response = await fetchFromApi<ApiResponse<Venue>>(endpoint);
-    return response.data;
+    
+    // Handle different response structures
+    if (response.data) {
+      return response.data;
+    } else if (response.venues && !Array.isArray(response.venues)) {
+      return response.venues;
+    } else {
+      // If the API changes and returns a different structure, try to handle it
+      return response as unknown as Venue;
+    }
   } catch (error) {
     console.error(`Error fetching venue with ID ${id}:`, error);
     throw error;
@@ -66,8 +113,19 @@ export const getVenueManagerVenues = async (profileName: string, token: string):
       }
     });
     
-    console.log(`Found ${response.data.length} venues for profile ${profileName}`);
-    return response.data;
+    // Handle different response structures
+    let venues: Venue[] = [];
+    
+    if (response.data && Array.isArray(response.data)) {
+      venues = response.data;
+    } else if (response.venues && Array.isArray(response.venues)) {
+      venues = response.venues;
+    } else if (Array.isArray(response)) {
+      venues = response;
+    }
+    
+    console.log(`Found ${venues.length} venues for profile ${profileName}`);
+    return venues;
   } catch (error) {
     console.error(`Error fetching venues for venue manager ${profileName}:`, error);
     throw error;
@@ -78,7 +136,19 @@ export const getVenueManagerVenues = async (profileName: string, token: string):
 export const searchVenues = async (query: string): Promise<Venue[]> => {
   try {
     const response = await fetchFromApi<ApiResponse<Venue[]>>(`/holidaze/venues/search?q=${encodeURIComponent(query)}`);
-    return response.data;
+    
+    // Handle different response structures
+    let venues: Venue[] = [];
+    
+    if (response.data && Array.isArray(response.data)) {
+      venues = response.data;
+    } else if (response.venues && Array.isArray(response.venues)) {
+      venues = response.venues;
+    } else if (Array.isArray(response)) {
+      venues = response;
+    }
+    
+    return venues;
   } catch (error) {
     console.error('Error searching venues:', error);
     throw error;
@@ -134,7 +204,15 @@ export const createVenue = async (venueData: Omit<Venue, 'id' | 'created' | 'upd
       body: JSON.stringify(venueData)
     });
     
-    return response.data;
+    // Handle different response structures
+    if (response.data) {
+      return response.data;
+    } else if (response.venues && !Array.isArray(response.venues)) {
+      return response.venues;
+    } else {
+      // If the API changes and returns a different structure, try to handle it
+      return response as unknown as Venue;
+    }
   } catch (error) {
     console.error('Error creating venue:', error);
     throw error;
@@ -152,7 +230,15 @@ export const updateVenue = async (id: string, venueData: Partial<Venue>, token: 
       body: JSON.stringify(venueData)
     });
     
-    return response.data;
+    // Handle different response structures
+    if (response.data) {
+      return response.data;
+    } else if (response.venues && !Array.isArray(response.venues)) {
+      return response.venues;
+    } else {
+      // If the API changes and returns a different structure, try to handle it
+      return response as unknown as Venue;
+    }
   } catch (error) {
     console.error(`Error updating venue with ID ${id}:`, error);
     throw error;
