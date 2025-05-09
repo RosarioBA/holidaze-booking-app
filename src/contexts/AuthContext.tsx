@@ -42,6 +42,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
+  // Computed property for role check (explicitly cast to boolean)
+  const isVenueManager = user?.venueManager === true;
+  
   // Helper function to check if token is valid
   const isTokenValid = (token: string): boolean => {
     try {
@@ -155,6 +158,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('registered_as_venue_manager'); // Clear this as well
+    localStorage.removeItem('registered_venue_manager_name'); // Clear this as well
     
     // Update state
     setToken(null);
@@ -165,31 +170,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const updateUser = (updatedUserData: Partial<Profile>) => {
     if (!user) return; // Can't update if no user exists
     
-    // Ensure venueManager is properly typed as boolean if it's being updated
-    const normalizedUpdates = {
-      ...updatedUserData
-    };
-    
-    if (updatedUserData.venueManager !== undefined) {
-      normalizedUpdates.venueManager = updatedUserData.venueManager === true;
-    }
-    
     // Create an updated user object by merging current user with updates
-    const updatedUser = { ...user, ...normalizedUpdates };
+    const updatedUser = { 
+      ...user, 
+      ...updatedUserData,
+      // Ensure venueManager remains its original value and can't be changed after login
+      venueManager: user.venueManager 
+    };
     
     // Save to localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
     // Update state
     setUser(updatedUser);
-    console.log('User data updated successfully with venueManager:', updatedUser.venueManager);
+    console.log('User data updated successfully');
   };
   
   const value = {
     user,
     token,
     isAuthenticated: !!token,
-    isVenueManager: user?.venueManager === true, // Explicit boolean conversion
+    isVenueManager, // Use the computed property
     login,
     logout,
     updateUser,
