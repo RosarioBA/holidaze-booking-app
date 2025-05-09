@@ -1,9 +1,72 @@
 // src/pages/venue/VenuesPage.tsx
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Venue, VenueFilters } from '../../types/venue';
 import { getVenues, searchVenues, filterVenues } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
+import { Venue, VenueFilters } from '../../types/venue'; // Assuming these types are imported from a types file
+
+// If you don't have a separate types file, define them here:
+/*
+interface MediaObject {
+  url: string;
+  alt: string;
+}
+
+interface VenueLocation {
+  address?: string;
+  city?: string;
+  zip?: string;
+  country?: string;
+  continent?: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface VenueMeta {
+  wifi?: boolean;
+  parking?: boolean;
+  breakfast?: boolean;
+  pets?: boolean;
+}
+
+interface Venue {
+  id: string;
+  name: string;
+  description: string;
+  media?: MediaObject[];
+  price: number;
+  maxGuests: number;
+  rating?: number;
+  created?: string;
+  updated?: string;
+  meta?: VenueMeta;
+  location: VenueLocation;
+}
+
+interface VenueFilters {
+  minPrice?: number;
+  maxPrice?: number;
+  maxGuests?: number;
+  wifi?: boolean;
+  parking?: boolean;
+  breakfast?: boolean;
+  pets?: boolean;
+}
+*/
+
+interface ApiResponse {
+  data?: Venue[] | any;
+  venues?: Venue[] | any;
+  meta?: {
+    currentPage?: number;
+    pageCount?: number;
+    isFirstPage?: boolean;
+    isLastPage?: boolean;
+    totalCount?: number;
+    previousPage?: number | null;
+    nextPage?: number | null;
+  };
+}
 
 const VenuesPage = () => {
   const location = useLocation();
@@ -34,14 +97,41 @@ const VenuesPage = () => {
       try {
         setLoading(true);
         const result = await getVenues(1, 100);
-        setVenues(result.venues);
-        setFilteredVenues(result.venues);
-        setPagination({
-          currentPage: result.meta.currentPage || 1,
-          totalPages: result.meta.pageCount || 1,
-          isFirstPage: result.meta.isFirstPage || true,
-          isLastPage: result.meta.isLastPage || true
-        });
+        
+        // Extract venues from the result based on its structure
+        let venuesList: Venue[] = [];
+        
+        if (Array.isArray(result)) {
+          venuesList = result;
+        } else if (result && typeof result === 'object') {
+          if (result.venues && Array.isArray(result.venues)) {
+            venuesList = result.venues;
+          } else if (result.data && Array.isArray(result.data)) {
+            venuesList = result.data;
+          }
+        }
+        
+        // Process venues to ensure they have all required properties
+        const processedVenues = venuesList.map(venue => ({
+          ...venue,
+          media: venue.media || [],
+          location: venue.location || {},
+          meta: venue.meta || {}
+        }));
+        
+        setVenues(processedVenues);
+        setFilteredVenues(processedVenues);
+        
+        // Set pagination data if available
+        if (result && result.meta) {
+          setPagination({
+            currentPage: result.meta.currentPage || 1,
+            totalPages: result.meta.pageCount || 1,
+            isFirstPage: result.meta.isFirstPage || true,
+            isLastPage: result.meta.isLastPage || true
+          });
+        }
+        
         setError(null);
         
         // If there's an initial search query, immediately filter results
@@ -64,7 +154,6 @@ const VenuesPage = () => {
     e.preventDefault();
     handleSearchQuery(search);
   };
-  
   const handleSearchQuery = async (query: string) => {
     if (!query.trim()) {
       setFilteredVenues(venues);
@@ -76,8 +165,34 @@ const VenuesPage = () => {
       
       // Try to use the API search endpoint first
       try {
-        const searchResults = await searchVenues(query);
-        setFilteredVenues(searchResults);
+        // Fetch search results
+        const searchResultsRaw = await searchVenues(query);
+        
+        // Simply ensure it's an array, whatever the structure
+        let searchResults: Venue[] = [];
+        
+        if (Array.isArray(searchResultsRaw)) {
+          searchResults = searchResultsRaw;
+        } else if (typeof searchResultsRaw === 'object' && searchResultsRaw !== null) {
+          // Try to extract from data property
+          if (Array.isArray((searchResultsRaw as any).data)) {
+            searchResults = (searchResultsRaw as any).data;
+          }
+          // Try to extract from venues property
+          else if (Array.isArray((searchResultsRaw as any).venues)) {
+            searchResults = (searchResultsRaw as any).venues;
+          }
+        }
+        
+        // Ensure each venue has the minimal required properties
+        const processedResults = searchResults.map(venue => ({
+          ...venue,
+          media: venue.media || [],
+          location: venue.location || {},
+          meta: venue.meta || {}
+        }));
+        
+        setFilteredVenues(processedResults);
       } catch (searchError) {
         // Fallback to client-side filtering if API search fails
         console.warn('API search failed, falling back to client-side filtering:', searchError);
@@ -86,8 +201,8 @@ const VenuesPage = () => {
           return (
             venue.name.toLowerCase().includes(searchLower) ||
             venue.description.toLowerCase().includes(searchLower) ||
-            (venue.location.city && venue.location.city.toLowerCase().includes(searchLower)) ||
-            (venue.location.country && venue.location.country.toLowerCase().includes(searchLower))
+            (venue.location?.city && venue.location.city.toLowerCase().includes(searchLower)) ||
+            (venue.location?.country && venue.location.country.toLowerCase().includes(searchLower))
           );
         });
         setFilteredVenues(filteredResults);
@@ -104,11 +219,27 @@ const VenuesPage = () => {
   const applyFilters = () => {
     const filters: VenueFilters = {};
     
-    if (minPrice) filters.minPrice = parseFloat(minPrice);
-    if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
-    if (guests) filters.maxGuests = parseInt(guests, 10);
+    if (minPrice && !isNaN(parseFloat(minPrice))) {
+      filters.minPrice = parseFloat(minPrice);
+    }
     
-    const filtered = filterVenues(filteredVenues, filters);
+    if (maxPrice && !isNaN(parseFloat(maxPrice))) {
+      filters.maxPrice = parseFloat(maxPrice);
+    }
+    
+    if (guests && !isNaN(parseInt(guests, 10))) {
+      filters.maxGuests = parseInt(guests, 10);
+    }
+    
+    // Ensure venues are properly processed for filtering
+    const venuesForFiltering = filteredVenues.map(venue => ({
+      ...venue,
+      media: venue.media || [],
+      meta: venue.meta || {},
+      location: venue.location || {}
+    }));
+    
+    const filtered = filterVenues(venuesForFiltering, filters);
     setFilteredVenues(filtered);
   };
   
