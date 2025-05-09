@@ -1,7 +1,7 @@
 // src/pages/auth/RegisterPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -79,21 +79,14 @@ const RegisterPage = () => {
         throw new Error(data.message || "Registration failed");
       }
       
-      // If the user selected venue manager, store this preference
-      // This will be used in the login page to override the API value if needed
-      if (isVenueManager) {
-        console.log("User registered as venue manager. Storing preference.");
-        localStorage.setItem('registered_as_venue_manager', 'true');
-        localStorage.setItem('registered_venue_manager_name', name);
-      }
-      
-      // If successful, redirect to login
+      // Successful registration - redirect to login with appropriate message
       navigate('/login', { 
         state: { 
           message: 'Registration successful! Please log in with your new account.',
           accountType: isVenueManager ? 'venueManager' : 'customer'
         } 
       });
+      
     } catch (error: any) {
       console.error("Registration error:", error);
       setApiError(error.message || "Registration failed. Please try again.");

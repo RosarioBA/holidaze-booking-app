@@ -1,5 +1,5 @@
 // src/pages/auth/LoginPage.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react'; // Remove useEffect since it's not used
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,25 +23,8 @@ const LoginPage = () => {
   // Get message from location state (if redirected from register)
   const state = location.state as LocationState;
   const successMessage = state?.message || '';
-  const from = state?.from?.pathname || '/';
-  const accountType = state?.accountType;
+  // Remove the unused 'from' variable since we're redirecting directly to dashboards
   
-  // Check if there's registered venue manager info
-  const [registeredAsVenueManager, setRegisteredAsVenueManager] = useState(false);
-  const [registeredName, setRegisteredName] = useState('');
-  
-  useEffect(() => {
-    // Check if the user registered as a venue manager
-    const isVenueManager = localStorage.getItem('registered_as_venue_manager') === 'true';
-    const name = localStorage.getItem('registered_venue_manager_name');
-    
-    if (isVenueManager && name) {
-      console.log(`Found registered venue manager info for: ${name}`);
-      setRegisteredAsVenueManager(true);
-      setRegisteredName(name);
-    }
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -85,35 +68,27 @@ const LoginPage = () => {
       // Log full response for debugging
       console.log("Full login response data:", data.data);
       
-      // Get the venue manager status from the API
-      let venueManagerStatus = data.data.venueManager === true;
-      
-      // Check if this is the user who registered as a venue manager
-      const isRegisteredUser = registeredAsVenueManager && 
-                             registeredName === data.data.name;
-      
-      // If so, override the venue manager status
-      if (isRegisteredUser && !venueManagerStatus) {
-        console.log("User registered as venue manager but API didn't set it. Overriding locally.");
-        venueManagerStatus = true;
-        
-        // Clear the registration flag since we've used it
-        localStorage.removeItem('registered_as_venue_manager');
-        localStorage.removeItem('registered_venue_manager_name');
-      }
-      
-      console.log("Final venueManager status:", venueManagerStatus);
+      // Ensure venueManager is a boolean value
+      const venueManagerStatus = data.data.venueManager === true;
+      console.log("Venue Manager status:", venueManagerStatus);
       
       // Login successful
       login(data.data.accessToken, {
         name: data.data.name,
         email: data.data.email,
         avatar: data.data.avatar,
-        venueManager: venueManagerStatus // Use our potentially overridden value
+        venueManager: venueManagerStatus
       });
       
-      // Redirect to home or previous page
-      navigate(from);
+      // Redirect based on role
+      if (venueManagerStatus) {
+        console.log("Redirecting to venue manager dashboard");
+        navigate('/venue-manager/dashboard');
+      } else {
+        console.log("Redirecting to customer dashboard");
+        navigate('/customer/dashboard');
+      }
+      
     } catch (error: any) {
       console.error("Login error:", error);
       setApiError(error.message || "Login failed. Please check your credentials and try again.");
@@ -121,6 +96,7 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
@@ -139,12 +115,6 @@ const LoginPage = () => {
           {successMessage && (
             <div className="mb-4 p-3 bg-green-50 text-green-700 rounded text-sm">
               {successMessage}
-            </div>
-          )}
-          
-          {registeredAsVenueManager && (
-            <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded text-sm">
-              You registered as a venue manager. You'll be able to create and manage venues after login.
             </div>
           )}
           
