@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserBookings } from '../../api/bookingService';
+// Add import for the modal components
+import CancelBookingModal from '../../components/booking/CancelBookingModal';
+import EditBookingModal from '../../components/booking/EditBookingModal';
 
 const CustomerTripsPage: React.FC = () => {
   const { user, token } = useAuth();
@@ -12,50 +15,56 @@ const CustomerTripsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(false);
+  // Inside the component, add these state variables for cancel functionality:
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<any>(null);
+  // Inside the component, add these state variables for edit functionality:
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [bookingToEdit, setBookingToEdit] = useState<any>(null);
+
+  const fetchBookings = async () => {
+    if (!token || !user) return;
+    
+    setIsLoading(true);
+    try {
+      // Use the bookingService to get bookings
+      const bookingsData = await getUserBookings(token);
+      console.log(`Received ${bookingsData.length} bookings from service`);
+      
+      // Get mock data flag from localStorage if debugging needed
+      const useMockFromStorage = localStorage.getItem('useMockBookings') === 'true';
+      setUseMockData(useMockFromStorage);
+      
+      // No error thrown if using mock data
+      if (bookingsData.length > 0) {
+        // Sort bookings by date (most recent check-in first)
+        const sortedBookings = [...bookingsData].sort((a, b) => 
+          new Date(b.dateFrom).getTime() - new Date(a.dateFrom).getTime()
+        );
+        
+        setBookings(sortedBookings);
+        setFilteredBookings(sortedBookings);
+        setError(null);
+        
+        // For debug info
+        console.log(`Successfully loaded ${sortedBookings.length} bookings`);
+      } else {
+        console.log("No bookings found - array empty");
+        setBookings([]);
+        setFilteredBookings([]);
+      }
+    } catch (err: any) {
+      console.error('Error processing bookings:', err);
+      setUseMockData(true);
+      
+      // Hide the error from users since mock data is shown
+      setError(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      if (!token || !user) return;
-      
-      setIsLoading(true);
-      try {
-        // Use the bookingService to get bookings
-        const bookingsData = await getUserBookings(token);
-        console.log(`Received ${bookingsData.length} bookings from service`);
-        
-        // Get mock data flag from localStorage if debugging needed
-        const useMockFromStorage = localStorage.getItem('useMockBookings') === 'true';
-        setUseMockData(useMockFromStorage);
-        
-        // No error thrown if using mock data
-        if (bookingsData.length > 0) {
-          // Sort bookings by date (most recent check-in first)
-          const sortedBookings = [...bookingsData].sort((a, b) => 
-            new Date(b.dateFrom).getTime() - new Date(a.dateFrom).getTime()
-          );
-          
-          setBookings(sortedBookings);
-          setFilteredBookings(sortedBookings);
-          setError(null);
-          
-          // For debug info
-          console.log(`Successfully loaded ${sortedBookings.length} bookings`);
-        } else {
-          console.log("No bookings found - array empty");
-          setBookings([]);
-          setFilteredBookings([]);
-        }
-      } catch (err: any) {
-        console.error('Error processing bookings:', err);
-        setUseMockData(true);
-        
-        // Hide the error from users since mock data is shown
-        setError(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchBookings();
   }, [token, user]);
   
@@ -78,6 +87,40 @@ const CustomerTripsPage: React.FC = () => {
         setFilteredBookings(bookings);
     }
   }, [bookings, activeFilter]);
+
+  // Add a function to handle booking cancellation
+  const handleCancelBooking = (booking: any) => {
+    setBookingToCancel(booking);
+    setShowCancelModal(true);
+  };
+
+  // Add a function to handle successful cancellation
+  const handleCancellationSuccess = () => {
+    setShowCancelModal(false);
+    setBookingToCancel(null);
+    
+    // Refresh booking data
+    fetchBookings();
+  };
+
+  // Add a function to handle editing
+  const handleEditBooking = (booking: any) => {
+    setBookingToEdit(booking);
+    setShowEditModal(true);
+  };
+
+  // Add a function to handle edit success
+  const handleEditSuccess = (updatedBooking: any) => {
+    setShowEditModal(false);
+    setBookingToEdit(null);
+    
+    // Update the booking in the local state
+    setBookings(prevBookings => 
+      prevBookings.map(booking => 
+        booking.id === updatedBooking.id ? updatedBooking : booking
+      )
+    );
+  };
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -266,6 +309,29 @@ const CustomerTripsPage: React.FC = () => {
                           >
                             View Venue
                           </Link>
+                          {/* Only show edit/cancel for upcoming bookings */}
+                          {new Date(booking.dateFrom) > new Date() && (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleEditBooking(booking);
+                                }}
+                                className="text-gray-600 hover:underline text-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleCancelBooking(booking);
+                                }}
+                                className="text-red-600 hover:underline text-sm"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -275,6 +341,25 @@ const CustomerTripsPage: React.FC = () => {
             );
           })}
         </div>
+      )}
+      
+      {/* Add the cancel modal */}
+      {showCancelModal && bookingToCancel && (
+        <CancelBookingModal
+          bookingId={bookingToCancel.id}
+          venueName={bookingToCancel.venue?.name || 'this venue'}
+          onClose={() => setShowCancelModal(false)}
+          onSuccess={handleCancellationSuccess}
+        />
+      )}
+      
+      {/* Add the edit modal */}
+      {showEditModal && bookingToEdit && (
+        <EditBookingModal
+          booking={bookingToEdit}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={handleEditSuccess}
+        />
       )}
     </div>
   );

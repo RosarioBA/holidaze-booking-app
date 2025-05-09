@@ -63,9 +63,13 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
       
       // Use the bookingService function instead of direct API call
       const updatedBooking = await updateBooking(booking.id, updateData, token);
+
+      if (!updatedBooking) {
+        throw new Error('Failed to update booking');
+      }
       
       // Add the venue data back to the response since the API doesn't return it
-      const completeUpdatedBooking = {
+      const completeUpdatedBooking: Booking = {
         ...updatedBooking,
         venue: booking.venue
       };

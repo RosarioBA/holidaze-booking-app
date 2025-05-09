@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { Venue } from '../../types/venue';
 import { getVenues } from '../../api/venueService';
+import CancelBookingModal from '../../components/booking/CancelBookingModal';
+
 
 const CustomerSavedPage: React.FC = () => {
   const { favorites, removeFavorite } = useFavorites();

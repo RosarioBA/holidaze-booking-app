@@ -22,6 +22,12 @@ interface CreateBookingData {
   venueId: string;
 }
 
+interface UpdateBookingData {
+  dateFrom?: string;
+  dateTo?: string;
+  guests?: number;
+} 
+
 // Create a new booking
 export const createBooking = async (bookingData: CreateBookingData, token: string): Promise<Booking> => {
   try {
@@ -191,27 +197,7 @@ function getMockBookings(): Booking[] {
 }
 
 // Delete a booking
-export const deleteBooking = async (bookingId: string, token: string): Promise<void> => {
-  try {
-    if (!bookingId) {
-      throw new Error('Booking ID is required');
-    }
-    
-    if (!token) {
-      throw new Error('Authorization token is required');
-    }
-    
-    await fetchFromApi(`/holidaze/bookings/${bookingId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  } catch (error) {
-    console.error(`Error deleting booking ${bookingId}:`, error);
-    throw error;
-  }
-};
+// Removed duplicate deleteBooking function to resolve redeclaration error.
 
 // Get a single booking by ID
 export const getBookingById = async (bookingId: string, token: string): Promise<Booking> => {
@@ -240,29 +226,63 @@ export const getBookingById = async (bookingId: string, token: string): Promise<
 // Update a booking
 export const updateBooking = async (
   bookingId: string, 
-  bookingData: Partial<Pick<CreateBookingData, 'dateFrom' | 'dateTo' | 'guests'>>, 
+  updateData: UpdateBookingData, 
   token: string
-): Promise<Booking> => {
+): Promise<Booking | null> => {
   try {
     if (!bookingId) {
-      throw new Error('Booking ID is required');
+      console.error("Missing bookingId in updateBooking");
+      return null;
     }
     
     if (!token) {
-      throw new Error('Authorization token is required');
+      console.error("Missing token in updateBooking");
+      return null;
     }
+    
+    console.log(`Updating booking ${bookingId} with data:`, updateData);
     
     const response = await fetchFromApi<ApiResponse<Booking>>(`/holidaze/bookings/${bookingId}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(bookingData)
+      body: JSON.stringify(updateData)
     });
     
+    console.log(`Successfully updated booking ${bookingId}`);
     return response.data;
   } catch (error) {
     console.error(`Error updating booking ${bookingId}:`, error);
-    throw error;
+    return null;
+  }
+};
+
+export const deleteBooking = async (bookingId: string, token: string): Promise<boolean> => {
+  try {
+    if (!bookingId) {
+      console.error("Missing bookingId in deleteBooking");
+      return false;
+    }
+    
+    if (!token) {
+      console.error("Missing token in deleteBooking");
+      return false;
+    }
+    
+    console.log(`Deleting booking with ID: ${bookingId}`);
+    
+    await fetchFromApi(`/holidaze/bookings/${bookingId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    console.log(`Successfully deleted booking ${bookingId}`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting booking ${bookingId}:`, error);
+    return false;
   }
 };
