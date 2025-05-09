@@ -133,15 +133,6 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
             Settings
           </Link>
           
-          {/* Only show the switch button if user is a venue manager */}
-          {isVenueManager && (
-            <button
-              onClick={switchToVenueManager}
-              className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
-            >
-              Switch to Venue Manager
-            </button>
-          )}
         </nav>
         <div className="p-6">
           <button 
@@ -210,17 +201,6 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               </Link>
               
               {/* Only show the switch button if user is a venue manager */}
-              {isVenueManager && (
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    switchToVenueManager();
-                  }}
-                  className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
-                >
-                  Switch to Venue Manager
-                </button>
-              )}
             </nav>
             <div className="p-6">
               <button 

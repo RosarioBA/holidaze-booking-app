@@ -141,13 +141,6 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
           >
             Settings
           </Link>
-          
-          <button
-            onClick={switchToCustomer}
-            className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
-          >
-            Switch to Customer View
-          </button>
         </nav>
         <div className="p-6">
           <button 
@@ -225,15 +218,6 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
                 Settings
               </Link>
               
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  switchToCustomer();
-                }}
-                className="block py-3 px-6 text-left w-full hover:bg-[#13262F] transition duration-200 text-gray-300"
-              >
-                Switch to Customer View
-              </button>
             </nav>
             <div className="p-6">
               <button 
