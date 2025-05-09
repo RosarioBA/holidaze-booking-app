@@ -5,10 +5,74 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
 
+// Define interfaces for type safety
+interface MediaObject {
+  url: string;
+  alt: string;
+}
+
+interface VenueLocation {
+  address?: string;
+  city?: string;
+  zip?: string;
+  country?: string;
+  continent?: string;
+  lat?: number;
+  lng?: number;
+}
+
+interface VenueMeta {
+  wifi?: boolean;
+  parking?: boolean;
+  breakfast?: boolean;
+  pets?: boolean;
+}
+
+interface Venue {
+  id: string;
+  name: string;
+  description: string;
+  media?: MediaObject[];
+  price: number;
+  maxGuests: number;
+  rating?: number;
+  created?: string;
+  updated?: string;
+  meta?: VenueMeta;
+  location?: VenueLocation;
+}
+
+interface Customer {
+  name: string;
+  email: string;
+}
+
+interface Booking {
+  id: string;
+  dateFrom: string;
+  dateTo: string;
+  guests: number;
+  created?: string;
+  updated?: string;
+  venue?: Venue;
+  customer?: Customer;
+}
+
+interface ApiResponse<T> {
+  data?: T | T[];
+  venues?: T[];
+  meta?: {
+    currentPage?: number;
+    pageCount?: number;
+    isFirstPage?: boolean;
+    isLastPage?: boolean;
+  };
+}
+
 const VenueManagerDashboardPage: React.FC = () => {
   const { user, token } = useAuth();
-  const [venues, setVenues] = useState<any[]>([]);
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,27 +85,70 @@ const VenueManagerDashboardPage: React.FC = () => {
       
       try {
         // Fetch venues managed by the user
-        const venuesData = await getVenues(Number(token)); // Ensure token is converted to a number
-        setVenues(venuesData.venues.slice(0, 3)); // Show only the first 3
+        const venuesData: ApiResponse<Venue> = await getVenues(1);
+        
+        // Log the data structure to debug
+        console.log("Venues data received:", venuesData);
+        
+        // Handle various response formats
+        let venuesList: Venue[] = [];
+        
+        if (Array.isArray(venuesData)) {
+          venuesList = venuesData;
+        } else if (venuesData.data && Array.isArray(venuesData.data)) {
+          venuesList = venuesData.data as Venue[];
+        } else if (venuesData.venues && Array.isArray(venuesData.venues)) {
+          venuesList = venuesData.venues;
+        } else {
+          console.error("Unexpected venues data structure:", venuesData);
+        }
+        
+        setVenues(venuesList.slice(0, 3));
         
         // Fetch recent bookings for all venues
-        const allBookings = await getUserBookings(token);
-        const now = new Date();
-        
-        // Filter for upcoming bookings only
-        const upcomingBookings = allBookings.filter(booking => 
-          new Date(booking.dateTo) >= now
-        );
-        
-        // Sort by date (most recent first)
-        upcomingBookings.sort((a, b) => 
-          new Date(a.dateFrom).getTime() - new Date(b.dateFrom).getTime()
-        );
-        
-        setBookings(upcomingBookings.slice(0, 3)); // Show only the first 3
+        try {
+          // Don't specify a type here, let TypeScript infer it
+          const bookingsData = await getUserBookings(token);
+          console.log("Bookings data received:", bookingsData);
+          
+          // Handle different possible structures
+          let bookingsList: Booking[] = [];
+          
+          if (Array.isArray(bookingsData)) {
+            bookingsList = bookingsData as Booking[];
+          } else if (bookingsData && typeof bookingsData === 'object') {
+            // Use 'any' type for more flexible property access
+            const anyData = bookingsData as any;
+            
+            if (anyData.data && Array.isArray(anyData.data)) {
+              bookingsList = anyData.data;
+            } else if (anyData.bookings && Array.isArray(anyData.bookings)) {
+              bookingsList = anyData.bookings;
+            }
+          }
+                
+          const now = new Date();
+          
+          // Filter for upcoming bookings only
+          const upcomingBookings = bookingsList.filter(booking => 
+            booking.dateTo && new Date(booking.dateTo) >= now
+          );
+          
+          // Sort by date (most recent first)
+          upcomingBookings.sort((a, b) => 
+            new Date(a.dateFrom).getTime() - new Date(b.dateFrom).getTime()
+          );
+          
+          setBookings(upcomingBookings.slice(0, 3));
+        } catch (bookingErr) {
+          console.error('Error fetching bookings:', bookingErr);
+          setBookings([]);
+        }
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
         setError('Failed to load dashboard data. Please try again later.');
+        setVenues([]);
+        setBookings([]);
       } finally {
         setIsLoading(false);
       }
@@ -49,14 +156,14 @@ const VenueManagerDashboardPage: React.FC = () => {
     
     fetchData();
   }, [token]);
-
+  
   // Format date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
   
   // Get image URL with fallback
-  const getImageUrl = (venue: any) => {
+  const getImageUrl = (venue: Venue) => {
     if (venue?.media && venue.media.length > 0 && venue.media[0].url) {
       return venue.media[0].url;
     }
@@ -158,7 +265,10 @@ const VenueManagerDashboardPage: React.FC = () => {
                   </div>
                   <div className="p-4">
                     <h3 className="font-medium mb-1">{venue.name}</h3>
-                    <p className="text-sm text-gray-600">{venue.location?.city}, {venue.location?.country}</p>
+                    <p className="text-sm text-gray-600">
+                      {venue.location?.city ? `${venue.location.city}, ` : ''}
+                      {venue.location?.country || 'Location not specified'}
+                    </p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm font-medium">{venue.price} kr/night</span>
                       <Link
