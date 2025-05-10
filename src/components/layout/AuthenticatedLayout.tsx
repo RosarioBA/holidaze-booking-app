@@ -7,14 +7,13 @@ interface AuthenticatedLayoutProps {
   children: ReactNode;
 }
 
-const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
+// In AuthenticatedLayout.tsx and CustomerLayout.tsx
 
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
   // Set this to false for production
-  const forceVenueManager = false; 
-  
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const AVATAR_STORAGE_KEY = `holidaze_avatar_url_${user?.name}`;
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
@@ -23,7 +22,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   console.log("Current user in AuthenticatedLayout:", user);
   console.log("Is venue manager:", user?.venueManager);
   console.log("Venue manager type:", typeof user?.venueManager);
-  console.log("Force venue manager mode:", forceVenueManager);
+ 
 
   // Check for saved avatar URL whenever the component renders
   useEffect(() => {
@@ -64,6 +63,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   };
 
   // Check if user is a venue manager (with force option for testing)
+  const forceVenueManager = false; // Set to true for testing purposes
   const isVenueManager = user?.venueManager === true || forceVenueManager;
 
   return (
