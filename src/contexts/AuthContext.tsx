@@ -133,49 +133,54 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
   const login = (newToken: string, userProfile: Profile) => {
     console.log('Login called with profile:', userProfile);
+    console.log('Profile venueManager status:', userProfile.venueManager, 'Type:', typeof userProfile.venueManager);
     
     // Ensure venueManager is a proper boolean
     const normalizedProfile: Profile = {
       ...userProfile,
-      venueManager: userProfile.venueManager === true // Force boolean value
+      venueManager: userProfile.venueManager === true
     };
     
-    console.log('Logging in with venueManager status:', normalizedProfile.venueManager);
+    console.log('Normalized profile venueManager:', normalizedProfile.venueManager);
     
     // Save to localStorage
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(normalizedProfile));
     
+    // Verify what was saved
+    const savedUser = localStorage.getItem('user');
+    console.log('Saved user data:', savedUser);
+    
     // Update state
     setToken(newToken);
     setUser(normalizedProfile);
-    console.log('Login successful, auth state updated with venueManager:', normalizedProfile.venueManager);
+    console.log('Login successful, auth state updated');
   };
-  
+// In AuthContext.tsx, update the logout function:
   const logout = () => {
-    console.log('Logging out');
-    
-    // Clear localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('registered_as_venue_manager'); // Clear this as well
-    localStorage.removeItem('registered_venue_manager_name'); // Clear this as well
-    
-    // Update state
-    setToken(null);
-    setUser(null);
-    console.log('Logout complete, auth state cleared');
-  };
+  console.log('Logging out');
+  
+  // Clear all authentication and user-specific data
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem(`holidaze_avatar_url_${user?.name}`); // Clear user-specific avatar
+  localStorage.removeItem('registered_as_venue_manager');
+  localStorage.removeItem('registered_venue_manager_name');
+  
+  // Update state
+  setToken(null);
+  setUser(null);
+  console.log('Logout complete, auth state cleared');
+};
   
   const updateUser = (updatedUserData: Partial<Profile>) => {
-    if (!user) return; // Can't update if no user exists
+    if (!user) return;
     
     // Create an updated user object by merging current user with updates
     const updatedUser = { 
       ...user, 
-      ...updatedUserData,
-      // Ensure venueManager remains its original value and can't be changed after login
-      venueManager: user.venueManager 
+      ...updatedUserData
+      // Remove the venueManager override to allow it to be updated
     };
     
     // Save to localStorage
@@ -183,9 +188,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Update state
     setUser(updatedUser);
-    console.log('User data updated successfully');
+    console.log('User data updated successfully:', updatedUser);
   };
-  
+
   const value = {
     user,
     token,
