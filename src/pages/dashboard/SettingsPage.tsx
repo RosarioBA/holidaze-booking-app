@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
-
 const SettingsPage: React.FC = () => {
   const { user, token, updateUser } = useAuth();
+  const AVATAR_STORAGE_KEY = `holidaze_avatar_url_${user?.name}`;
   const [name, setName] = useState(user?.name || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar?.url || '');
