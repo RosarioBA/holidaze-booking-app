@@ -7,11 +7,12 @@ interface CustomerLayoutProps {
   children: ReactNode;
 }
 
-const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
+// In AuthenticatedLayout.tsx and CustomerLayout.tsx
 
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const { user, logout, isVenueManager } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const AVATAR_STORAGE_KEY = `holidaze_avatar_url_${user?.name}`;
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
