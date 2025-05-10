@@ -1,7 +1,11 @@
 // src/pages/auth/LoginPage.tsx
-import { useState } from 'react'; // Remove useEffect since it's not used
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+
+// Add the API constants if they're not imported
+const API_BASE_URL = '/api'; // or import from your api.ts file
+const API_KEY = '54941b48-0ce5-4d6d-a8f2-9e3dcc28ddcf'; // or import from your api.ts file
 
 interface LocationState {
   message?: string;
@@ -23,7 +27,6 @@ const LoginPage = () => {
   // Get message from location state (if redirected from register)
   const state = location.state as LocationState;
   const successMessage = state?.message || '';
-  // Remove the unused 'from' variable since we're redirecting directly to dashboards
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,10 +41,12 @@ const LoginPage = () => {
       setIsLoading(true);
       setApiError('');
       
+      // Use the direct API URL instead of the proxy
       const response = await fetch('https://v2.api.noroff.dev/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Noroff-API-Key': '54941b48-0ce5-4d6d-a8f2-9e3dcc28ddcf'
         },
         body: JSON.stringify({
           email,
@@ -65,23 +70,44 @@ const LoginPage = () => {
         throw new Error(data.message || "Login failed");
       }
       
-      // Log full response for debugging
-      console.log("Full login response data:", data.data);
+      // Get the access token and user data from login
+      const token = data.data.accessToken;
+      const loginProfile = data.data;
       
-      // Ensure venueManager is a boolean value
-      const venueManagerStatus = data.data.venueManager === true;
-      console.log("Venue Manager status:", venueManagerStatus);
+      console.log("Login successful, fetching complete profile...");
       
-      // Login successful
-      login(data.data.accessToken, {
-        name: data.data.name,
-        email: data.data.email,
-        avatar: data.data.avatar,
-        venueManager: venueManagerStatus
+      // Step 2: Fetch the complete user profile to get venueManager status
+      const profileResponse = await fetch(`https://v2.api.noroff.dev/holidaze/profiles/${loginProfile.name}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'X-Noroff-API-Key': '54941b48-0ce5-4d6d-a8f2-9e3dcc28ddcf'
+        }
       });
       
+      if (!profileResponse.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+      
+      const profileData = await profileResponse.json();
+      const completeProfile = profileData.data;
+      
+      console.log("Complete profile data:", completeProfile);
+      console.log("Venue Manager status:", completeProfile.venueManager);
+      
+      // Create the user profile object with all data
+      const userProfile = {
+        name: completeProfile.name,
+        email: completeProfile.email,
+        avatar: completeProfile.avatar,
+        venueManager: completeProfile.venueManager === true,
+        bio: completeProfile.bio
+      };
+      
+      // Login successful
+      login(token, userProfile);
+      
       // Redirect based on role
-      if (venueManagerStatus) {
+      if (completeProfile.venueManager === true) {
         console.log("Redirecting to venue manager dashboard");
         navigate('/venue-manager/dashboard');
       } else {
@@ -96,7 +122,6 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
