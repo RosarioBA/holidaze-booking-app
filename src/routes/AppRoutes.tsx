@@ -26,9 +26,9 @@ import CustomerSavedPage from '../pages/customer/CustomerSavedPage';
 import VenueManagerDashboardPage from '../pages/venue-manager/VenueManagerDashboardPage';
 import CreateVenuePage from '../pages/venue-manager/CreateVenuePage';
 // Import these when you create them
-// import VenueManagerVenuesPage from '../pages/venue-manager/VenueManagerVenuesPage';
-// import VenueManagerBookingsPage from '../pages/venue-manager/VenueManagerBookingsPage';
-// import EditVenuePage from '../pages/venue-manager/EditVenuePage';
+ import VenueManagerVenuesPage from '../pages/venue-manager/VenueManagerVenuesPage';
+//import VenueManagerBookingsPage from '../pages/venue-manager/VenueManagerBookingsPage';
+import EditVenuePage from '../pages/venue-manager/EditVenuePage';
 
 // Role-based Protected Route component
 interface ProtectedRouteProps {
@@ -81,20 +81,21 @@ const ConditionalLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isVenueManager } = useAuth();
   const location = useLocation();
   
-  // For venue manager routes
-  if (location.pathname.startsWith('/venue-manager') && isAuthenticated) {
-    return <VenueManagerLayout>{children}</VenueManagerLayout>;
+  // Check if user is authenticated and their role
+  if (isAuthenticated) {
+    // If user is a venue manager, use VenueManagerLayout
+    if (isVenueManager) {
+      return <VenueManagerLayout>{children}</VenueManagerLayout>;
+    }
+    // If user is a regular customer, use CustomerLayout
+    else {
+      return <CustomerLayout>{children}</CustomerLayout>;
+    }
   }
   
-  // For customer routes
-  if (location.pathname.startsWith('/customer') && isAuthenticated) {
-    return <CustomerLayout>{children}</CustomerLayout>;
-  }
-  
-  // For public pages, use the standard layout
+  // For non-authenticated users, use the standard layout
   return <Layout>{children}</Layout>;
 };
-
 const AppRoutes = () => {
   const { isAuthenticated, isVenueManager } = useAuth();
   const location = useLocation();
@@ -230,7 +231,7 @@ const AppRoutes = () => {
       } />
       
       {/* These routes need to be added once you create the components */}
-      {/* 
+      
       <Route path="/venue-manager/venues" element={
         <ProtectedRoute requireVenueManager={true}>
           <VenueManagerLayout>
@@ -239,13 +240,13 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/venue-manager/bookings" element={
+     {/*  <Route path="/venue-manager/bookings" element={
         <ProtectedRoute requireVenueManager={true}>
           <VenueManagerLayout>
             <VenueManagerBookingsPage />
           </VenueManagerLayout>
         </ProtectedRoute>
-      } />
+      } />  */}
       
       <Route path="/venue-manager/edit/:id" element={
         <ProtectedRoute requireVenueManager={true}>
@@ -254,7 +255,7 @@ const AppRoutes = () => {
           </VenueManagerLayout>
         </ProtectedRoute>
       } />
-      */}
+      
       
       {/* 404 route */}
       <Route path="*" element={
