@@ -37,7 +37,7 @@ const CustomerDashboardPage: React.FC = () => {
         const allVenues = await getVenues();
         
         // Filter for saved venues based on favorites
-        const favoriteVenues = allVenues.venues.filter(venue => 
+        const favoriteVenues = (allVenues.venues as Venue[]).filter(venue => 
           favorites.includes(venue.id)
         );
         setSavedVenues(favoriteVenues.slice(0, 3)); // Show only first 3
@@ -53,7 +53,7 @@ const CustomerDashboardPage: React.FC = () => {
             
             if (Array.isArray(recentlyViewedIds) && recentlyViewedIds.length > 0) {
               // Filter venues to only include those in recently viewed list
-              const recentVenues = allVenues.venues.filter(venue => 
+              const recentVenues = (allVenues.venues as Venue[]).filter(venue => 
                 recentlyViewedIds.includes(venue.id)
               );
               console.log("DEBUG Dashboard: Recent venues found:", recentVenues.map(v => v.name));
@@ -61,7 +61,7 @@ const CustomerDashboardPage: React.FC = () => {
               // Sort them according to the order in recentlyViewedIds
               const orderedRecentVenues = [];
               for (const id of recentlyViewedIds) {
-                const venue = allVenues.venues.find(v => v.id === id);
+                const venue = allVenues.venues.find((v: Venue) => v.id === id);
                 if (venue) {
                   orderedRecentVenues.push(venue);
                 }
