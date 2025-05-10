@@ -1,5 +1,4 @@
 // src/api/api.ts
-
 // API base URL - Change to use Vite proxy
 export const API_BASE_URL = '/api';
 
@@ -44,6 +43,19 @@ export const fetchFromApi = async <T>(
         console.error('Could not parse error response');
         throw new Error(`API error: ${response.statusText}`);
       }
+    }
+    
+    // Handle 204 No Content responses
+    if (response.status === 204) {
+      return null as unknown as T;
+    }
+    
+    // Check if response has content
+    const contentLength = response.headers.get('content-length');
+    const contentType = response.headers.get('content-type');
+    
+    if (contentLength === '0' || !contentType || !contentType.includes('application/json')) {
+      return null as unknown as T;
     }
     
     return await response.json();
