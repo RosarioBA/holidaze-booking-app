@@ -1,73 +1,18 @@
-// src/pages/venue-manager/VenueManagerDashboardPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getVenues } from '../../api/venueService';
+import { getVenues, getVenueManagerVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
+import { Venue, Booking } from '../../types/venue'; // Import the types
 
-// Define interfaces for type safety
-interface MediaObject {
-  url: string;
-  alt: string;
-}
-
-interface VenueLocation {
-  address?: string;
-  city?: string;
-  zip?: string;
-  country?: string;
-  continent?: string;
-  lat?: number;
-  lng?: number;
-}
-
-interface VenueMeta {
-  wifi?: boolean;
-  parking?: boolean;
-  breakfast?: boolean;
-  pets?: boolean;
-}
-
-interface Venue {
-  id: string;
-  name: string;
-  description: string;
-  media?: MediaObject[];
-  price: number;
-  maxGuests: number;
-  rating?: number;
-  created?: string;
-  updated?: string;
-  meta?: VenueMeta;
-  location?: VenueLocation;
-}
-
+// Remove all the interface definitions for Venue, MediaObject, etc.
+// Just keep these if they're not already in your types file:
 interface Customer {
   name: string;
   email: string;
 }
 
-interface Booking {
-  id: string;
-  dateFrom: string;
-  dateTo: string;
-  guests: number;
-  created?: string;
-  updated?: string;
-  venue?: Venue;
-  customer?: Customer;
-}
-
-interface ApiResponse<T> {
-  data?: T | T[];
-  venues?: T[];
-  meta?: {
-    currentPage?: number;
-    pageCount?: number;
-    isFirstPage?: boolean;
-    isLastPage?: boolean;
-  };
-}
+// ApiResponse interface is not being used, so you can remove it
 
 const VenueManagerDashboardPage: React.FC = () => {
   const { user, token } = useAuth();
@@ -78,46 +23,32 @@ const VenueManagerDashboardPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) return;
+      if (!token || !user) return;
       
       setIsLoading(true);
       setError(null);
       
       try {
-        // Fetch venues managed by the user
-        const venuesData: ApiResponse<Venue> = await getVenues(1);
+        // Fetch only venues managed by the current user
+        console.log("Fetching venues for user:", user.name);
+        const myVenues = await getVenueManagerVenues(user.name, token);
         
-        // Log the data structure to debug
-        console.log("Venues data received:", venuesData);
+        console.log("My venues response:", myVenues);
+        console.log("Number of venues:", myVenues.length);
         
-        // Handle various response formats
-        let venuesList: Venue[] = [];
+        setVenues(myVenues.slice(0, 3));
         
-        if (Array.isArray(venuesData)) {
-          venuesList = venuesData;
-        } else if (venuesData.data && Array.isArray(venuesData.data)) {
-          venuesList = venuesData.data as Venue[];
-        } else if (venuesData.venues && Array.isArray(venuesData.venues)) {
-          venuesList = venuesData.venues;
-        } else {
-          console.error("Unexpected venues data structure:", venuesData);
-        }
-        
-        setVenues(venuesList.slice(0, 3));
-        
-        // Fetch recent bookings for all venues
+        // Fetch bookings
         try {
-          // Don't specify a type here, let TypeScript infer it
           const bookingsData = await getUserBookings(token);
           console.log("Bookings data received:", bookingsData);
           
-          // Handle different possible structures
+          // Process bookings as before...
           let bookingsList: Booking[] = [];
           
           if (Array.isArray(bookingsData)) {
             bookingsList = bookingsData as Booking[];
           } else if (bookingsData && typeof bookingsData === 'object') {
-            // Use 'any' type for more flexible property access
             const anyData = bookingsData as any;
             
             if (anyData.data && Array.isArray(anyData.data)) {
@@ -155,7 +86,8 @@ const VenueManagerDashboardPage: React.FC = () => {
     };
     
     fetchData();
-  }, [token]);
+  }, [token, user]);
+
   
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -169,7 +101,7 @@ const VenueManagerDashboardPage: React.FC = () => {
     }
     return 'https://placehold.co/300x200?text=No+Image';
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
