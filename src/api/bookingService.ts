@@ -51,6 +51,7 @@ export const createBooking = async (bookingData: CreateBookingData, token: strin
 };
 
 // Get bookings for a venue
+// src/api/bookingService.ts
 export const getVenueBookings = async (venueId: string, token: string): Promise<Booking[]> => {
   try {
     if (!venueId) {
@@ -61,19 +62,29 @@ export const getVenueBookings = async (venueId: string, token: string): Promise<
       throw new Error('Authorization token is required');
     }
     
-    const response = await fetchFromApi<ApiResponse<Booking[]>>(`/holidaze/venues/${venueId}/bookings`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    // Since there's no direct endpoint for venue bookings, we need to get ALL bookings
+    // and filter them. This is not ideal but it's what the API provides.
+    const response = await fetchFromApi<ApiResponse<Booking[]>>(
+      `/holidaze/bookings?_venue=true&_customer=true`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       }
-    });
+    );
     
-    return response.data;
+    // Filter bookings to only include those for the specified venue
+    const allBookings = response.data || [];
+    const venueBookings = allBookings.filter(booking => 
+      booking.venue?.id === venueId
+    );
+    
+    return venueBookings;
   } catch (error) {
     console.error(`Error getting bookings for venue ${venueId}:`, error);
-    throw error;
+    return [];
   }
 };
-
 // Get bookings for the current user
 // In bookingService.ts
 
@@ -118,6 +129,29 @@ export const getUserBookings = async (token: string): Promise<Booking[]> => {
     // Return mock data for development
     console.log("Returning mock booking data");
     return getMockBookings();
+  }
+};
+
+export const getProfileBookings = async (profileName: string, token: string): Promise<Booking[]> => {
+  try {
+    if (!token || !profileName) {
+      throw new Error('Authorization token and profile name are required');
+    }
+    
+    const response = await fetchFromApi<ApiResponse<Booking[]>>(
+      `/holidaze/profiles/${profileName}/bookings?_venue=true&_customer=true`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    
+    console.log(`Profile ${profileName} bookings:`, response.data);
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error fetching bookings for profile ${profileName}:`, error);
+    return [];
   }
 };
 

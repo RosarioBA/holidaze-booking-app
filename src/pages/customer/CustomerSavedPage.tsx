@@ -27,7 +27,7 @@ const CustomerSavedPage: React.FC = () => {
         console.log("DEBUG: All venues count:", result.venues.length);
         
         // Filter venues to only include those in favorites
-        const filteredVenues = result.venues.filter(venue => 
+        const filteredVenues = (result.venues as Venue[]).filter((venue: Venue) => 
           favorites.includes(venue.id)
         );
         

@@ -25,9 +25,9 @@ import CustomerSavedPage from '../pages/customer/CustomerSavedPage';
 // Venue Manager Pages
 import VenueManagerDashboardPage from '../pages/venue-manager/VenueManagerDashboardPage';
 import CreateVenuePage from '../pages/venue-manager/CreateVenuePage';
-// Import these when you create them
- import VenueManagerVenuesPage from '../pages/venue-manager/VenueManagerVenuesPage';
-//import VenueManagerBookingsPage from '../pages/venue-manager/VenueManagerBookingsPage';
+
+import VenueManagerVenuesPage from '../pages/venue-manager/VenueManagerVenuesPage';
+import VenueManagerBookingsPage from '../pages/venue-manager/VenueManagerBookingsPage';
 import EditVenuePage from '../pages/venue-manager/EditVenuePage';
 
 // Role-based Protected Route component
@@ -240,13 +240,13 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-     {/*  <Route path="/venue-manager/bookings" element={
+    <Route path="/venue-manager/bookings" element={
         <ProtectedRoute requireVenueManager={true}>
           <VenueManagerLayout>
             <VenueManagerBookingsPage />
           </VenueManagerLayout>
         </ProtectedRoute>
-      } />  */}
+      } />  
       
       <Route path="/venue-manager/edit/:id" element={
         <ProtectedRoute requireVenueManager={true}>
