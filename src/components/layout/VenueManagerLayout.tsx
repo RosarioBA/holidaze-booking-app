@@ -7,10 +7,9 @@ interface VenueManagerLayoutProps {
   children: ReactNode;
 }
 
-const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
-
 const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const AVATAR_STORAGE_KEY = user ? `holidaze_avatar_url_${user.name}_manager` : 'holidaze_avatar_url_default';
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,7 +42,7 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user]);
+  }, [user, AVATAR_STORAGE_KEY]);
 
   const handleLogout = () => {
     logout();

@@ -23,11 +23,14 @@ interface Profile {
 }
 
 const PROFILE_STORAGE_KEY = 'holidaze_profile';
-const AVATAR_STORAGE_KEY = 'holidaze_avatar_url';
-const BANNER_STORAGE_KEY = 'holidaze_banner_url';
 
 const ProfilePage: React.FC = () => {
   const { user, token, updateUser } = useAuth();
+  
+  // Define user-specific avatar and banner keys inside the component where user is available
+  const AVATAR_STORAGE_KEY = user ? `holidaze_avatar_url_${user.name}_${user.venueManager ? 'manager' : 'customer'}` : 'holidaze_avatar_url_default';
+  const BANNER_STORAGE_KEY = user ? `holidaze_banner_url_${user.name}_${user.venueManager ? 'manager' : 'customer'}` : 'holidaze_banner_url_default';
+  
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -122,11 +125,10 @@ const ProfilePage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, updateUser]);
+  }, [user, updateUser, AVATAR_STORAGE_KEY, BANNER_STORAGE_KEY]);
 
   // Fetch user bookings directly from the API
-  // Modify the useEffect for fetching bookings to properly type the updatedProfile
-useEffect(() => {
+  useEffect(() => {
     const fetchUserBookings = async () => {
       if (!token) return;
       
