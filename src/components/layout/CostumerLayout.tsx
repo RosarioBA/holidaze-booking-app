@@ -7,12 +7,10 @@ interface CustomerLayoutProps {
   children: ReactNode;
 }
 
-// In AuthenticatedLayout.tsx and CustomerLayout.tsx
-
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const AVATAR_STORAGE_KEY = user ? `holidaze_avatar_url_${user.name}_customer` : 'holidaze_avatar_url_default';
   const navigate = useNavigate();
-  const AVATAR_STORAGE_KEY = `holidaze_avatar_url_${user?.name}`;
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
@@ -44,7 +42,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user]);
+  }, [user, AVATAR_STORAGE_KEY]);
 
   const handleLogout = () => {
     logout();
