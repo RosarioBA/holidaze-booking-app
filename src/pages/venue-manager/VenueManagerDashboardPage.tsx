@@ -1,18 +1,16 @@
+// src/pages/venue-manager/VenueManagerDashboardPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getVenues, getVenueManagerVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
-import { Venue, Booking } from '../../types/venue'; // Import the types
+import { fetchFromApi } from '../../api/api'; // Make sure to add this import
+import { Venue, Booking } from '../../types/venue';
 
-// Remove all the interface definitions for Venue, MediaObject, etc.
-// Just keep these if they're not already in your types file:
 interface Customer {
   name: string;
   email: string;
 }
-
-// ApiResponse interface is not being used, so you can remove it
 
 const VenueManagerDashboardPage: React.FC = () => {
   const { user, token } = useAuth();
@@ -38,34 +36,50 @@ const VenueManagerDashboardPage: React.FC = () => {
         
         setVenues(myVenues.slice(0, 3));
         
-        // Fetch bookings
+        // Fetch bookings for venues
         try {
-          const bookingsData = await getUserBookings(token);
-          console.log("Bookings data received:", bookingsData);
+          // For each venue, fetch its bookings
+          const allBookings: Booking[] = [];
           
-          // Process bookings as before...
-          let bookingsList: Booking[] = [];
-          
-          if (Array.isArray(bookingsData)) {
-            bookingsList = bookingsData as Booking[];
-          } else if (bookingsData && typeof bookingsData === 'object') {
-            const anyData = bookingsData as any;
-            
-            if (anyData.data && Array.isArray(anyData.data)) {
-              bookingsList = anyData.data;
-            } else if (anyData.bookings && Array.isArray(anyData.bookings)) {
-              bookingsList = anyData.bookings;
+          for (const venue of myVenues) {
+            try {
+              // Try to get venue with bookings
+              const venueResponse = await fetchFromApi<any>(
+                `/holidaze/venues/${venue.id}?_bookings=true`, 
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                }
+              );
+              
+              if (venueResponse.data?.bookings && Array.isArray(venueResponse.data.bookings)) {
+                // Add venue info to each booking
+                const venueBookings = venueResponse.data.bookings.map((booking: any) => ({
+                  ...booking,
+                  venue: {
+                    id: venue.id,
+                    name: venue.name
+                  }
+                }));
+                
+                allBookings.push(...venueBookings);
+              }
+            } catch (err) {
+              console.error(`Error fetching bookings for venue ${venue.id}:`, err);
             }
           }
-                
+          
+          console.log("All venue bookings found:", allBookings);
+          
           const now = new Date();
           
           // Filter for upcoming bookings only
-          const upcomingBookings = bookingsList.filter(booking => 
+          const upcomingBookings = allBookings.filter(booking => 
             booking.dateTo && new Date(booking.dateTo) >= now
           );
           
-          // Sort by date (most recent first)
+          // Sort by date (nearest first)
           upcomingBookings.sort((a, b) => 
             new Date(a.dateFrom).getTime() - new Date(b.dateFrom).getTime()
           );
