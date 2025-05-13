@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { getUserBookings } from '../../api/bookingService';
+import { getVenueManagerVenues } from '../../api/venueService';
+import { fetchFromApi } from '../../api/api';
 
 interface ProfileMedia {
   url: string;
@@ -130,12 +132,58 @@ const ProfilePage: React.FC = () => {
   // Fetch user bookings directly from the API
   useEffect(() => {
     const fetchUserBookings = async () => {
-      if (!token) return;
+      if (!token || !user) return;
       
       setBookingsLoading(true);
       try {
-        const bookings = await getUserBookings(token);
-        setUserBookings(bookings);
+        // Use different approaches depending on whether user is a venue manager
+        if (user.venueManager) {
+          // First, get all venues owned by this manager
+          const venuesData = await getVenueManagerVenues(user.name, token);
+          
+          // For a venue manager, we'll fetch bookings for their venues
+          const allBookings: any[] = [];
+          
+          for (const venue of venuesData) {
+            try {
+              // Try to get venue with bookings
+              const venueResponse = await fetchFromApi<any>(
+                `/holidaze/venues/${venue.id}?_bookings=true`, 
+                {
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                }
+              );
+              
+              if (venueResponse.data?.bookings) {
+                // Add venue info to each booking
+                const venueBookings = venueResponse.data.bookings.map((booking: any) => ({
+                  ...booking,
+                  venue: {
+                    id: venue.id,
+                    name: venue.name
+                  }
+                }));
+                
+                allBookings.push(...venueBookings);
+              }
+            } catch (err) {
+              console.error(`Error fetching venue ${venue.id}:`, err);
+            }
+          }
+          
+          // Sort bookings by date (most recent first)  
+          allBookings.sort((a, b) => 
+            new Date(b.dateFrom).getTime() - new Date(a.dateFrom).getTime()
+          );
+          
+          setUserBookings(allBookings);
+        } else {
+          // For a regular customer, just fetch their bookings
+          const bookings = await getUserBookings(token);
+          setUserBookings(bookings);
+        }
         
         // Also update the profile's booking count
         if (profile) {
@@ -143,7 +191,7 @@ const ProfilePage: React.FC = () => {
             ...profile,
             _count: {
               venues: profile._count?.venues || 0,
-              bookings: bookings.length
+              bookings: userBookings.length
             }
           };
           setProfile(updatedProfile);
@@ -157,7 +205,7 @@ const ProfilePage: React.FC = () => {
     };
     
     fetchUserBookings();
-  }, [token, profile?.name]);
+  }, [token, profile?.name, user]);
   
   // Update profile function
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -437,41 +485,47 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
       
-      {/* My Bookings Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">My Bookings</h2>
-          <Link 
-            to="/my-trips"
-            className="text-[#0081A7] hover:underline"
-          >
-            View All
-          </Link>
-        </div>
-        
-        {bookingsLoading ? (
-          <div className="text-center p-3">
-            <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#0081A7]"></div>
-            <span className="ml-2 text-gray-600">Loading bookings...</span>
-          </div>
-        ) : !bookingsCount || bookingsCount === 0 ? (
-          <div className="text-center p-6 bg-gray-50 rounded-lg">
-            <p className="text-gray-600 mb-3">You don't have any bookings yet.</p>
-            <Link 
-              to="/venues" 
-              className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
-            >
-              Explore Venues
-            </Link>
-          </div>
-        ) : (
-          <p className="text-gray-600">
-            You have {bookingsCount} {bookingsCount === 1 ? 'booking' : 'bookings'}.
-            <br />
-            Visit the My Trips page to view your bookings.
-          </p>
-        )}
-      </div>
+     {/* My Bookings Section */}
+<div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-xl font-bold">
+      {profile.venueManager ? 'Venue Bookings' : 'My Bookings'}
+    </h2>
+    <Link 
+      to={profile.venueManager ? "/venue-manager/bookings" : "/my-trips"}
+      className="text-[#0081A7] hover:underline"
+    >
+      View All
+    </Link>
+  </div>
+  
+  {bookingsLoading ? (
+    <div className="text-center p-3">
+      <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#0081A7]"></div>
+      <span className="ml-2 text-gray-600">Loading bookings...</span>
+    </div>
+  ) : !bookingsCount || bookingsCount === 0 ? (
+    <div className="text-center p-6 bg-gray-50 rounded-lg">
+      <p className="text-gray-600 mb-3">
+        {profile.venueManager 
+          ? "You don't have any bookings for your venues yet."
+          : "You don't have any bookings yet."}
+      </p>
+      <Link 
+        to="/venues" 
+        className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
+      >
+        Explore Venues
+      </Link>
+    </div>
+  ) : (
+    <p className="text-gray-600">
+      You have {bookingsCount} {bookingsCount === 1 ? 'booking' : 'bookings'}.
+      <br />
+      Visit the {profile.venueManager ? 'Bookings Management' : 'My Trips'} page to view {profile.venueManager ? 'all' : 'your'} bookings.
+    </p>
+  )}
+</div>
       
       {/* Become a Venue Manager CTA (if not already) */}
       {!profile.venueManager && (
