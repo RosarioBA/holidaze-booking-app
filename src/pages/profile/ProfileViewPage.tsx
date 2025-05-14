@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchFromApi } from '../../api/api';
 import { Venue } from '../../types/venue';
-import { getUserAvatar } from '../../utils/avatarUtils';
-import { useAuth } from '../../contexts/AuthContext'; // Add this import
+import { getUserAvatar, getUserBanner } from '../../utils/avatarUtils';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ProfileViewProps {}
 
@@ -82,12 +82,6 @@ const ProfileViewPage: React.FC<ProfileViewProps> = () => {
     fetchProfileData();
   }, [name, token]);
   
-  // Format date for display
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-  
   // Get image URL with fallback
   const getImageUrl = (venue: Venue) => {
     if (venue?.media && venue.media.length > 0 && venue.media[0].url) {
@@ -122,7 +116,18 @@ const ProfileViewPage: React.FC<ProfileViewProps> = () => {
       {/* Banner and Profile Image */}
       <div className="relative mb-16">
         <div className="h-48 bg-[#F5F7DC] rounded-lg overflow-hidden">
-          {profile.banner ? (
+          {/* Try to get banner from localStorage first, then fall back to profile banner */}
+          {name && getUserBanner(name) ? (
+            <img 
+              src={getUserBanner(name)}
+              alt={`${profile.name}'s banner`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://placehold.co/1200x400?text=No+Banner';
+              }}
+            />
+          ) : profile.banner ? (
             <img 
               src={profile.banner.url} 
               alt={profile.banner.alt || `${profile.name}'s banner`}
