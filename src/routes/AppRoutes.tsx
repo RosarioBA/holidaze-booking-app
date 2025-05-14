@@ -16,6 +16,7 @@ import BookingDetailPage from '../pages/booking/BookingDetailPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import NotFoundPage from '../pages/NotFoundPage';
+import ProfileViewPage from '../pages/profile/ProfileViewPage';
 
 // Customer Pages
 import CustomerDashboardPage from '../pages/customer/CustomerDashboardPage';
@@ -212,6 +213,12 @@ const AppRoutes = () => {
           </ConditionalLayout>
         </AuthenticatedRoute>
       } />
+
+<Route path="/profiles/:name" element={
+  <ConditionalLayout>
+    <ProfileViewPage />
+  </ConditionalLayout>
+} />
       
       {/* Venue Manager Routes */}
       <Route path="/venue-manager/dashboard" element={
