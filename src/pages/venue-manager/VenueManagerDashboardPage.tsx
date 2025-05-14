@@ -283,12 +283,12 @@ const VenueManagerDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link 
-                          to={`/venue-manager/bookings/${booking.id}`} 
-                          className="text-[#0081A7] hover:underline"
-                        >
-                          Details
-                        </Link>
+                      <Link 
+                      to={`/bookings/${booking.id}`} 
+                      className="text-[#0081A7] hover:underline"
+                    >
+                      Details
+                    </Link>
                       </td>
                     </tr>
                   ))}
