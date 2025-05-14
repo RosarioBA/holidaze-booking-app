@@ -5,6 +5,7 @@ import { getVenueManagerVenues } from '../../api/venueService';
 import { getProfileBookings } from '../../api/bookingService';
 import { Venue, Booking } from '../../types/venue';
 import { fetchFromApi } from '../../api/api';
+import { getUserAvatar } from '../../utils/avatarUtils';
 
 // Add this interface for the API response
 interface ApiResponse<T> {
@@ -312,32 +313,42 @@ const VenueManagerBookingsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {booking.customer ? (
-                          <div className="flex items-center">
-                            {booking.customer.avatar?.url && (
-                              <img 
-                                src={booking.customer.avatar.url} 
-                                alt={booking.customer.name}
-                                className="h-8 w-8 rounded-full mr-2"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
-                                }}
-                              />
-                            )}
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {booking.customer.name}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {booking.customer.email}
-                              </div>
+                    {booking.customer ? (
+                        <div className="flex items-center">
+                        {booking.customer.name && getUserAvatar(booking.customer.name) ? (
+                            <img 
+                            src={getUserAvatar(booking.customer.name)} 
+                            alt={booking.customer.name}
+                            className="h-8 w-8 rounded-full mr-2"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                            }}
+                            />
+                        ) : booking.customer.avatar?.url ? (
+                            <img 
+                            src={booking.customer.avatar.url} 
+                            alt={booking.customer.name}
+                            className="h-8 w-8 rounded-full mr-2"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                            }}
+                            />
+                        ) : null}
+                        <div>
+                            <div className="text-sm font-medium text-gray-900">
+                            {booking.customer.name}
                             </div>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-500">Unknown customer</span>
-                        )}
-                      </td>
+                            <div className="text-xs text-gray-500">
+                            {booking.customer.email}
+                            </div>
+                        </div>
+                        </div>
+                    ) : (
+                        <span className="text-sm text-gray-500">Unknown customer</span>
+                    )}
+                    </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
