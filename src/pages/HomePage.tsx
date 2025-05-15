@@ -1,13 +1,39 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Add useNavigate
+// src/pages/HomePage.tsx
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getVenues } from '../api/venueService';
+import { Venue } from '../types/venue';
+import VenueCard from '../components/venue/VenueCard';
 
 const HomePage = () => {
   const [searchLocation, setSearchLocation] = useState('');
-  const navigate = useNavigate(); // Add this to redirect
+  const navigate = useNavigate();
+  const [featuredVenues, setFeaturedVenues] = useState<Venue[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch venues on component mount
+  useEffect(() => {
+    const fetchFeaturedVenues = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch venues, sorted by rating to get the best ones
+        const result = await getVenues(1, 3, 'rating', 'desc');
+        
+        if (result?.venues && Array.isArray(result.venues)) {
+          setFeaturedVenues(result.venues.slice(0, 3));
+        }
+      } catch (error) {
+        console.error('Error fetching featured venues:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeaturedVenues();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect to venues page with search query
     navigate(`/venues${searchLocation ? `?search=${encodeURIComponent(searchLocation)}` : ''}`);
   };
 
@@ -50,71 +76,49 @@ const HomePage = () => {
       </section>
       
       {/* Featured Properties Section */}
-      <section className="bg-secondary py-16 px-2 sm:px-4 rounded-none"> {/* No rounded corners */}
+      <section className="bg-secondary py-16 px-2 sm:px-4 rounded-none">
         <div className="mx-auto">
           <h2 className="text-2xl font-bold mb-10 text-center">Featured Properties</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {/* Property cards remain the same */}
-            {/* Property Card 1 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg">Mountain View Cabin</h3>
-                <p className="text-gray-600">Oslo, Norway</p>
-                <div className="mt-4 flex justify-between items-center">
-                  <p className="font-semibold">$120 / night</p>
-                  <Link 
-                    to="/venues/1" 
-                    className="bg-primary text-white px-4 py-2 rounded"
-                  >
-                    View
-                  </Link>
-                </div>
+            {isLoading ? (
+              // Loading skeleton
+              <>
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="h-48 bg-gray-200 animate-pulse"></div>
+                    <div className="p-4">
+                      <div className="h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3 mb-4"></div>
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="h-5 bg-gray-200 rounded animate-pulse w-1/3"></div>
+                        <div className="h-8 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : featuredVenues.length > 0 ? (
+              // Display actual venue data
+              featuredVenues.map(venue => (
+                <VenueCard key={venue.id} venue={venue} />
+              ))
+            ) : (
+              // Fallback when no venues found
+              <div className="col-span-3 text-center py-10">
+                <p className="text-gray-600">No featured properties available at the moment.</p>
+                <Link to="/venues" className="mt-4 inline-block bg-primary text-white px-4 py-2 rounded">
+                  Browse All Venues
+                </Link>
               </div>
-            </div>
-            
-            {/* Property Card 2 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg">Modern City Loft</h3>
-                <p className="text-gray-600">Bergen, Norway</p>
-                <div className="mt-4 flex justify-between items-center">
-                  <p className="font-semibold">$95 / night</p>
-                  <Link 
-                    to="/venues/2" 
-                    className="bg-primary text-white px-4 py-2 rounded"
-                  >
-                    View
-                  </Link>
-                </div>
-              </div>
-            </div>
-            
-            {/* Property Card 3 */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg">Seaside Retreat</h3>
-                <p className="text-gray-600">Stavanger, Norway</p>
-                <div className="mt-4 flex justify-between items-center">
-                  <p className="font-semibold">$150 / night</p>
-                  <Link 
-                    to="/venues/3" 
-                    className="bg-primary text-white px-4 py-2 rounded"
-                  >
-                    View
-                  </Link>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
       
       {/* Why Book With Holidaze Section */}
-      <section className="py-16 px-2 sm:px-4 bg-white rounded-none"> {/* No rounded corners */}
+      <section className="py-16 px-2 sm:px-4 bg-white rounded-none">
+        {/* This section remains unchanged */}
         <div className="mx-auto">
           <h2 className="text-2xl font-bold mb-10 text-center">Why Book With Holidaze</h2>
           
@@ -153,7 +157,8 @@ const HomePage = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="bg-primary text-white py-16 px-2 sm:px-4 rounded-b-lg mb-0 pb-16"> {/* Added mb-0 */}
+      <section className="bg-primary text-white py-16 px-2 sm:px-4 rounded-b-lg mb-0 pb-16">
+        {/* This section remains unchanged */}
         <div className="mx-auto text-center max-w-4xl">
           <h2 className="text-2xl font-bold mb-4">Own a Property? Become a Host Today!</h2>
           <p className="mb-6">List your property on Holidaze and start earning income.</p>
