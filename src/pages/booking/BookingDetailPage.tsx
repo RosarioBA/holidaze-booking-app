@@ -124,7 +124,7 @@ const BookingDetailPage: React.FC = () => {
         Back to My Trips
       </Link>
       
-      <h1 className="text-2xl font-bold mb-6">Booking Details</h1>
+      <h1 className="text-2xl font-bold mb-6 font-averia">Booking Details</h1>
       
       {isEditing ? (
         <BookingUpdateForm 

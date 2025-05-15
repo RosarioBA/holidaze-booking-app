@@ -185,7 +185,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="font-bold text-lg mb-4">Book Your Stay</h3>
+     <h3 className="font-bold text-lg mb-4 font-averia">Book Your Stay</h3>
       
       {error && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm">
@@ -195,7 +195,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium font-lato text-gray-700 mb-1">
             Check-in / Check-out
           </label>
           <div className="border border-gray-200 rounded p-1">

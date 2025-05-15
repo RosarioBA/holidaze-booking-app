@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and Tagline */}
           <div>
-            <h2 className="text-2xl font-bold mb-4">HOLIDAZE</h2>
+            <h2 className="text-2xl font-bold mb-4 font-averia">HOLIDAZE</h2>
             <p className="text-gray-400 mb-4">
               Find your perfect stay in Norway. From cozy cabins to modern apartments.
             </p>
@@ -19,7 +19,7 @@ const Footer = () => {
           
           {/* Explore Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Explore</h3>
+            <h3 className="text-lg font-semibold mb-4 font-averia">Explore</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/venues" className="text-gray-400 hover:text-white transition-colors">
@@ -46,7 +46,7 @@ const Footer = () => {
           
           {/* Host Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Host</h3>
+            <h3 className="text-lg font-semibold mb-4 font-averia">Host</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/register" className="text-gray-400 hover:text-white transition-colors">
@@ -69,7 +69,7 @@ const Footer = () => {
         
         {/* Support Section */}
         <div className="mt-12 pt-8 border-t border-gray-700">
-          <h3 className="text-lg font-semibold mb-4">Support</h3>
+          <h3 className="text-lg font-semibold mb-4 font-averia">Support</h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <li>
               <Link to="/help" className="text-gray-400 hover:text-white transition-colors">

@@ -19,7 +19,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold">Holidaze</Link>
+          <Link to="/" className="text-2xl font-bold font-averia">HOLIDAZE</Link>
           
           {/* Mobile Menu Button */}
           <button 

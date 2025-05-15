@@ -28,12 +28,12 @@ const BookingSuccess: React.FC<BookingSuccessProps> = ({ booking, price, onReset
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-1">Booking Confirmed!</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-1 font-averia">Booking Confirmed!</h3>
         <p className="text-gray-600">Your reservation has been successfully booked.</p>
       </div>
       
       <div className="bg-gray-50 p-4 rounded mb-6">
-        <h4 className="font-semibold mb-3">Booking Details</h4>
+       <h4 className="font-semibold mb-3 font-averia">Booking Details</h4>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <span className="block text-gray-600">Confirmation #</span>

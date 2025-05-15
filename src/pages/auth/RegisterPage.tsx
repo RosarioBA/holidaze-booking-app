@@ -98,16 +98,15 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
       <div className="w-full max-w-md">
-        <div className="mb-2 text-xs uppercase tracking-wide text-gray-600">HOLIDAZE</div>
+      <div className="mb-2 text-xs uppercase tracking-wide text-gray-600 font-averia">HOLIDAZE</div>
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold font-averia">HOLIDAZE</h1>
+          <h2 className="text-sm font-bold font-averia">BOOK YOUR ESCAPE</h2>
+        </div>
         
-        <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-bold">HOLIDAZE</h1>
-            <h2 className="text-sm font-bold">BOOK YOUR ESCAPE</h2>
-          </div>
-          
-          <h3 className="text-lg font-semibold mb-4">Create an Account</h3>
-          <p className="text-xs text-gray-500 mb-6">Join Holidaze to discover venues across Norway</p>
+        <h3 className="text-lg font-semibold mb-4 font-averia">Create an Account</h3>
+        <p className="text-xs text-gray-500 mb-6">Join Holidaze to discover venues across Norway</p>
           
           {apiError && (
             <div className="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm">

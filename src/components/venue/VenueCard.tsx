@@ -80,9 +80,9 @@ const VenueCard = ({ venue }: VenueCardProps) => {
           )}
         </div>
         <div className="p-4">
-          <h3 className="font-bold text-lg">{name}</h3>
+          <h3 className="font-bold text-lg font-averia">{name}</h3>
           <p className="text-gray-600 text-sm mt-1">{locationText}</p>
-          
+                  
           <div className="mt-2 flex flex-wrap gap-2">
             {venue.meta?.wifi && (
               <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">

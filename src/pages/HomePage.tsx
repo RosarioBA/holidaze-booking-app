@@ -42,7 +42,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="bg-[#505E64] text-white py-16 rounded-t-lg">
         <div className="mx-auto px-2 sm:px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center font-averia">
             Find your perfect stay in Norway
           </h1>
           
@@ -78,7 +78,7 @@ const HomePage = () => {
       {/* Featured Properties Section */}
       <section className="bg-secondary py-16 px-2 sm:px-4 rounded-none">
         <div className="mx-auto">
-          <h2 className="text-2xl font-bold mb-10 text-center">Featured Properties</h2>
+          <h2 className="text-2xl font-bold mb-10 text-center font-averia">Featured Properties</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {isLoading ? (
@@ -118,9 +118,8 @@ const HomePage = () => {
       
       {/* Why Book With Holidaze Section */}
       <section className="py-16 px-2 sm:px-4 bg-white rounded-none">
-        {/* This section remains unchanged */}
         <div className="mx-auto">
-          <h2 className="text-2xl font-bold mb-10 text-center">Why Book With Holidaze</h2>
+          <h2 className="text-2xl font-bold mb-10 text-center font-averia">Why Book With Holidaze</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="text-center">
@@ -129,7 +128,7 @@ const HomePage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="font-bold mb-2">Trusted Properties</h3>
+              <h3 className="font-bold mb-2 font-averia">Trusted Properties</h3>
               <p className="text-gray-600">All our listings are verified for quality and comfort.</p>
             </div>
             
@@ -139,7 +138,7 @@ const HomePage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-bold mb-2">Best Price Guarantee</h3>
+              <h3 className="font-bold mb-2 font-averia">Best Price Guarantee</h3>
               <p className="text-gray-600">We offer competitive prices with no hidden fees.</p>
             </div>
             
@@ -149,7 +148,7 @@ const HomePage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-bold mb-2">Customer Support</h3>
+              <h3 className="font-bold mb-2 font-averia">Customer Support</h3>
               <p className="text-gray-600">24/7 support for all your booking needs.</p>
             </div>
           </div>
@@ -158,9 +157,8 @@ const HomePage = () => {
       
       {/* CTA Section */}
       <section className="bg-primary text-white py-16 px-2 sm:px-4 rounded-b-lg mb-0 pb-16">
-        {/* This section remains unchanged */}
         <div className="mx-auto text-center max-w-4xl">
-          <h2 className="text-2xl font-bold mb-4">Own a Property? Become a Host Today!</h2>
+          <h2 className="text-2xl font-bold mb-4 font-averia">Own a Property? Become a Host Today!</h2>
           <p className="mb-6">List your property on Holidaze and start earning income.</p>
           <Link 
             to="/register" 
