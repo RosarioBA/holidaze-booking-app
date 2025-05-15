@@ -1,4 +1,4 @@
-// src/components/layout/Layout.tsx
+// src/components/layout/Layout.tsx - Update to remove spacing between main and footer
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from './Header';
@@ -15,7 +15,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className={`flex-grow ${isHomePage ? 'px-0' : 'container mx-auto px-4'} py-6`}>
+      <main className={`flex-grow ${isHomePage ? 'px-0 py-0' : 'container mx-auto px-4'} py-6 mb-0`}> {/* Added mb-0 */}
         {children}
       </main>
       <Footer />
