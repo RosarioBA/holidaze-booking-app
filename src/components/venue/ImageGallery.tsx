@@ -49,8 +49,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
 
   return (
     <div>
-      {/* Main Image */}
-      <div className="aspect-w-16 aspect-h-9 mb-2 overflow-hidden rounded-lg shadow-md">
+      {/* Main Image - Fixed height container */}
+      <div className="relative h-96 mb-2 overflow-hidden rounded-lg shadow-md">
         <img
           src={galleryImages[0].url}
           alt={galleryImages[0].alt || name}
@@ -69,7 +69,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
           {galleryImages.slice(0, 4).map((image, index) => (
             <div 
               key={index} 
-              className={`aspect-w-1 aspect-h-1 overflow-hidden rounded ${index === 0 ? 'border-2 border-[#0081A7]' : ''}`}
+              className={`relative h-24 overflow-hidden rounded ${index === 0 ? 'border-2 border-[#0081A7]' : ''}`}
             >
               <img
                 src={image.url}
@@ -87,7 +87,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
           {/* Show "View all photos" button if there are more than 4 images */}
           {galleryImages.length > 4 && (
             <div 
-              className="aspect-w-1 aspect-h-1 bg-gray-200 flex items-center justify-center rounded cursor-pointer"
+              className="relative h-24 bg-gray-200 flex items-center justify-center rounded cursor-pointer"
               onClick={() => setShowModal(true)}
             >
               <span className="text-gray-600 font-medium">
@@ -124,15 +124,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
               </svg>
             </button>
             
-            <img
-              src={galleryImages[activeIndex].url}
-              alt={galleryImages[activeIndex].alt || `${name} image ${activeIndex + 1}`}
-              className="max-h-full max-w-full object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = placeholderImage.url;
-              }}
-            />
+            <div className="max-h-full max-w-full overflow-hidden flex items-center justify-center">
+              <img
+                src={galleryImages[activeIndex].url}
+                alt={galleryImages[activeIndex].alt || `${name} image ${activeIndex + 1}`}
+                className="max-h-[80vh] max-w-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = placeholderImage.url;
+                }}
+              />
+            </div>
             
             <button
               onClick={handleNext}
@@ -150,6 +152,31 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
               {activeIndex + 1} / {galleryImages.length}
             </p>
           </div>
+          
+          {/* Thumbnail Row for Modal */}
+          {galleryImages.length > 1 && (
+            <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
+              {galleryImages.map((image, index) => (
+                <div 
+                  key={index} 
+                  className={`flex-shrink-0 h-16 w-24 overflow-hidden rounded cursor-pointer ${
+                    index === activeIndex ? 'border-2 border-white' : ''
+                  }`}
+                  onClick={() => setActiveIndex(index)}
+                >
+                  <img
+                    src={image.url}
+                    alt={image.alt || `${name} thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = placeholderImage.url;
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
