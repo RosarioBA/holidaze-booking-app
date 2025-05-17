@@ -8,8 +8,15 @@ import { Booking } from '../../types/venue';
 import BookingSuccess from './BookingSuccess';
 import { Link } from 'react-router-dom';
 
-// Custom styles for the date picker to show booked dates
-
+// Custom inline styles for elements that can't be styled with Tailwind
+const calendarStyles = {
+  bookedDay: {
+    backgroundColor: '#fee2e2',
+    borderColor: '#fecaca',
+    color: '#991b1b',
+    cursor: 'not-allowed'
+  }
+};
 
 interface BookingCalendarProps {
   venueId: string;
@@ -69,10 +76,33 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   // Custom day class for displaying booked dates
   const dayClassName = (date: Date) => {
     if (isDateBooked(date)) {
-      return "booked-day";
+      return "react-datepicker__day--highlighted-custom";
     }
     return "";
   };
+
+  // Add custom inline styles to the DatePicker
+  useEffect(() => {
+    // Add a custom style tag for the booked days
+    const styleTag = document.createElement('style');
+    styleTag.innerHTML = `
+      .react-datepicker__day--highlighted-custom {
+        background-color: #fee2e2 !important;
+        border: 1px solid #fecaca !important;
+        color: #991b1b !important;
+        position: relative;
+        cursor: not-allowed !important;
+      }
+      .react-datepicker__day--highlighted-custom:hover {
+        background-color: #fecaca !important;
+      }
+    `;
+    document.head.appendChild(styleTag);
+    
+    return () => {
+      document.head.removeChild(styleTag);
+    };
+  }, []);
   
   // Handle date changes
   const handleDateChange = (dates: [Date | null, Date | null]) => {
@@ -185,7 +215,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
-     <h3 className="font-bold text-lg mb-4 font-averia">Book Your Stay</h3>
+      <h3 className="font-bold text-lg mb-4 font-averia">Book Your Stay</h3>
       
       {error && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded text-sm">
@@ -215,12 +245,12 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
             />
             
             <div className="flex items-center mt-2 text-xs text-gray-500 p-2 bg-gray-50 rounded">
-              <div className="mr-2 flex items-center">
-                <div className="w-3 h-3 rounded-full bg-blue-100 border border-blue-400 mr-1"></div>
+              <div className="mr-4 flex items-center">
+                <div className="w-4 h-4 rounded-full bg-blue-100 border border-blue-400 mr-1"></div>
                 <span>Selected</span>
               </div>
               <div className="flex items-center">
-                <div className="w-3 h-3 rounded-full bg-red-100 border border-red-400 mr-1"></div>
+                <div className="w-4 h-4 rounded-full bg-red-100 border border-red-400 mr-1"></div>
                 <span>Booked</span>
               </div>
             </div>
