@@ -211,9 +211,10 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
             </button>
           </div>
         </div>
-      </aside>
+      {/* Removed extra closing aside tag */}
 
       {/* Remove the spacer div - was causing layout issues */}
+      </aside>
 
       {/* Sidebar - Mobile */}
       {isMobileMenuOpen && (
@@ -353,7 +354,7 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
       )}
 
       {/* Main content */}
-      <main className="flex-1 bg-gray-100 min-h-screen p-4 md:p-8 mt-14 md:mt-0 md:ml-64">
+      <main className="flex-1 bg-gray-100 min-h-screen w-full p-4 md:p-8 mt-14 md:mt-0 md:ml-64">
         {/* Desktop user info */}
         <div className="hidden md:flex justify-end mb-6">
           <div className="flex items-center">
