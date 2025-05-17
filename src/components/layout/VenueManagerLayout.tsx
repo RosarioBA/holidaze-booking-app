@@ -92,7 +92,7 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 overflow-x-hidden max-w-full">
+    <div className="flex">
       {/* Mobile menu toggle and header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-md p-4 flex justify-between items-center">
         <Link to="/venue-manager/dashboard" className="font-bold text-lg font-averia">
@@ -143,78 +143,84 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
       </div>
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#13262F] text-white">
+      <aside className="hidden md:flex flex-col w-64 bg-[#13262F] text-white h-screen fixed left-0 top-0">
         <div className="px-6 py-4 border-b border-gray-800">
           <h2 className="text-sm font-bold tracking-widest uppercase font-averia">HOLIDAZE MANAGER</h2>
         </div>
-        <nav className="flex-1 py-4">
-          <Link 
-            to="/venue-manager/dashboard" 
-            className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/venue-manager/venues" 
-            className={`block py-3 px-6 ${isActive('/venue-manager/venues')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            My Venues
-          </Link>
-          <Link 
-            to="/venue-manager/bookings" 
-            className={`block py-3 px-6 ${isActive('/venue-manager/bookings')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            Bookings
-          </Link>
-          <Link 
-            to="/venue-manager/create" 
-            className={`block py-3 px-6 mb-4 ${isActive('/venue-manager/create')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            Create New Venue
-          </Link>
+        <div className="flex flex-col h-full">
+          <nav className="py-4">
+            <Link 
+              to="/venue-manager/dashboard" 
+              className={`block py-3 px-6 ${isActive('/venue-manager/dashboard')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              to="/venue-manager/venues" 
+              className={`block py-3 px-6 ${isActive('/venue-manager/venues')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              My Venues
+            </Link>
+            <Link 
+              to="/venue-manager/bookings" 
+              className={`block py-3 px-6 ${isActive('/venue-manager/bookings')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              Bookings
+            </Link>
+            <Link 
+              to="/venue-manager/create" 
+              className={`block py-3 px-6 mb-4 ${isActive('/venue-manager/create')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              Create New Venue
+            </Link>
+            
+            <div className="my-4 border-t border-gray-700"></div>
+            
+            <Link 
+              to="/venues" 
+              className="block py-3 px-6"
+            >
+              <div className="w-full bg-[#0081A7] text-white py-2 text-center font-medium rounded hover:bg-[#0081A7]/90 transition duration-200">
+                EXPLORE VENUES
+              </div>
+            </Link>
+            
+            <div className="my-4 border-t border-gray-700"></div>
+            
+            <Link 
+              to="/profile" 
+              className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              Profile
+            </Link>
+            <Link 
+              to="/settings" 
+              className={`block py-3 px-6 ${isActive('/settings')} hover:bg-[#0081A7] transition duration-200`}
+            >
+              Settings
+            </Link>
+          </nav>
           
-          <div className="my-4 border-t border-gray-700"></div>
-          
-          <Link 
-            to="/venues" 
-            className="block py-3 px-6"
-          >
-            <div className="w-full bg-[#0081A7] text-white py-2 text-center font-medium rounded hover:bg-[#0081A7]/90 transition duration-200">
-              EXPLORE VENUES
-            </div>
-          </Link>
-          
-          <div className="my-4 border-t border-gray-700"></div>
-          
-          <Link 
-            to="/profile" 
-            className={`block py-3 px-6 ${isActive('/profile')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            Profile
-          </Link>
-          <Link 
-            to="/settings" 
-            className={`block py-3 px-6 ${isActive('/settings')} hover:bg-[#0081A7] transition duration-200`}
-          >
-            Settings
-          </Link>
-        </nav>
-        <div className="p-6">
-          <button 
-            onClick={handleLogout}
-            className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200"
-          >
-            LOGOUT
-          </button>
+          {/* Use mt-auto to push the logout button all the way to bottom */}
+          <div className="mt-auto p-6">
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200"
+            >
+              LOGOUT
+            </button>
+          </div>
         </div>
       </aside>
+
+      {/* Remove the spacer div - was causing layout issues */}
 
       {/* Sidebar - Mobile */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black bg-opacity-50 overflow-hidden">
           <aside 
             id="mobile-sidebar"
-            className="fixed top-0 left-0 w-64 h-full bg-[#13262F] text-white shadow-lg z-50 overflow-y-auto max-w-full"
+            className="fixed top-0 left-0 w-64 h-full bg-[#13262F] text-white shadow-lg z-50 overflow-y-auto"
           >
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-800">
               <h2 className="text-sm font-bold tracking-widest uppercase font-averia">HOLIDAZE MANAGER</h2>
@@ -328,25 +334,26 @@ const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => 
                 </svg>
                 Settings
               </Link>
+              
+              {/* Logout button closer to settings in mobile view */}
+              <div className="px-6 py-3 mt-1">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200 flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  LOGOUT
+                </button>
+              </div>
             </nav>
-            
-            <div className="p-6 mt-auto">
-              <button 
-                onClick={handleLogout}
-                className="w-full bg-[#8F754F] text-white py-2 px-4 rounded font-medium hover:bg-[#8F754F]/80 transition duration-200 flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                LOGOUT
-              </button>
-            </div>
           </aside>
         </div>
       )}
 
       {/* Main content */}
-      <main className="flex-1 p-4 md:p-8 mt-14 md:mt-0 overflow-x-hidden w-full">
+      <main className="flex-1 bg-gray-100 min-h-screen p-4 md:p-8 mt-14 md:mt-0 md:ml-64">
         {/* Desktop user info */}
         <div className="hidden md:flex justify-end mb-6">
           <div className="flex items-center">
