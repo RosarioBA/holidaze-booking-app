@@ -70,7 +70,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
     <div className="flex min-h-screen bg-gray-100">
       {/* Mobile menu toggle */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-md p-4 flex justify-between items-center">
-        <Link to="/" className="font-bold text-lg">HOLIDAZE</Link>
+       <Link to="/" className="font-bold text-lg font-averia">HOLIDAZE</Link>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="text-gray-600 focus:outline-none"
@@ -95,7 +95,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-[#13262F] text-white">
         <div className="px-6 py-4 border-b border-gray-800">
-          <h2 className="text-sm font-bold tracking-widest uppercase">HOLIDAZE</h2>
+          <h2 className="text-sm font-bold tracking-widest uppercase font-averia">HOLIDAZE</h2>
         </div>
         <nav className="flex-1 py-4">
           <Link 
@@ -183,7 +183,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
         <div className="fixed inset-0 z-20 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
           <aside className="w-64 h-full bg-[#13262F] text-white transform transition-transform duration-300">
             <div className="px-6 py-4 border-b border-gray-800">
-              <h2 className="text-sm font-bold tracking-widest uppercase">HOLIDAZE</h2>
+             <h2 className="text-sm font-bold tracking-widest uppercase font-averia">HOLIDAZE</h2>
             </div>
             <nav className="flex-1 py-4">
               <Link 

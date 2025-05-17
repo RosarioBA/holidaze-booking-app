@@ -28,7 +28,7 @@ const LandingPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">HOLIDAZE</h1>
+         <h1 className="text-xl font-bold font-averia">HOLIDAZE</h1>
           
           <div className="space-x-4">
             {isAuthenticated ? (
@@ -66,17 +66,17 @@ const LandingPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden my-8">
           <div className="md:flex">
             <div className="md:w-1/2 p-8 flex flex-col justify-center">
-              <h2 className="text-3xl font-bold mb-4">Welcome to Holidaze</h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-3xl font-bold mb-4 font-averia">Welcome to Holidaze</h2>
+              <p className="text-gray-600 mb-6 font-light">
                 Book your perfect holiday venue or list your property to earn extra income.
               </p>
               <div className="space-y-4">
-                <Link 
-                  to="/venues" 
-                  className="block text-center w-full py-3 px-6 bg-[#0081A7] text-white rounded-lg hover:bg-[#13262F] transition"
-                >
-                  Explore Venues
-                </Link>
+              <Link 
+              to="/venues" 
+              className="block text-center w-full py-3 px-6 bg-[#0081A7] text-white rounded-lg hover:bg-[#13262F] transition font-medium tracking-wide"
+            >
+              Explore Venues
+            </Link>
                 
                 {isAuthenticated && isVenueManager && (
                   <Link 
@@ -114,7 +114,7 @@ const LandingPage: React.FC = () => {
         {/* Dashboard selection - for logged in users */}
         {isAuthenticated && (
           <div className="mb-12">
-            <h3 className="text-xl font-semibold mb-6 text-center">Choose Your Dashboard</h3>
+            <h3 className="text-xl font-semibold mb-6 text-center font-averia">Choose Your Dashboard</h3>
             
             <div className="grid md:grid-cols-2 gap-8">
               {/* Customer Dashboard Card */}
@@ -125,8 +125,8 @@ const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <div className="p-6">
-                  <h4 className="text-lg font-semibold mb-2">Customer Dashboard</h4>
-                  <p className="text-gray-600 mb-4">
+                  <h4 className="text-lg font-semibold mb-2 font-averia">Customer Dashboard</h4>
+                  <p className="text-gray-600 mb-4 font-light">
                     Browse venues, book your stays, and manage your trips.
                   </p>
                   <Link 
@@ -147,7 +147,7 @@ const LandingPage: React.FC = () => {
                     </svg>
                   </div>
                   <div className="p-6">
-                    <h4 className="text-lg font-semibold mb-2">Venue Manager Dashboard</h4>
+                    <h4 className="text-lg font-semibold mb-2 font-averia">Venue Manager Dashboard</h4>
                     <p className="text-gray-600 mb-4">
                       Manage your venues, view bookings, and track revenue.
                     </p>
@@ -170,7 +170,7 @@ const LandingPage: React.FC = () => {
                     </svg>
                   </div>
                   <div className="p-6">
-                    <h4 className="text-lg font-semibold mb-2">Venue Manager</h4>
+                    <h4 className="text-lg font-semibold mb-2 font-averia">Venue Manager</h4>
                     <p className="text-gray-600 mb-4">
                       Want to list your property? Enable venue manager mode in settings.
                     </p>
@@ -207,7 +207,7 @@ const LandingPage: React.FC = () => {
                   />
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold mb-2">Beautiful Venue {item}</h4>
+                  <h4 className="font-semibold mb-2 font-averia">Beautiful Venue {item}</h4>
                   <p className="text-gray-600 text-sm mb-2">Oslo, Norway</p>
                   <p className="font-medium">1200 kr/night</p>
                   <Link 
@@ -236,12 +236,12 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="md:flex md:justify-between">
             <div className="mb-6 md:mb-0">
-              <h2 className="text-lg font-bold mb-4">HOLIDAZE</h2>
+              <h2 className="text-lg font-bold mb-4 font-averia">HOLIDAZE</h2>
               <p className="text-gray-400 text-sm">Your perfect holiday accommodation awaits.</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
               <div>
-                <h3 className="text-sm font-semibold mb-3 text-gray-300">Quick Links</h3>
+                <h3 className="text-sm font-semibold mb-3 text-gray-300 font-averia">Quick Links</h3>
                 <ul className="text-gray-400">
                   <li className="mb-2"><Link to="/" className="hover:text-white">Home</Link></li>
                   <li className="mb-2"><Link to="/venues" className="hover:text-white">Venues</Link></li>
@@ -250,7 +250,7 @@ const LandingPage: React.FC = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm font-semibold mb-3 text-gray-300">Resources</h3>
+                <h3 className="text-sm font-semibold mb-3 text-gray-300 font-averia">Resources</h3>
                 <ul className="text-gray-400">
                   <li className="mb-2"><a href="#" className="hover:text-white">Help Center</a></li>
                   <li className="mb-2"><a href="#" className="hover:text-white">Privacy Policy</a></li>

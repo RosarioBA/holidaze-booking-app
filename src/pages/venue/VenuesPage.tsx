@@ -5,69 +5,6 @@ import { getVenues, searchVenues, filterVenues } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
 import { Venue, VenueFilters } from '../../types/venue'; // Assuming these types are imported from a types file
 
-// If you don't have a separate types file, define them here:
-/*
-interface MediaObject {
-  url: string;
-  alt: string;
-}
-
-interface VenueLocation {
-  address?: string;
-  city?: string;
-  zip?: string;
-  country?: string;
-  continent?: string;
-  lat?: number;
-  lng?: number;
-}
-
-interface VenueMeta {
-  wifi?: boolean;
-  parking?: boolean;
-  breakfast?: boolean;
-  pets?: boolean;
-}
-
-interface Venue {
-  id: string;
-  name: string;
-  description: string;
-  media?: MediaObject[];
-  price: number;
-  maxGuests: number;
-  rating?: number;
-  created?: string;
-  updated?: string;
-  meta?: VenueMeta;
-  location: VenueLocation;
-}
-
-interface VenueFilters {
-  minPrice?: number;
-  maxPrice?: number;
-  maxGuests?: number;
-  wifi?: boolean;
-  parking?: boolean;
-  breakfast?: boolean;
-  pets?: boolean;
-}
-*/
-
-interface ApiResponse {
-  data?: Venue[] | any;
-  venues?: Venue[] | any;
-  meta?: {
-    currentPage?: number;
-    pageCount?: number;
-    isFirstPage?: boolean;
-    isLastPage?: boolean;
-    totalCount?: number;
-    previousPage?: number | null;
-    nextPage?: number | null;
-  };
-}
-
 const VenuesPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -255,7 +192,7 @@ const VenuesPage = () => {
   return (
     <div className="space-y-8">
       <section className="bg-[#0081A7] text-white p-6 rounded-lg">
-        <h1 className="text-3xl font-bold mb-6">Explore Venues</h1>
+       <h1 className="text-3xl font-bold mb-6 font-averia">Explore Venues</h1>
         
         <form onSubmit={handleSearch} className="space-y-4">
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
@@ -272,14 +209,14 @@ const VenuesPage = () => {
             <button 
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="md:w-auto bg-[#13262F] hover:bg-opacity-90 text-white py-3 px-6 rounded font-medium"
+              className="md:w-auto bg-[#13262F] hover:bg-opacity-90 text-white py-3 px-6 rounded font-medium tracking-wide"
             >
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
             
             <button 
               type="submit"
-              className="md:w-auto bg-white hover:bg-gray-100 text-[#0081A7] py-3 px-6 rounded font-medium"
+              className="md:w-auto bg-white hover:bg-gray-100 text-[#0081A7] py-3 px-6 rounded font-medium tracking-wide"
             >
               Search
             </button>
@@ -288,9 +225,9 @@ const VenuesPage = () => {
           {showFilters && (
             <div className="bg-[#13262F] p-4 rounded grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="minPrice" className="block text-sm font-medium mb-1">
-                  Min Price ($)
-                </label>
+              <label htmlFor="minPrice" className="block text-sm font-medium mb-1 tracking-wide">
+                Min Price ($)
+              </label>
                 <input
                   type="number"
                   id="minPrice"
@@ -303,9 +240,9 @@ const VenuesPage = () => {
               </div>
               
               <div>
-                <label htmlFor="maxPrice" className="block text-sm font-medium mb-1">
-                  Max Price ($)
-                </label>
+              <label htmlFor="maxPrice" className="block text-sm font-medium mb-1 tracking-wide">
+                Max Price ($)
+              </label>
                 <input
                   type="number"
                   id="maxPrice"
@@ -318,9 +255,9 @@ const VenuesPage = () => {
               </div>
               
               <div>
-                <label htmlFor="guests" className="block text-sm font-medium mb-1">
-                  Guests
-                </label>
+              <label htmlFor="guests" className="block text-sm font-medium mb-1 tracking-wide">
+                Guests
+              </label>
                 <input
                   type="number"
                   id="guests"
@@ -363,7 +300,7 @@ const VenuesPage = () => {
         </div>
       ) : filteredVenues.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-xl text-gray-600">No venues found matching your search</p>
+          <p className="text-xl text-gray-600 font-light tracking-wide">No venues found matching your search</p>
           <button
             onClick={clearFilters}
             className="mt-4 bg-[#0081A7] text-white py-2 px-4 rounded hover:bg-[#13262F]"
@@ -374,7 +311,7 @@ const VenuesPage = () => {
       ) : (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <p className="text-gray-600">{filteredVenues.length} venues found</p>
+           <p className="text-gray-600 font-light">{filteredVenues.length} venues found</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -366,9 +366,9 @@ const ProfilePage: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold">{profile.name}</h1>
-            <p className="text-gray-600">{profile.email}</p>
-            <p className="text-gray-700 mt-2">
+            <h1 className="text-2xl font-bold font-averia">{profile.name}</h1>
+            <p className="text-gray-600 font-light">{profile.email}</p>
+            <p className="text-gray-700 mt-2 tracking-wide">
               {profile.bio || 'No bio provided'}
             </p>
           </div>
@@ -380,9 +380,8 @@ const ProfilePage: React.FC = () => {
             Edit Profile
           </button>
         </div>
-        
         <div className="border-t border-gray-200 pt-4">
-          <h2 className="font-semibold mb-2">Account Details</h2>
+         <h2 className="font-semibold mb-2 font-averia">Account Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-gray-600 block text-sm">Account Type</span>
@@ -415,7 +414,7 @@ const ProfilePage: React.FC = () => {
       {/* Profile Edit Form */}
       {isEditing && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+          <h2 className="text-xl font-bold mb-4 font-averia">Edit Profile</h2>
           <form onSubmit={handleUpdateProfile}>
             <div className="mb-4">
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
@@ -486,11 +485,11 @@ const ProfilePage: React.FC = () => {
       )}
       
      {/* My Bookings Section */}
-<div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-xl font-bold">
-      {profile.venueManager ? 'Venue Bookings' : 'My Bookings'}
-    </h2>
+     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold font-averia">
+          {profile.venueManager ? 'Venue Bookings' : 'My Bookings'}
+        </h2>
     <Link 
       to={profile.venueManager ? "/venue-manager/bookings" : "/my-trips"}
       className="text-[#0081A7] hover:underline"
@@ -530,8 +529,8 @@ const ProfilePage: React.FC = () => {
       {/* Become a Venue Manager CTA (if not already) */}
       {!profile.venueManager && (
         <div className="bg-[#F5F7DC] rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-2">Become a Venue Manager</h2>
-          <p className="text-gray-700 mb-4">
+          <h2 className="text-xl font-bold mb-2 font-averia">Become a Venue Manager</h2>
+          <p className="text-gray-700 mb-4 font-light tracking-wide">
             List your property on Holidaze and start earning income from your space.
           </p>
           <Link

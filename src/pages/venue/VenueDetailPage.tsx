@@ -187,7 +187,7 @@ const addToRecentlyViewed = (venue: Venue) => {
 
         {/* Venue Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{name}</h1>
+         <h1 className="text-3xl md:text-4xl font-bold mb-2 font-averia">{name}</h1>
           <div className="flex flex-wrap items-center text-gray-600 gap-4">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -219,15 +219,15 @@ const addToRecentlyViewed = (venue: Venue) => {
           <div className="lg:w-2/3">
             {/* Description Section */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold mb-4">About this venue</h2>
+             <h2 className="text-2xl font-bold mb-4 font-averia">About this venue</h2>
               <div className="prose max-w-none">
-                <p className="whitespace-pre-line">{description}</p>
+               <p className="whitespace-pre-line font-light">{description}</p>
               </div>
             </section>
 
             {/* Amenities Section */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold mb-4">Amenities</h2>
+             <h2 className="text-2xl font-bold mb-4 font-averia">Amenities</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className={`flex items-center ${meta?.wifi ? 'text-gray-800' : 'text-gray-400'}`}>
                   <AmenityIcon type="wifi" active={meta?.wifi || false} />
@@ -250,9 +250,9 @@ const addToRecentlyViewed = (venue: Venue) => {
 
             {/* Location Section */}
             <section className="mb-10">
-              <h2 className="text-2xl font-bold mb-4">Location</h2>
+             <h2 className="text-2xl font-bold mb-4 font-averia">Location</h2>
               <div className="bg-gray-100 p-4 rounded-lg">
-                <h3 className="font-medium mb-2">Address</h3>
+                <h3 className="font-medium mb-2 font-averia">Address</h3>
                 <p>
                   {location.address && <span className="block">{location.address}</span>}
                   {location.city && location.zip && <span className="block">{location.city}, {location.zip}</span>}
@@ -269,7 +269,7 @@ const addToRecentlyViewed = (venue: Venue) => {
          {/* Host Section */}
 {owner && (
   <section className="mb-10">
-    <h2 className="text-2xl font-bold mb-4">
+    <h2 className="text-2xl font-bold mb-4 font-averia">
       Hosted by{' '}
       <Link to={`/profiles/${owner.name}`} className="text-[#0081A7] hover:underline">
         {owner.name}
@@ -307,11 +307,11 @@ const addToRecentlyViewed = (venue: Venue) => {
         )}
       </div>
       <div>
-        <h3 className="font-bold text-lg">
-          <Link to={`/profiles/${owner.name}`} className="text-[#0081A7] hover:underline">
-            {owner.name}
-          </Link>
-        </h3>
+       <h3 className="font-bold text-lg font-averia">
+        <Link to={`/profiles/${owner.name}`} className="text-[#0081A7] hover:underline">
+          {owner.name}
+        </Link>
+      </h3>
         {owner.bio && <p className="text-gray-600">{owner.bio}</p>}
       </div>
     </div>

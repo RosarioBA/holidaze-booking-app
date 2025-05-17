@@ -127,9 +127,10 @@ const VenueManagerDashboardPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">Venue Manager Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {user?.name}</p>
+        <h1 className="text-2xl font-bold mb-2 font-averia">Venue Manager Dashboard</h1>
+        <p className="text-gray-600 font-light">Welcome back, {user?.name}</p>
       </div>
+
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -140,7 +141,7 @@ const VenueManagerDashboardPage: React.FC = () => {
       {/* Quick Actions Section */}
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="font-semibold text-lg">Quick Actions</h2>
+          <h2 className="font-semibold text-lg font-averia">Quick Actions</h2>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link 
@@ -150,7 +151,7 @@ const VenueManagerDashboardPage: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7] mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            <span className="font-medium">Create New Venue</span>
+            <span className="font-medium tracking-wide">Create New Venue</span>
           </Link>
           
           <Link 
@@ -160,7 +161,7 @@ const VenueManagerDashboardPage: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7] mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            <span className="font-medium">Manage Venues</span>
+            <span className="font-medium tracking-wide">Manage Venues</span>
           </Link>
           
           <Link 
@@ -170,7 +171,7 @@ const VenueManagerDashboardPage: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#0081A7] mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="font-medium">Manage Bookings</span>
+            <span className="font-medium tracking-wide">Manage Bookings</span>
           </Link>
         </div>
       </section>
@@ -178,7 +179,7 @@ const VenueManagerDashboardPage: React.FC = () => {
       {/* Your Venues Section */}
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="font-semibold text-lg">Your Venues</h2>
+          <h2 className="font-semibold text-lg font-averia">Your Venues</h2>
           <Link to="/venue-manager/venues" className="text-[#0081A7] hover:underline text-sm">
             View All
           </Link>
@@ -210,7 +211,7 @@ const VenueManagerDashboardPage: React.FC = () => {
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-medium mb-1">{venue.name}</h3>
+                    <h3 className="font-medium mb-1 font-averia">{venue.name}</h3>
                     <p className="text-sm text-gray-600">
                       {venue.location?.city ? `${venue.location.city}, ` : ''}
                       {venue.location?.country || 'Location not specified'}
@@ -235,7 +236,7 @@ const VenueManagerDashboardPage: React.FC = () => {
       {/* Recent Bookings Section */}
       <section className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="font-semibold text-lg">Recent Bookings</h2>
+          <h2 className="font-semibold text-lg font-averia">Recent Bookings</h2>
           <Link to="/venue-manager/bookings" className="text-[#0081A7] hover:underline text-sm">
             View All
           </Link>

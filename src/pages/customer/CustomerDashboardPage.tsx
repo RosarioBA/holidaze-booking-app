@@ -111,7 +111,7 @@ const CustomerDashboardPage: React.FC = () => {
           )}
         </div>
         <div className="p-3">
-          <h3 className="font-bold text-sm">{venue.name}</h3>
+         <h3 className="font-bold text-sm font-averia">{venue.name}</h3>
           <div className="flex justify-between items-center mt-1">
             <p className="text-xs text-gray-600">
               ${venue.price} / night
@@ -130,7 +130,7 @@ const CustomerDashboardPage: React.FC = () => {
     <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
       <Link to={`/bookings/${booking.id}`}>
         <div className="p-3">
-          <h3 className="font-bold text-sm">{booking.venue?.name || 'Venue'}</h3>
+         <h3 className="font-bold text-sm font-averia">{booking.venue?.name || 'Venue'}</h3>
           <p className="text-xs text-gray-600">
             {new Date(booking.dateFrom).toLocaleDateString()} - {new Date(booking.dateTo).toLocaleDateString()}
           </p>
@@ -154,12 +154,12 @@ const CustomerDashboardPage: React.FC = () => {
 
   return (
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Welcome back, {user?.name}</h1>
-        <p className="text-gray-600 mb-8">Ready to plan your next adventure?</p>
+        <h1 className="text-2xl font-bold mb-6 font-averia">Welcome back, {user?.name}</h1>
+        <p className="text-gray-600 mb-8 font-light">Ready to plan your next adventure?</p>
         
         {/* Upcoming Trips Section */}
         <section className="mb-10">
-          <h2 className="text-lg font-bold mb-4">Your Upcoming Trips</h2>
+          <h2 className="text-lg font-bold mb-4 font-averia">Your Upcoming Trips</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingTrips.length > 0 ? (
               upcomingTrips.map((booking) => (
@@ -183,7 +183,7 @@ const CustomerDashboardPage: React.FC = () => {
         
         {/* Places You've Saved Section */}
         <section className="mb-10">
-          <h2 className="text-lg font-bold mb-4">Places You've Saved</h2>
+         <h2 className="text-lg font-bold mb-4 font-averia">Places You've Saved</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {savedVenues.length > 0 ? (
               savedVenues.map((venue) => (
@@ -209,7 +209,7 @@ const CustomerDashboardPage: React.FC = () => {
         
         {/* Recently Viewed Section */}
         <section>
-          <h2 className="text-lg font-bold mb-4">Recently Viewed</h2>
+         <h2 className="text-lg font-bold mb-4 font-averia">Recently Viewed</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recentlyViewed.length > 0 ? (
               recentlyViewed.map((venue) => (

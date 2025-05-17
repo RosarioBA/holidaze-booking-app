@@ -170,7 +170,7 @@ const EditVenuePage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Edit Venue</h1>
+      <h1 className="text-2xl font-bold mb-6 font-averia">Edit Venue</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -180,9 +180,9 @@ const EditVenuePage: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
         <div className="mb-6">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Venue Name
-          </label>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
+          Venue Name
+        </label>
           <input
             type="text"
             id="name"
@@ -194,7 +194,7 @@ const EditVenuePage: React.FC = () => {
         </div>
         
         <div className="mb-6">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
             Description
           </label>
           <textarea
@@ -277,7 +277,7 @@ const EditVenuePage: React.FC = () => {
         
         {/* Location Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3">Location</h3>
+          <h3 className="text-lg font-medium mb-3 font-averia">Location</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -336,7 +336,7 @@ const EditVenuePage: React.FC = () => {
         
         {/* Amenities Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium mb-3">Amenities</h3>
+          <h3 className="text-lg font-medium mb-3 font-averia">Amenities</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-center">
@@ -395,19 +395,19 @@ const EditVenuePage: React.FC = () => {
         
         <div className="flex justify-end gap-4">
           <button
-            type="button"
-            onClick={() => navigate('/venue-manager/venues')}
-            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Cancel
-          </button>
+              type="button"
+              onClick={() => navigate('/venue-manager/venues')}
+              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 font-medium tracking-wide"
+            >
+              Cancel
+            </button>
           <button
-            type="submit"
-            className="bg-[#0081A7] text-white px-6 py-2 rounded-md hover:bg-[#13262F] disabled:opacity-50"
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </button>
+              type="submit"
+              className="bg-[#0081A7] text-white px-6 py-2 rounded-md hover:bg-[#13262F] disabled:opacity-50 font-medium tracking-wide"
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
         </div>
       </form>
     </div>

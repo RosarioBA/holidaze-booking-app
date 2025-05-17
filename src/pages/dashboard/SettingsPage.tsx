@@ -236,7 +236,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold mb-6 font-averia">Settings</h1>
       
       {message && (
         <div className={`mb-6 p-4 rounded ${
@@ -248,7 +248,7 @@ const SettingsPage: React.FC = () => {
       
       {/* Venue Manager Section */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-        <h2 className="border-b border-gray-200 px-6 py-4 font-semibold">Account Type</h2>
+        <h2 className="border-b border-gray-200 px-6 py-4 font-semibold font-averia">Account Type</h2>
         <div className="p-6">
           {venueManagerMessage && (
             <div className={`mb-4 p-3 rounded ${
@@ -260,8 +260,8 @@ const SettingsPage: React.FC = () => {
           
           <div className="flex items-center justify-between p-4 border rounded">
             <div>
-              <h3 className="font-medium">Venue Manager Status</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-medium font-averia">Venue Manager Status</h3>
+              <p className="text-sm text-gray-600 font-light tracking-wide">
                 {venueManager 
                   ? 'You can create and manage venues' 
                   : 'Become a venue manager to list your properties'}
@@ -295,7 +295,7 @@ const SettingsPage: React.FC = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-        <h2 className="border-b border-gray-200 px-6 py-4 font-semibold">Profile Information</h2>
+       <h2 className="border-b border-gray-200 px-6 py-4 font-semibold font-averia">Profile Information</h2>
         <form onSubmit={handleProfileUpdate} className="p-6">
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -366,7 +366,7 @@ const SettingsPage: React.FC = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <h2 className="border-b border-gray-200 px-6 py-4 font-semibold">Change Password</h2>
+       <h2 className="border-b border-gray-200 px-6 py-4 font-semibold font-averia">Change Password</h2>
         <div className="p-6">
           <p className="italic text-gray-500 mb-2">
             Note: Password changes are not supported by the Noroff API. This section is for demonstration purposes only.

@@ -49,7 +49,7 @@ const HomePage = () => {
           <form onSubmit={handleSearch} className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
             <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-grow">
-                <label htmlFor="location" className="block text-gray-700 text-sm font-medium mb-2">
+                <label htmlFor="location" className="block text-gray-700 text-sm font-medium mb-2 tracking-wide">
                   Where do you want to go?
                 </label>
                 <input
@@ -63,12 +63,12 @@ const HomePage = () => {
               </div>
               
               <div>
-                <button
-                  type="submit"
-                  className="w-full md:w-auto bg-primary text-white py-3 px-8 rounded font-medium hover:bg-primary-dark transition-colors"
-                >
-                  Search
-                </button>
+              <button
+                type="submit"
+                className="w-full md:w-auto bg-primary text-white py-3 px-8 rounded font-medium tracking-wide hover:bg-primary-dark transition-colors"
+              >
+                Search
+              </button>
               </div>
             </div>
           </form>
@@ -129,7 +129,7 @@ const HomePage = () => {
                 </svg>
               </div>
               <h3 className="font-bold mb-2 font-averia">Trusted Properties</h3>
-              <p className="text-gray-600">All our listings are verified for quality and comfort.</p>
+              <p className="text-gray-600 font-light">All our listings are verified for quality and comfort.</p>
             </div>
             
             <div className="text-center">
@@ -139,7 +139,7 @@ const HomePage = () => {
                 </svg>
               </div>
               <h3 className="font-bold mb-2 font-averia">Best Price Guarantee</h3>
-              <p className="text-gray-600">We offer competitive prices with no hidden fees.</p>
+              <p className="text-gray-600 font-light">We offer competitive prices with no hidden fees.</p>
             </div>
             
             <div className="text-center">
@@ -149,7 +149,7 @@ const HomePage = () => {
                 </svg>
               </div>
               <h3 className="font-bold mb-2 font-averia">Customer Support</h3>
-              <p className="text-gray-600">24/7 support for all your booking needs.</p>
+              <p className="text-gray-600 font-light">24/7 support for all your booking needs.</p>
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ const HomePage = () => {
       <section className="bg-primary text-white py-16 px-2 sm:px-4 rounded-b-lg mb-0 pb-16">
         <div className="mx-auto text-center max-w-4xl">
           <h2 className="text-2xl font-bold mb-4 font-averia">Own a Property? Become a Host Today!</h2>
-          <p className="mb-6">List your property on Holidaze and start earning income.</p>
+          <p className="mb-6 font-light">List your property on Holidaze and start earning income.</p>
           <Link 
             to="/register" 
             className="inline-block bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"

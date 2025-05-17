@@ -161,10 +161,10 @@ const CustomerTripsPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">My Trips</h1>
-        <p className="text-gray-600">Manage your upcoming and past bookings</p>
-      </div>
+     <div className="mb-8">
+      <h1 className="text-2xl font-bold mb-2 font-averia">My Trips</h1>
+      <p className="text-gray-600 font-light">Manage your upcoming and past bookings</p>
+    </div>
       
       {/* Show mock data notice */}
       {useMockData && (
@@ -225,14 +225,15 @@ const CustomerTripsPage: React.FC = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h2 className="text-xl font-semibold mb-2">No trips found</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-xl font-semibold mb-2 font-averia">No trips found</h2>
+          <p className="text-gray-600 mb-6 font-light tracking-wide">
             {activeFilter === 'upcoming'
               ? "You don't have any upcoming trips planned."
               : activeFilter === 'past'
               ? "You don't have any past trips."
               : "You haven't booked any trips yet."}
           </p>
+
           <Link 
             to="/venues" 
             className="inline-block bg-[#0081A7] text-white px-6 py-3 rounded-lg hover:bg-[#13262F] transition"
@@ -268,10 +269,10 @@ const CustomerTripsPage: React.FC = () => {
                   <div className="p-6 md:w-2/3">
                     <div className="sm:flex justify-between items-start">
                       <div>
-                        <h2 className="text-xl font-semibold">{booking.venue?.name || 'Unknown Venue'}</h2>
-                        <p className="text-gray-600 mb-2">
-                          {booking.venue?.location?.city || 'Unknown'}, {booking.venue?.location?.country || ''}
-                        </p>
+                      <h2 className="text-xl font-semibold font-averia">{booking.venue?.name || 'Unknown Venue'}</h2>
+                      <p className="text-gray-600 mb-2 font-light">
+                        {booking.venue?.location?.city || 'Unknown'}, {booking.venue?.location?.country || ''}
+                      </p>
                       </div>
                       <div className="mt-2 sm:mt-0 text-right">
                         <div className="text-gray-700">

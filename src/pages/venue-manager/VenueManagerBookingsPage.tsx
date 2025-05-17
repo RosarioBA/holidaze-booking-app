@@ -186,10 +186,9 @@ const VenueManagerBookingsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">Bookings Management</h1>
-        <p className="text-gray-600">View and manage all bookings for your venues</p>
+      <h1 className="text-2xl font-bold mb-2 font-averia">Bookings Management</h1>
+      <p className="text-gray-600 font-light">View and manage all bookings for your venues</p>
       </div>
-      
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
@@ -200,7 +199,7 @@ const VenueManagerBookingsPage: React.FC = () => {
 <div className="mb-6 flex flex-col md:flex-row gap-4">
   {/* Venue filter */}
   <div className="flex-1">
-    <label htmlFor="venueFilter" className="block text-sm font-medium text-gray-700 mb-1">
+    <label htmlFor="venueFilter" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
       Filter by Venue
     </label>
     <select
@@ -221,15 +220,15 @@ const VenueManagerBookingsPage: React.FC = () => {
   {/* Time filter */}
   <div className="flex items-end gap-2">
     <button
-      onClick={() => setActiveFilter('all')}
-      className={`px-4 py-2 rounded border ${
-        activeFilter === 'all' 
-          ? 'bg-[#0081A7] text-white border-[#0081A7]' 
-          : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
-      }`}
-    >
-      All
-    </button>
+       onClick={() => setActiveFilter('all')}
+       className={`px-4 py-2 rounded border ${
+         activeFilter === 'all' 
+           ? 'bg-[#0081A7] text-white border-[#0081A7]' 
+           : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
+       } font-medium tracking-wide`}
+     >
+       All
+     </button>
     <button
       onClick={() => setActiveFilter('upcoming')}
       className={`px-4 py-2 rounded border ${
@@ -259,7 +258,7 @@ const VenueManagerBookingsPage: React.FC = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h2 className="text-xl font-semibold mb-2">No bookings found</h2>
+          <h2 className="text-xl font-semibold mb-2 font-averia">No bookings found</h2>
           <p className="text-gray-600">
             {selectedVenue === 'all' 
               ? "You don't have any bookings for your venues yet."
@@ -272,9 +271,9 @@ const VenueManagerBookingsPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Booking Details
-                  </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Booking Details
+                </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Venue
                   </th>
@@ -378,17 +377,17 @@ const VenueManagerBookingsPage: React.FC = () => {
       {/* Summary cards */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-2">Total Bookings</h3>
+          <h3 className="text-lg font-semibold mb-2 font-averia">Total Bookings</h3>
           <p className="text-3xl font-bold text-[#0081A7]">{bookings.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-2">Upcoming Bookings</h3>
+          <h3 className="text-lg font-semibold mb-2 font-averia">Upcoming Bookings</h3>
           <p className="text-3xl font-bold text-blue-600">
             {bookings.filter(b => new Date(b.dateFrom) > new Date()).length}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-2">Total Venues</h3>
+          <h3 className="text-lg font-semibold mb-2 font-averia">Total Venues</h3>
           <p className="text-3xl font-bold text-green-600">{venues.length}</p>
         </div>
       </div>

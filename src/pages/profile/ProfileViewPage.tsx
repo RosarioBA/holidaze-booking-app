@@ -178,16 +178,16 @@ const ProfileViewPage: React.FC<ProfileViewProps> = () => {
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-2xl font-bold">{profile.name}</h1>
-            <p className="text-gray-600">{profile.email}</p>
-            <p className="text-gray-700 mt-2">
+            <h1 className="text-2xl font-bold font-averia">{profile.name}</h1>
+            <p className="text-gray-600 font-light">{profile.email}</p>
+            <p className="text-gray-700 mt-2 tracking-wide">
               {profile.bio || 'No bio provided'}
             </p>
           </div>
         </div>
         
         <div className="border-t border-gray-200 pt-4">
-          <h2 className="font-semibold mb-2">Account Details</h2>
+          <h2 className="font-semibold mb-2 font-averia">Account Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-gray-600 block text-sm">Account Type</span>
@@ -220,28 +220,18 @@ const ProfileViewPage: React.FC<ProfileViewProps> = () => {
       {/* Venues Section - only show if profile is a venue manager */}
       {profile.venueManager && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">{profile.name}'s Venues</h2>
+          <h2 className="text-xl font-bold mb-4 font-averia">{profile.name}'s Venues</h2>
           
           {venues.length === 0 ? (
-            <p className="text-gray-600">This venue manager hasn't listed any venues yet.</p>
+            <p className="text-gray-600 font-light">This venue manager hasn't listed any venues yet.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {venues.map(venue => (
                 <div key={venue.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md">
-                  <div className="h-40 bg-gray-200">
-                    <img 
-                      src={getImageUrl(venue)} 
-                      alt={venue.name} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://placehold.co/300x200?text=No+Image';
-                      }}
-                    />
-                  </div>
+                  {/* ... */}
                   <div className="p-4">
-                    <h3 className="font-medium text-lg mb-1">{venue.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">
+                    <h3 className="font-medium text-lg mb-1 font-averia">{venue.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2 tracking-wide">
                       {venue.location?.city ? `${venue.location.city}, ` : ''}
                       {venue.location?.country || 'Location not specified'}
                     </p>

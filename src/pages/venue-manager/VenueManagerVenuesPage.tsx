@@ -72,10 +72,10 @@ const VenueManagerVenuesPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Venues</h1>
+        <h1 className="text-2xl font-bold font-averia">My Venues</h1>
         <Link
           to="/venue-manager/create"
-          className="bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
+          className="bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F] font-medium tracking-wide"
         >
           Create New Venue
         </Link>
@@ -89,8 +89,8 @@ const VenueManagerVenuesPage: React.FC = () => {
       
       {venues.length === 0 ? (
         <div className="text-center p-12 bg-white rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">No venues yet</h2>
-          <p className="text-gray-600 mb-6">Start by creating your first venue.</p>
+          <h2 className="text-xl font-semibold mb-4 font-averia">No venues yet</h2>
+          <p className="text-gray-600 mb-6 font-light">Start by creating your first venue.</p>
           <Link
             to="/venue-manager/create"
             className="inline-block bg-[#0081A7] text-white px-6 py-3 rounded hover:bg-[#13262F]"
@@ -114,8 +114,8 @@ const VenueManagerVenuesPage: React.FC = () => {
                 />
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{venue.name}</h3>
-                <p className="text-gray-600 text-sm mb-2">{venue.description}</p>
+                <h3 className="font-semibold text-lg mb-2 font-averia">{venue.name}</h3>
+                <p className="text-gray-600 text-sm mb-2 font-light">{venue.description}</p>
                 <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
                   <span>{venue.location?.city}, {venue.location?.country}</span>
                   <span>{venue.price} kr/night</span>
@@ -146,18 +146,18 @@ const VenueManagerVenuesPage: React.FC = () => {
               {deleteConfirmId === venue.id && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                    <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
-                    <p className="text-gray-600 mb-6">
+                  <h3 className="text-lg font-semibold mb-4 font-averia">Confirm Deletion</h3>
+                    <p className="text-gray-600 mb-6 font-light">
                       Are you sure you want to delete "{venue.name}"? This action cannot be undone.
                     </p>
                     <div className="flex gap-4">
-                      <button
-                        onClick={() => handleDelete(venue.id)}
-                        disabled={isDeleting}
-                        className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
-                      >
-                        {isDeleting ? 'Deleting...' : 'Yes, Delete'}
-                      </button>
+                    <button
+                      onClick={() => handleDelete(venue.id)}
+                      disabled={isDeleting}
+                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 font-medium tracking-wide"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                    </button>
                       <button
                         onClick={() => setDeleteConfirmId(null)}
                         disabled={isDeleting}
