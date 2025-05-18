@@ -1,5 +1,5 @@
 // src/pages/profile/ProfilePage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { getUserBookings } from '../../api/bookingService';
@@ -28,6 +28,7 @@ const PROFILE_STORAGE_KEY = 'holidaze_profile';
 
 const ProfilePage: React.FC = () => {
   const { user, token, updateUser } = useAuth();
+  const editFormRef = useRef<HTMLDivElement>(null);
   
   // Define user-specific avatar and banner keys inside the component where user is available
   const AVATAR_STORAGE_KEY = user ? `holidaze_avatar_url_${user.name}_${user.venueManager ? 'manager' : 'customer'}` : 'holidaze_avatar_url_default';
@@ -42,6 +43,17 @@ const ProfilePage: React.FC = () => {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(true);
+
+  // Handle edit button click
+  const handleEditClick = () => {
+    setIsEditing(true);
+    
+    // Use setTimeout to ensure the form is rendered before scrolling
+    setTimeout(() => {
+      // Smooth scroll to the edit form
+      editFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   // Load profile from localStorage first
   useEffect(() => {
@@ -374,7 +386,7 @@ const ProfilePage: React.FC = () => {
           </div>
           
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={handleEditClick}
             className="bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
           >
             Edit Profile
@@ -413,7 +425,10 @@ const ProfilePage: React.FC = () => {
       
       {/* Profile Edit Form */}
       {isEditing && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div 
+          ref={editFormRef} 
+          className="bg-white rounded-lg shadow-sm p-6 mb-6 border-l-4 border-[#0081A7]"
+        >
           <h2 className="text-xl font-bold mb-4 font-averia">Edit Profile</h2>
           <form onSubmit={handleUpdateProfile}>
             <div className="mb-4">
