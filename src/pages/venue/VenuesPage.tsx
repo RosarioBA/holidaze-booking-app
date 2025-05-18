@@ -1,11 +1,11 @@
 // src/pages/venue/VenuesPage.tsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getVenues, searchVenues, filterVenues } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
-import { Venue, VenueFilters } from '../../types/venue'; // Assuming these types are imported from a types file
+import { Venue, VenueFilters } from '../../types/venue';
 
-const VenuesPage = () => {
+const VenuesPage: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const initialSearchQuery = searchParams.get('search') || '';
@@ -28,24 +28,24 @@ const VenuesPage = () => {
   const [guests, setGuests] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
   
+  // State to track if filters are applied
+  const [activeFilters, setActiveFilters] = useState<VenueFilters>({});
+  const [searchResults, setSearchResults] = useState<Venue[]>([]);
+  
   // Fetch venues on initial load
   useEffect(() => {
     const fetchVenues = async () => {
       try {
         setLoading(true);
-        const result = await getVenues(1, 100);
+        const result = await getVenues();
         
         // Extract venues from the result based on its structure
         let venuesList: Venue[] = [];
         
-        if (Array.isArray(result)) {
+        if (result && typeof result === 'object' && 'venues' in result && Array.isArray(result.venues)) {
+          venuesList = result.venues;
+        } else if (Array.isArray(result)) {
           venuesList = result;
-        } else if (result && typeof result === 'object') {
-          if (result.venues && Array.isArray(result.venues)) {
-            venuesList = result.venues;
-          } else if (result.data && Array.isArray(result.data)) {
-            venuesList = result.data;
-          }
         }
         
         // Process venues to ensure they have all required properties
@@ -58,9 +58,10 @@ const VenuesPage = () => {
         
         setVenues(processedVenues);
         setFilteredVenues(processedVenues);
+        setSearchResults(processedVenues); // Initialize search results with all venues
         
         // Set pagination data if available
-        if (result && result.meta) {
+        if (result && typeof result === 'object' && 'meta' in result && result.meta) {
           setPagination({
             currentPage: result.meta.currentPage || 1,
             totalPages: result.meta.pageCount || 1,
@@ -91,9 +92,18 @@ const VenuesPage = () => {
     e.preventDefault();
     handleSearchQuery(search);
   };
+  
   const handleSearchQuery = async (query: string) => {
     if (!query.trim()) {
-      setFilteredVenues(venues);
+      setSearchResults(venues);
+      
+      // Apply any active filters to the full venue list
+      if (Object.keys(activeFilters).length > 0) {
+        const newFilteredVenues = filterVenues(venues, activeFilters);
+        setFilteredVenues(newFilteredVenues);
+      } else {
+        setFilteredVenues(venues);
+      }
       return;
     }
     
@@ -103,37 +113,29 @@ const VenuesPage = () => {
       // Try to use the API search endpoint first
       try {
         // Fetch search results
-        const searchResultsRaw = await searchVenues(query);
-        
-        // Simply ensure it's an array, whatever the structure
-        let searchResults: Venue[] = [];
-        
-        if (Array.isArray(searchResultsRaw)) {
-          searchResults = searchResultsRaw;
-        } else if (typeof searchResultsRaw === 'object' && searchResultsRaw !== null) {
-          // Try to extract from data property
-          if (Array.isArray((searchResultsRaw as any).data)) {
-            searchResults = (searchResultsRaw as any).data;
-          }
-          // Try to extract from venues property
-          else if (Array.isArray((searchResultsRaw as any).venues)) {
-            searchResults = (searchResultsRaw as any).venues;
-          }
-        }
+        const searchResultsArray = await searchVenues(query);
         
         // Ensure each venue has the minimal required properties
-        const processedResults = searchResults.map(venue => ({
+        const processedResults = searchResultsArray.map(venue => ({
           ...venue,
           media: venue.media || [],
           location: venue.location || {},
           meta: venue.meta || {}
         }));
         
-        setFilteredVenues(processedResults);
+        setSearchResults(processedResults);
+        
+        // Apply any active filters to the search results
+        if (Object.keys(activeFilters).length > 0) {
+          const filteredSearchResults = filterVenues(processedResults, activeFilters);
+          setFilteredVenues(filteredSearchResults);
+        } else {
+          setFilteredVenues(processedResults);
+        }
       } catch (searchError) {
         // Fallback to client-side filtering if API search fails
         console.warn('API search failed, falling back to client-side filtering:', searchError);
-        const filteredResults = venues.filter(venue => {
+        const clientSearchResults = venues.filter(venue => {
           const searchLower = query.toLowerCase();
           return (
             venue.name.toLowerCase().includes(searchLower) ||
@@ -142,7 +144,16 @@ const VenuesPage = () => {
             (venue.location?.country && venue.location.country.toLowerCase().includes(searchLower))
           );
         });
-        setFilteredVenues(filteredResults);
+        
+        setSearchResults(clientSearchResults);
+        
+        // Apply any active filters to the client-side search results
+        if (Object.keys(activeFilters).length > 0) {
+          const filteredClientResults = filterVenues(clientSearchResults, activeFilters);
+          setFilteredVenues(filteredClientResults);
+        } else {
+          setFilteredVenues(clientSearchResults);
+        }
       }
     } catch (err) {
       console.error('Error during search:', err);
@@ -154,6 +165,7 @@ const VenuesPage = () => {
   
   // Apply price and guest filters (client-side)
   const applyFilters = () => {
+    // Build filters object
     const filters: VenueFilters = {};
     
     if (minPrice && !isNaN(parseFloat(minPrice))) {
@@ -168,24 +180,36 @@ const VenuesPage = () => {
       filters.maxGuests = parseInt(guests, 10);
     }
     
-    // Ensure venues are properly processed for filtering
-    const venuesForFiltering = filteredVenues.map(venue => ({
-      ...venue,
-      media: venue.media || [],
-      meta: venue.meta || {},
-      location: venue.location || {}
-    }));
+    console.log("Applying filters:", filters);
     
-    const filtered = filterVenues(venuesForFiltering, filters);
+    // Save active filters
+    setActiveFilters(filters);
+    
+    // Apply filters to current search results, not all venues
+    const filtered = filterVenues(searchResults, filters);
+    console.log("Filtered results:", filtered.length);
     setFilteredVenues(filtered);
   };
   
   // Clear all filters
   const clearFilters = () => {
+    setMinPrice('');
+    setMaxPrice('');
+    setGuests('');
+    setActiveFilters({});
+    
+    // Reset to search results or all venues if no search
+    setFilteredVenues(searchResults);
+  };
+  
+  // Reset everything
+  const resetAll = () => {
     setSearch('');
     setMinPrice('');
     setMaxPrice('');
     setGuests('');
+    setActiveFilters({});
+    setSearchResults(venues);
     setFilteredVenues(venues);
   };
   
@@ -275,7 +299,7 @@ const VenuesPage = () => {
                   onClick={clearFilters}
                   className="bg-transparent hover:bg-[#13262F] text-white py-2 px-4 border border-white rounded mr-2"
                 >
-                  Clear
+                  Clear Filters
                 </button>
                 <button
                   type="button"
@@ -300,18 +324,31 @@ const VenuesPage = () => {
         </div>
       ) : filteredVenues.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-xl text-gray-600 font-light tracking-wide">No venues found matching your search</p>
+          <p className="text-xl text-gray-600 font-light tracking-wide">No venues found matching your criteria</p>
           <button
-            onClick={clearFilters}
+            onClick={resetAll}
             className="mt-4 bg-[#0081A7] text-white py-2 px-4 rounded hover:bg-[#13262F]"
           >
-            Clear Filters
+            Reset All Filters
           </button>
         </div>
       ) : (
         <div>
           <div className="flex justify-between items-center mb-4">
            <p className="text-gray-600 font-light">{filteredVenues.length} venues found</p>
+           
+           {/* Show active filters indicator */}
+           {Object.keys(activeFilters).length > 0 && (
+             <div className="flex items-center">
+               <span className="text-sm text-gray-600 mr-2">Filters active</span>
+               <button 
+                 onClick={clearFilters}
+                 className="text-[#0081A7] text-sm hover:underline"
+               >
+                 Clear
+               </button>
+             </div>
+           )}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

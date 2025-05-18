@@ -157,35 +157,45 @@ export const searchVenues = async (query: string): Promise<Venue[]> => {
 
 // Function to filter venues (client-side, when API doesn't support all filter options)
 export const filterVenues = (venues: Venue[], filters: VenueFilters): Venue[] => {
+  console.log("Filtering venues with:", filters);
+  console.log("Before filtering:", venues.length, "venues");
+  
   return venues.filter(venue => {
     // Filter by price range
     if (filters.minPrice !== undefined && venue.price < filters.minPrice) {
+      console.log(`Venue ${venue.name} filtered out: price ${venue.price} < min ${filters.minPrice}`);
       return false;
     }
     
     if (filters.maxPrice !== undefined && venue.price > filters.maxPrice) {
+      console.log(`Venue ${venue.name} filtered out: price ${venue.price} > max ${filters.maxPrice}`);
       return false;
     }
     
     // Filter by max guests
     if (filters.maxGuests !== undefined && venue.maxGuests < filters.maxGuests) {
+      console.log(`Venue ${venue.name} filtered out: maxGuests ${venue.maxGuests} < requested ${filters.maxGuests}`);
       return false;
     }
     
     // Filter by amenities
     if (filters.wifi !== undefined && venue.meta?.wifi !== filters.wifi) {
+      console.log(`Venue ${venue.name} filtered out: wifi status doesn't match`);
       return false;
     }
     
     if (filters.parking !== undefined && venue.meta?.parking !== filters.parking) {
+      console.log(`Venue ${venue.name} filtered out: parking status doesn't match`);
       return false;
     }
     
     if (filters.breakfast !== undefined && venue.meta?.breakfast !== filters.breakfast) {
+      console.log(`Venue ${venue.name} filtered out: breakfast status doesn't match`);
       return false;
     }
     
     if (filters.pets !== undefined && venue.meta?.pets !== filters.pets) {
+      console.log(`Venue ${venue.name} filtered out: pets status doesn't match`);
       return false;
     }
     
