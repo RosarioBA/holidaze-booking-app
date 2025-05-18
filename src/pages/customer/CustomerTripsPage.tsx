@@ -304,12 +304,12 @@ const CustomerTripsPage: React.FC = () => {
                           <span className="ml-1 font-mono">{booking.id.substring(0, 8)}...</span>
                         </div>
                         <div className="flex space-x-2">
-                          <Link 
-                            to={`/venues/${booking.venue?.id}`}
-                            className="text-[#0081A7] hover:underline text-sm"
-                          >
-                            View Venue
-                          </Link>
+                        <Link 
+                          to={`/venues/${booking.venue?.id}?source=my-trips`}
+                          className="text-[#0081A7] hover:underline text-sm"
+                        >
+                          View Venue
+                        </Link>
                           {/* Only show edit/cancel for upcoming bookings */}
                           {new Date(booking.dateFrom) > new Date() && (
                             <>

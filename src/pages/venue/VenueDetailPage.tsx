@@ -1,6 +1,6 @@
 // src/pages/venue/VenueDetailPage.tsx
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { getVenueById } from '../../api/venueService';
 import { createBooking } from '../../api/bookingService';
 import { Venue } from '../../types/venue';
@@ -13,6 +13,10 @@ import { getUserAvatar } from '../../utils/avatarUtils';
 const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { token } = useAuth();
+
+  const currentLocation = useLocation();
+  const queryParams = new URLSearchParams(currentLocation.search);
+  const source = queryParams.get('source');
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(true);
@@ -178,11 +182,14 @@ const addToRecentlyViewed = (venue: Venue) => {
         )}
         
         {/* Back Button */}
-        <Link to="/venues" className="text-blue-600 hover:underline flex items-center mb-6">
+        <Link 
+          to={source === 'my-trips' ? '/my-trips' : '/venues'} 
+          className="text-blue-600 hover:underline flex items-center mb-6"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
           </svg>
-          Back to Venues
+          {source === 'my-trips' ? 'Back to My Trips' : 'Back to Venues'}
         </Link>
 
         {/* Venue Header */}
