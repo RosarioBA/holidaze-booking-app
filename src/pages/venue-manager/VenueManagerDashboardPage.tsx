@@ -4,12 +4,17 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getVenues, getVenueManagerVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
-import { fetchFromApi } from '../../api/api'; // Make sure to add this import
+import { fetchFromApi } from '../../api/api';
 import { Venue, Booking } from '../../types/venue';
+import { getUserAvatar } from '../../utils/avatarUtils'; // Add this import
 
 interface Customer {
   name: string;
   email: string;
+  avatar?: {
+    url: string;
+    alt?: string;
+  };
 }
 
 const VenueManagerDashboardPage: React.FC = () => {
@@ -274,9 +279,43 @@ const VenueManagerDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {booking.customer?.name || 'Unknown guest'}
-                        </div>
+                        {booking.customer ? (
+                          <div className="flex items-center">
+                            {booking.customer.name && getUserAvatar(booking.customer.name) ? (
+                              <img 
+                                src={getUserAvatar(booking.customer.name)} 
+                                alt={booking.customer.name}
+                                className="h-8 w-8 rounded-full mr-2"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                                }}
+                              />
+                            ) : booking.customer.avatar?.url ? (
+                              <img 
+                                src={booking.customer.avatar.url} 
+                                alt={booking.customer.name}
+                                className="h-8 w-8 rounded-full mr-2"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                                }}
+                              />
+                            ) : null}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                <Link to={`/profiles/${booking.customer.name}`} className="text-[#0081A7] hover:underline">
+                                  {booking.customer.name}
+                                </Link>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {booking.customer.email}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500">Unknown guest</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -284,12 +323,12 @@ const VenueManagerDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link 
-                      to={`/bookings/${booking.id}`} 
-                      className="text-[#0081A7] hover:underline"
-                    >
-                      Details
-                    </Link>
+                        <Link 
+                          to={`/bookings/${booking.id}`} 
+                          className="text-[#0081A7] hover:underline"
+                        >
+                          Details
+                        </Link>
                       </td>
                     </tr>
                   ))}
