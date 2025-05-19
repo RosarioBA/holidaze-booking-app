@@ -540,8 +540,7 @@ const ProfilePage: React.FC = () => {
     </p>
   )}
 </div>
-      
-      {/* Become a Venue Manager CTA (if not already) */}
+     {/* Become a Venue Manager CTA (if not already) */}
       {!profile.venueManager && (
         <div className="bg-[#F5F7DC] rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-2 font-averia">Become a Venue Manager</h2>
@@ -549,10 +548,10 @@ const ProfilePage: React.FC = () => {
             List your property on Holidaze and start earning income from your space.
           </p>
           <Link
-            to="/settings"
+            to="/register?type=venue-manager"
             className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
           >
-            Upgrade Account
+            Register as Venue Manager
           </Link>
         </div>
       )}
