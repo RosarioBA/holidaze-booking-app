@@ -75,19 +75,18 @@ const VenueDetailPage = () => {
   const checkEligibilityToRate = () => {
     // In development, allow all authenticated users to rate
     // For production, uncomment the code below to check booking history
-    /*
-    if (user && venue.bookings) {
-      const userBookings = venue.bookings.filter(booking => 
+    
+    if (user && venue && venue.bookings && venue.bookings.length > 0) {
+      const userCompletedBookings = venue.bookings.filter(booking => 
         booking.customer?.name === user.name && 
         new Date(booking.dateTo) < new Date()  // Only past bookings
       );
-      setUserHasBooked(userBookings.length > 0);
-    }
-    */
-    
+      setUserHasBooked(userCompletedBookings.length > 0);
+  } else {
     // For now, allow all authenticated users to rate
-    setUserHasBooked(!!user);
-  };
+    setUserHasBooked(false);
+  }
+};
 
   useEffect(() => {
     const fetchVenue = async () => {

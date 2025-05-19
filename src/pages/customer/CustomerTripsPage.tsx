@@ -317,14 +317,18 @@ const CustomerTripsPage: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {filteredBookings.map(booking => {
-            const nights = calculateNights(booking.dateFrom, booking.dateTo);
-            const status = getBookingStatus(booking.dateFrom, booking.dateTo);
-            const isPastBooking = new Date(booking.dateTo) < new Date();
-            const venueId = booking.venue?.id;
-            const hasRated = venueId ? hasUserRatedVenue(venueId, user?.name || '') : false;
-            
-            return (
-              <div key={booking.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+          const nights = calculateNights(booking.dateFrom, booking.dateTo);
+          const status = getBookingStatus(booking.dateFrom, booking.dateTo);
+          
+          // Only allow rating for COMPLETED bookings (past bookings)
+          const isPastBooking = new Date(booking.dateTo) < new Date();
+          const venueId = booking.venue?.id;
+          
+          // Only check for ratings if it's a past booking
+          const hasRated = isPastBooking && venueId ? hasUserRatedVenue(venueId, user?.name || '') : false;
+          
+          return (
+            <div key={booking.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"> 
                 <div className="md:flex">
                   <div className="md:w-1/3 h-48 md:h-auto relative">
                     <img 
