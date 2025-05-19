@@ -29,6 +29,8 @@ const CreateVenuePage: React.FC = () => {
     breakfast: false,
     pets: false
   });
+  const [initialRating, setInitialRating] = useState<number | null>(null);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
 
   // Redirect non-venue managers
   if (!isVenueManager) {
@@ -70,6 +72,18 @@ const CreateVenuePage: React.FC = () => {
     });
   };
 
+  const handleStarClick = (selectedRating: number) => {
+    setInitialRating(selectedRating);
+  };
+
+  const handleStarHover = (starValue: number) => {
+    setHoveredStar(starValue);
+  };
+
+  const handleStarLeave = () => {
+    setHoveredStar(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -103,7 +117,9 @@ const CreateVenuePage: React.FC = () => {
         maxGuests: parseInt(maxGuests, 10),
         media,
         location,
-        meta
+        meta,
+        // Only include rating if it's set
+        ...(initialRating !== null && { rating: initialRating })
       };
       
       await createVenue(venueData, token);
@@ -130,9 +146,9 @@ const CreateVenuePage: React.FC = () => {
       
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
         <div className="mb-6">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
-          Venue Name*
-        </label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
+            Venue Name*
+          </label>
           <input
             type="text"
             id="name"
@@ -144,10 +160,9 @@ const CreateVenuePage: React.FC = () => {
         </div>
         
         <div className="mb-6">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
-          Description*
-        </label>
-
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
+            Description*
+          </label>
           <textarea
             id="description"
             rows={4}
@@ -191,6 +206,46 @@ const CreateVenuePage: React.FC = () => {
           </div>
         </div>
         
+        {/* Initial Rating Section */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Initial Rating (Optional)
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Set an initial rating for your venue. This will be averaged with customer ratings as they come in.
+          </p>
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((starValue) => (
+              <button
+                key={starValue}
+                type="button"
+                onClick={() => handleStarClick(starValue)}
+                onMouseEnter={() => handleStarHover(starValue)}
+                onMouseLeave={handleStarLeave}
+                className="text-2xl focus:outline-none mr-1"
+              >
+                {starValue <= (hoveredStar || initialRating || 0) ? (
+                  <span className="text-yellow-500">★</span>
+                ) : (
+                  <span className="text-gray-300">☆</span>
+                )}
+              </button>
+            ))}
+            <span className="ml-2 text-sm text-gray-600">
+              {initialRating ? `${initialRating} out of 5 stars` : 'No initial rating'}
+            </span>
+            {initialRating && (
+              <button
+                type="button"
+                onClick={() => setInitialRating(null)}
+                className="ml-3 text-sm text-red-600 hover:text-red-800"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+        
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Media
@@ -226,7 +281,7 @@ const CreateVenuePage: React.FC = () => {
         </div>
         
         <div className="mb-6">
-         <h3 className="text-lg font-medium mb-3 font-averia">Location</h3>
+          <h3 className="text-lg font-medium mb-3 font-averia">Location</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -297,7 +352,7 @@ const CreateVenuePage: React.FC = () => {
         </div>
         
         <div className="mb-6">
-         <h3 className="text-lg font-medium mb-3 font-averia">Amenities</h3>
+          <h3 className="text-lg font-medium mb-3 font-averia">Amenities</h3>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-center">

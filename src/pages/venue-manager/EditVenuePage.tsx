@@ -1,25 +1,29 @@
 // src/pages/venue-manager/EditVenuePage.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getVenueById, updateVenue } from '../../api/venueService';
+import { getVenueById, updateVenue, deleteVenue } from '../../api/venueService';
 import { Venue } from '../../types/venue';
 
 const EditVenuePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { token } = useAuth();
+  const { token, isVenueManager, user } = useAuth();
   const navigate = useNavigate();
+  
   const [venue, setVenue] = useState<Venue | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Form state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [maxGuests, setMaxGuests] = useState('');
-  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+  const [mediaUrls, setMediaUrls] = useState<{ url: string; alt?: string }[]>([]);
   const [location, setLocation] = useState({
     address: '',
     city: '',
@@ -33,27 +37,33 @@ const EditVenuePage: React.FC = () => {
     breakfast: false,
     pets: false
   });
-
+  const [rating, setRating] = useState<number | null>(null);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  
+  // Fetch venue data
   useEffect(() => {
     const fetchVenue = async () => {
       if (!id || !token) return;
       
       try {
-        const venueData = await getVenueById(id);
+        setIsLoading(true);
+        const venueData = await getVenueById(id, true, false);
+        
+        // Check if current user is the owner
+        if (user && venueData.owner?.name !== user.name) {
+          setError('You can only edit venues that you manage');
+          return;
+        }
+        
         setVenue(venueData);
+        
+        // Populate form fields
         setName(venueData.name);
         setDescription(venueData.description);
         setPrice(venueData.price.toString());
         setMaxGuests(venueData.maxGuests.toString());
+        setMediaUrls(venueData.media || []);
         
-        // Set media URLs
-        if (venueData.media && venueData.media.length > 0) {
-          setMediaUrls(venueData.media.map(m => m.url));
-        } else {
-          setMediaUrls(['']);
-        }
-        
-        // Set location if it exists
         if (venueData.location) {
           setLocation({
             address: venueData.location.address || '',
@@ -64,7 +74,6 @@ const EditVenuePage: React.FC = () => {
           });
         }
         
-        // Set meta if it exists
         if (venueData.meta) {
           setMeta({
             wifi: venueData.meta.wifi || false,
@@ -73,32 +82,56 @@ const EditVenuePage: React.FC = () => {
             pets: venueData.meta.pets || false
           });
         }
+        
+        if (venueData.rating !== undefined) {
+          setRating(venueData.rating);
+        }
+        
+        setError(null);
       } catch (err) {
         console.error('Error fetching venue:', err);
-        setError('Failed to load venue data');
+        setError('Failed to load venue details. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchVenue();
-  }, [id, token]);
+  }, [id, token, user]);
 
-  const handleAddMediaUrl = () => {
-    setMediaUrls([...mediaUrls, '']);
+  // Redirect non-venue managers
+  if (!isVenueManager) {
+    return (
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6">
+          You need to be a venue manager to edit venues.
+        </div>
+      </div>
+    );
+  }
+  
+  const handleAddMedia = () => {
+    setMediaUrls([...mediaUrls, { url: '', alt: '' }]);
   };
-
-  const handleRemoveMediaUrl = (index: number) => {
+  
+  const handleRemoveMedia = (index: number) => {
     const updatedUrls = mediaUrls.filter((_, i) => i !== index);
-    setMediaUrls(updatedUrls.length ? updatedUrls : ['']);
-  };
-
-  const handleMediaUrlChange = (index: number, value: string) => {
-    const updatedUrls = [...mediaUrls];
-    updatedUrls[index] = value;
     setMediaUrls(updatedUrls);
   };
-
+  
+  const handleMediaChange = (index: number, field: 'url' | 'alt', value: string) => {
+    const updatedUrls = [...mediaUrls];
+    updatedUrls[index] = { ...updatedUrls[index], [field]: value };
+    setMediaUrls(updatedUrls);
+  };
+  
+  const handleMetaChange = (field: keyof typeof meta) => {
+    setMeta({
+      ...meta,
+      [field]: !meta[field]
+    });
+  };
+  
   const handleLocationChange = (field: keyof typeof location, value: string) => {
     setLocation({
       ...location,
@@ -106,42 +139,64 @@ const EditVenuePage: React.FC = () => {
     });
   };
 
-  const handleMetaChange = (field: keyof typeof meta) => {
-    setMeta({
-      ...meta,
-      [field]: !meta[field]
-    });
+  const handleStarClick = (selectedRating: number) => {
+    setRating(selectedRating);
   };
 
+  const handleStarHover = (starValue: number) => {
+    setHoveredStar(starValue);
+  };
+
+  const handleStarLeave = () => {
+    setHoveredStar(null);
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!id || !token) return;
+    if (!id || !token) {
+      setError('You must be logged in to update a venue');
+      return;
+    }
+    
+    // Basic validation
+    if (!name.trim() || !description.trim() || !price || !maxGuests) {
+      setError('Please fill in all required fields');
+      return;
+    }
     
     try {
       setIsSaving(true);
       setError(null);
       
-      // Filter out empty media URLs and format them
-      const media = mediaUrls
-        .filter(url => url.trim() !== '')
-        .map(url => ({
-          url,
-          alt: `Image of ${name}`
+      // Filter out empty media URLs
+      const filteredMedia = mediaUrls
+        .filter(media => media.url.trim() !== '')
+        .map(media => ({
+          url: media.url,
+          alt: media.alt || `Image of ${name}`
         }));
       
-      const updateData = {
+      const venueData = {
         name,
         description,
         price: parseFloat(price),
         maxGuests: parseInt(maxGuests, 10),
-        media,
+        media: filteredMedia,
         location,
-        meta
+        meta,
+        // Only include rating if it's set
+        ...(rating !== null && { rating })
       };
       
-      await updateVenue(id, updateData, token);
-      navigate('/venue-manager/venues');
+      await updateVenue(id, venueData, token);
+      
+      setSuccess('Venue updated successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccess(null);
+      }, 3000);
     } catch (err) {
       console.error('Error updating venue:', err);
       setError('Failed to update venue. Please try again.');
@@ -149,21 +204,45 @@ const EditVenuePage: React.FC = () => {
       setIsSaving(false);
     }
   };
-
+  
+  const handleDelete = async () => {
+    if (!id || !token) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteVenue(id, token);
+      
+      // Redirect to venue manager dashboard
+      navigate('/venue-manager/dashboard');
+    } catch (err) {
+      console.error('Error deleting venue:', err);
+      setError('Failed to delete venue. Please try again.');
+      setIsDeleting(false);
+    }
+  };
+  
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0081A7]"></div>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0081A7]"></div>
+        </div>
       </div>
     );
   }
-
-  if (!venue) {
+  
+  if (error && !venue) {
     return (
       <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          Venue not found
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
         </div>
+        <button
+          onClick={() => navigate('/venue-manager/dashboard')}
+          className="text-[#0081A7] hover:underline"
+        >
+          Return to Dashboard
+        </button>
       </div>
     );
   }
@@ -178,11 +257,17 @@ const EditVenuePage: React.FC = () => {
         </div>
       )}
       
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+          {success}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
         <div className="mb-6">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
-          Venue Name
-        </label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Venue Name*
+          </label>
           <input
             type="text"
             id="name"
@@ -194,8 +279,8 @@ const EditVenuePage: React.FC = () => {
         </div>
         
         <div className="mb-6">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
-            Description
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            Description*
           </label>
           <textarea
             id="description"
@@ -210,7 +295,7 @@ const EditVenuePage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price per Night
+              Price per Night ($)*
             </label>
             <input
               type="number"
@@ -226,7 +311,7 @@ const EditVenuePage: React.FC = () => {
           
           <div>
             <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-700 mb-1">
-              Maximum Guests
+              Maximum Guests*
             </label>
             <input
               type="number"
@@ -240,25 +325,64 @@ const EditVenuePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Media/Images Section */}
+        {/* Rating Section */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Rating
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Update the venue's rating. This will be averaged with customer ratings as they come in.
+          </p>
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((starValue) => (
+              <button
+                key={starValue}
+                type="button"
+                onClick={() => handleStarClick(starValue)}
+                onMouseEnter={() => handleStarHover(starValue)}
+                onMouseLeave={handleStarLeave}
+                className="text-2xl focus:outline-none mr-1"
+              >
+                {starValue <= (hoveredStar || rating || 0) ? (
+                  <span className="text-yellow-500">★</span>
+                ) : (
+                  <span className="text-gray-300">☆</span>
+                )}
+              </button>
+            ))}
+            <span className="ml-2 text-sm text-gray-600">
+              {rating ? `${rating} out of 5 stars` : 'No rating'}
+            </span>
+            {rating && (
+              <button
+                type="button"
+                onClick={() => setRating(null)}
+                className="ml-3 text-sm text-red-600 hover:text-red-800"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+        
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Images
+            Media
           </label>
           
-          {mediaUrls.map((url, index) => (
+          {mediaUrls.map((media, index) => (
             <div key={index} className="flex mb-2">
               <input
                 type="url"
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0081A7]"
                 placeholder="Image URL"
-                value={url}
-                onChange={(e) => handleMediaUrlChange(index, e.target.value)}
+                value={media.url}
+                onChange={(e) => handleMediaChange(index, 'url', e.target.value)}
               />
               
               <button
                 type="button"
-                onClick={() => handleRemoveMediaUrl(index)}
+                onClick={() => handleRemoveMedia(index)}
                 className="ml-2 bg-red-100 text-red-600 px-3 py-2 rounded-md hover:bg-red-200"
               >
                 Remove
@@ -268,14 +392,13 @@ const EditVenuePage: React.FC = () => {
           
           <button
             type="button"
-            onClick={handleAddMediaUrl}
+            onClick={handleAddMedia}
             className="mt-2 text-[#0081A7] hover:text-[#13262F]"
           >
             + Add another image
           </button>
         </div>
         
-        {/* Location Section */}
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-3 font-averia">Location</h3>
           
@@ -331,10 +454,22 @@ const EditVenuePage: React.FC = () => {
                 onChange={(e) => handleLocationChange('country', e.target.value)}
               />
             </div>
+            
+            <div>
+              <label htmlFor="continent" className="block text-sm font-medium text-gray-700 mb-1">
+                Continent
+              </label>
+              <input
+                type="text"
+                id="continent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0081A7]"
+                value={location.continent}
+                onChange={(e) => handleLocationChange('continent', e.target.value)}
+              />
+            </div>
           </div>
         </div>
         
-        {/* Amenities Section */}
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-3 font-averia">Amenities</h3>
           
@@ -393,23 +528,51 @@ const EditVenuePage: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-between">
           <button
-              type="button"
-              onClick={() => navigate('/venue-manager/venues')}
-              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 font-medium tracking-wide"
-            >
-              Cancel
-            </button>
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700"
+          >
+            Delete Venue
+          </button>
+          
           <button
-              type="submit"
-              className="bg-[#0081A7] text-white px-6 py-2 rounded-md hover:bg-[#13262F] disabled:opacity-50 font-medium tracking-wide"
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
+            type="submit"
+            className="bg-[#0081A7] text-white px-6 py-2 rounded-md hover:bg-[#13262F] disabled:opacity-50"
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
         </div>
       </form>
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4 font-averia">Confirm Deletion</h3>
+            <p className="mb-6">
+              Are you sure you want to delete this venue? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Venue'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
