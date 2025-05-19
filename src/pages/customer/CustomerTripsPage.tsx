@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserBookings } from '../../api/bookingService';
-// Add import for the modal components
+import { getVenueById } from '../../api/venueService';
+import { hasUserRatedVenue } from '../../api/ratingService'; // Moved import to the top
+// Modal components
 import CancelBookingModal from '../../components/booking/CancelBookingModal';
 import EditBookingModal from '../../components/booking/EditBookingModal';
+import RatingModal from '../../components/venue/RatingModal';
 
 const CustomerTripsPage: React.FC = () => {
   const { user, token } = useAuth();
@@ -15,12 +18,17 @@ const CustomerTripsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [useMockData, setUseMockData] = useState(false);
-  // Inside the component, add these state variables for cancel functionality:
+  
+  // Booking management modals
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<any>(null);
-  // Inside the component, add these state variables for edit functionality:
   const [showEditModal, setShowEditModal] = useState(false);
   const [bookingToEdit, setBookingToEdit] = useState<any>(null);
+  
+  // Rating functionality
+  const [venuesWithRatings, setVenuesWithRatings] = useState<any[]>([]);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [venueToRate, setVenueToRate] = useState<{id: string; name: string} | null>(null);
 
   const fetchBookings = async () => {
     if (!token || !user) return;
@@ -48,6 +56,9 @@ const CustomerTripsPage: React.FC = () => {
         
         // For debug info
         console.log(`Successfully loaded ${sortedBookings.length} bookings`);
+        
+        // Fetch venue data for ratings
+        await fetchVenueRatings(sortedBookings);
       } else {
         console.log("No bookings found - array empty");
         setBookings([]);
@@ -61,6 +72,37 @@ const CustomerTripsPage: React.FC = () => {
       setError(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // Fetch venue data to check for ratings
+  const fetchVenueRatings = async (bookingsData: any[]) => {
+    if (!token || !user) return;
+    
+    try {
+      // Get all unique venue IDs from bookings
+      const venueIds = bookingsData
+        .filter(booking => booking.venue?.id)
+        .map(booking => booking.venue.id);
+      
+      // Get unique venue IDs
+      const uniqueVenueIds = Array.from(new Set(venueIds));
+      
+      // Fetch venue data for each unique ID
+      const venues = [];
+      
+      for (const venueId of uniqueVenueIds) {
+        try {
+          const venueData = await getVenueById(venueId, false, false);
+          venues.push(venueData);
+        } catch (err) {
+          console.error(`Error fetching venue ${venueId}:`, err);
+        }
+      }
+      
+      setVenuesWithRatings(venues);
+    } catch (err) {
+      console.error('Error fetching venue ratings:', err);
     }
   };
 
@@ -88,13 +130,17 @@ const CustomerTripsPage: React.FC = () => {
     }
   }, [bookings, activeFilter]);
 
-  // Add a function to handle booking cancellation
+  // Remove this function entirely since it's not being used
+  // The warning was about this function being declared but never used
+  // We'll use hasUserRatedVenue directly in the render section
+  
+  // Handle booking cancellation
   const handleCancelBooking = (booking: any) => {
     setBookingToCancel(booking);
     setShowCancelModal(true);
   };
 
-  // Add a function to handle successful cancellation
+  // Handle successful cancellation
   const handleCancellationSuccess = () => {
     setShowCancelModal(false);
     setBookingToCancel(null);
@@ -103,13 +149,13 @@ const CustomerTripsPage: React.FC = () => {
     fetchBookings();
   };
 
-  // Add a function to handle editing
+  // Handle editing
   const handleEditBooking = (booking: any) => {
     setBookingToEdit(booking);
     setShowEditModal(true);
   };
 
-  // Add a function to handle edit success
+  // Handle edit success
   const handleEditSuccess = (updatedBooking: any) => {
     setShowEditModal(false);
     setBookingToEdit(null);
@@ -120,6 +166,33 @@ const CustomerTripsPage: React.FC = () => {
         booking.id === updatedBooking.id ? updatedBooking : booking
       )
     );
+  };
+  
+  // Handle rating a venue
+  const handleRateVenue = (venueId: string, venueName: string) => {
+    setVenueToRate({ id: venueId, name: venueName });
+    setShowRatingModal(true);
+  };
+  
+  // Handle rating submission
+  const handleRatingSubmitted = async () => {
+    if (!token || !venueToRate) return;
+    
+    try {
+      // Refetch the venue to get updated ratings
+      const updatedVenue = await getVenueById(venueToRate.id, false, false);
+      
+      // Update our list of venues
+      setVenuesWithRatings(prev => 
+        prev.map(v => v.id === venueToRate.id ? updatedVenue : v)
+      );
+      
+      // Close the modal
+      setShowRatingModal(false);
+      setVenueToRate(null);
+    } catch (err) {
+      console.error('Error updating after rating submission:', err);
+    }
   };
 
   // Format date for display
@@ -246,6 +319,9 @@ const CustomerTripsPage: React.FC = () => {
           {filteredBookings.map(booking => {
             const nights = calculateNights(booking.dateFrom, booking.dateTo);
             const status = getBookingStatus(booking.dateFrom, booking.dateTo);
+            const isPastBooking = new Date(booking.dateTo) < new Date();
+            const venueId = booking.venue?.id;
+            const hasRated = venueId ? hasUserRatedVenue(venueId, user?.name || '') : false;
             
             return (
               <div key={booking.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
@@ -269,10 +345,10 @@ const CustomerTripsPage: React.FC = () => {
                   <div className="p-6 md:w-2/3">
                     <div className="sm:flex justify-between items-start">
                       <div>
-                      <h2 className="text-xl font-semibold font-averia">{booking.venue?.name || 'Unknown Venue'}</h2>
-                      <p className="text-gray-600 mb-2 font-light">
-                        {booking.venue?.location?.city || 'Unknown'}, {booking.venue?.location?.country || ''}
-                      </p>
+                        <h2 className="text-xl font-semibold font-averia">{booking.venue?.name || 'Unknown Venue'}</h2>
+                        <p className="text-gray-600 mb-2 font-light">
+                          {booking.venue?.location?.city || 'Unknown'}, {booking.venue?.location?.country || ''}
+                        </p>
                       </div>
                       <div className="mt-2 sm:mt-0 text-right">
                         <div className="text-gray-700">
@@ -303,13 +379,35 @@ const CustomerTripsPage: React.FC = () => {
                           <span className="text-gray-500">Booking ID:</span>
                           <span className="ml-1 font-mono">{booking.id.substring(0, 8)}...</span>
                         </div>
-                        <div className="flex space-x-2">
-                        <Link 
-                          to={`/venues/${booking.venue?.id}?source=my-trips`}
-                          className="text-[#0081A7] hover:underline text-sm"
-                        >
-                          View Venue
-                        </Link>
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          <Link 
+                            to={`/venues/${booking.venue?.id}?source=my-trips`}
+                            className="text-[#0081A7] hover:underline text-sm"
+                          >
+                            View Venue
+                          </Link>
+                          
+                          {/* Show rating option for past bookings */}
+                          {isPastBooking && booking.venue && (
+                            <>
+                              {hasRated ? (
+                                <span className="text-green-600 text-sm flex items-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                  Rated
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => handleRateVenue(booking.venue.id, booking.venue.name)}
+                                  className="text-yellow-600 hover:underline text-sm"
+                                >
+                                  Rate Venue
+                                </button>
+                              )}
+                            </>
+                          )}
+                          
                           {/* Only show edit/cancel for upcoming bookings */}
                           {new Date(booking.dateFrom) > new Date() && (
                             <>
@@ -344,7 +442,7 @@ const CustomerTripsPage: React.FC = () => {
         </div>
       )}
       
-      {/* Add the cancel modal */}
+      {/* Cancel modal */}
       {showCancelModal && bookingToCancel && (
         <CancelBookingModal
           bookingId={bookingToCancel.id}
@@ -354,12 +452,22 @@ const CustomerTripsPage: React.FC = () => {
         />
       )}
       
-      {/* Add the edit modal */}
+      {/* Edit modal */}
       {showEditModal && bookingToEdit && (
         <EditBookingModal
           booking={bookingToEdit}
           onClose={() => setShowEditModal(false)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+      
+      {/* Rating modal */}
+      {showRatingModal && venueToRate && (
+        <RatingModal
+          venueId={venueToRate.id}
+          venueName={venueToRate.name}
+          onClose={() => setShowRatingModal(false)}
+          onRatingSubmitted={handleRatingSubmitted}
         />
       )}
     </div>
