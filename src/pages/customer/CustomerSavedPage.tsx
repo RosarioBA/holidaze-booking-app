@@ -1,12 +1,19 @@
-// src/pages/customer/CustomerSavedPage.tsx
+/**
+ * @file CustomerSavedPage.tsx
+ * @description Page displaying all venues saved by the customer with grid and list view options
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { Venue } from '../../types/venue';
 import { getVenues } from '../../api/venueService';
-import CancelBookingModal from '../../components/booking/CancelBookingModal';
 
-
+/**
+ * Page component for displaying and managing saved/favorite venues
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const CustomerSavedPage: React.FC = () => {
   const { favorites, removeFavorite } = useFavorites();
   const [savedVenues, setSavedVenues] = useState<Venue[]>([]);
@@ -14,29 +21,25 @@ const CustomerSavedPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('grid');
 
+  /**
+   * Fetches all venues and filters for saved venues based on favorites
+   */
   useEffect(() => {
     const fetchSavedVenues = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        console.log("DEBUG: Current favorites IDs:", favorites);
-
         // Get all venues
         const result = await getVenues();
-        console.log("DEBUG: All venues count:", result.venues.length);
         
         // Filter venues to only include those in favorites
         const filteredVenues = (result.venues as Venue[]).filter((venue: Venue) => 
           favorites.includes(venue.id)
         );
         
-        console.log("DEBUG: Filtered venues count:", filteredVenues.length);
-        console.log("DEBUG: Filtered venues:", filteredVenues.map(v => ({id: v.id, name: v.name})));
-        
         setSavedVenues(filteredVenues);
       } catch (err) {
-        console.error('Error fetching saved venues:', err);
         setError('Failed to load your saved venues. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -46,7 +49,12 @@ const CustomerSavedPage: React.FC = () => {
     fetchSavedVenues();
   }, [favorites]);
 
-  // Get image URL with fallback
+  /**
+   * Gets image URL with fallback for a venue
+   * 
+   * @param {Venue} venue - The venue to get image for
+   * @returns {string} URL of the image or fallback
+   */
   const getImageUrl = (venue: Venue) => {
     if (venue.media && venue.media.length > 0 && venue.media[0].url) {
       return venue.media[0].url;
@@ -54,14 +62,24 @@ const CustomerSavedPage: React.FC = () => {
     return 'https://placehold.co/300x200?text=No+Image';
   };
 
-  // Handle removing venue from favorites
+  /**
+   * Handles removing a venue from favorites
+   * 
+   * @param {string} venueId - ID of the venue to remove
+   * @param {React.MouseEvent} e - Click event
+   */
   const handleRemoveFavorite = (venueId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     removeFavorite(venueId);
   };
 
-  // Render venue amenities icons
+  /**
+   * Renders amenity icons for a venue
+   * 
+   * @param {Venue} venue - The venue to render amenities for
+   * @returns {JSX.Element|null} Rendered amenities or null
+   */
   const renderAmenities = (venue: Venue) => {
     if (!venue.meta) return null;
     
@@ -103,6 +121,7 @@ const CustomerSavedPage: React.FC = () => {
     );
   };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -114,11 +133,11 @@ const CustomerSavedPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-      <h1 className="text-2xl font-bold mb-2 font-averia">Saved Venues</h1>
-      <p className="text-gray-600 font-light">Your favorite venues in one place</p>
-     </div>
+        <h1 className="text-2xl font-bold mb-2 font-averia">Saved Venues</h1>
+        <p className="text-gray-600 font-light">Your favorite venues in one place</p>
+      </div>
 
-      
+      {/* Error message */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
@@ -157,15 +176,16 @@ const CustomerSavedPage: React.FC = () => {
         </div>
       </div>
       
+      {/* Empty state */}
       {savedVenues.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
           <h2 className="text-xl font-semibold mb-2 font-averia">No saved venues</h2>
-            <p className="text-gray-600 mb-6 font-light tracking-wide">
-              You haven't saved any venues yet. Browse venues and click the heart icon to save them for later.
-            </p>
+          <p className="text-gray-600 mb-6 font-light tracking-wide">
+            You haven't saved any venues yet. Browse venues and click the heart icon to save them for later.
+          </p>
 
           <Link 
             to="/venues" 
@@ -175,6 +195,7 @@ const CustomerSavedPage: React.FC = () => {
           </Link>
         </div>
       ) : view === 'grid' ? (
+        // Grid view
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savedVenues.map(venue => (
             <Link 
@@ -202,7 +223,7 @@ const CustomerSavedPage: React.FC = () => {
                 </button>
               </div>
               <div className="p-4">
-              <h3 className="font-semibold font-averia">{venue.name}</h3>
+                <h3 className="font-semibold font-averia">{venue.name}</h3>
                 <p className="text-sm text-gray-600 mt-1 tracking-wide">
                   {venue.location?.city}, {venue.location?.country}
                 </p>
@@ -217,6 +238,7 @@ const CustomerSavedPage: React.FC = () => {
           ))}
         </div>
       ) : (
+        // List view
         <div className="space-y-4">
           {savedVenues.map(venue => (
             <Link 
@@ -237,11 +259,11 @@ const CustomerSavedPage: React.FC = () => {
               </div>
               <div className="p-4 flex-grow relative">
                 <div className="pr-8">
-                <h3 className="font-semibold font-averia">{venue.name}</h3>
-                <p className="text-sm text-gray-600 mt-1 tracking-wide">
-                  {venue.location?.city}, {venue.location?.country}
-                </p>
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2 font-light">{venue.description}</p>
+                  <h3 className="font-semibold font-averia">{venue.name}</h3>
+                  <p className="text-sm text-gray-600 mt-1 tracking-wide">
+                    {venue.location?.city}, {venue.location?.country}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2 font-light">{venue.description}</p>
                   <div className="flex justify-between items-center mt-2">
                     <p className="text-sm">
                       <span className="font-medium">{venue.price} kr</span>
