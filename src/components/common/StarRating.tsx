@@ -1,15 +1,30 @@
-// src/components/common/StarRating.tsx
+/**
+ * @file StarRating.tsx
+ * @description Displays a visual star rating from 1-5 with optional text and review count
+ */
+
 import React from 'react';
 
+/**
+ * Props for the StarRating component
+ */
 interface StarRatingProps {
+  /** The rating value (0-5), can include decimals for half stars */
   rating: number;
+  /** Size of the stars */
   size?: 'sm' | 'md' | 'lg';
+  /** Whether to display the numeric rating next to stars */
   showText?: boolean;
+  /** Optional number of reviews to display */
   reviewCount?: number;
 }
 
 /**
  * A reusable star rating component that displays 1-5 stars
+ * Supports half-star increments and multiple size options
+ * 
+ * @param {StarRatingProps} props - Component props
+ * @returns {JSX.Element} Rendered component
  */
 const StarRating: React.FC<StarRatingProps> = ({ 
   rating, 
