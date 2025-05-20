@@ -1,4 +1,8 @@
-// src/components/venue/BookingCalendar.tsx
+/**
+ * @file BookingCalendar.tsx
+ * @description Calendar component for booking venue stays with date selection and availability checking
+ */
+
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -8,7 +12,9 @@ import { Booking } from '../../types/venue';
 import BookingSuccess from './BookingSuccess';
 import { Link } from 'react-router-dom';
 
-// Custom inline styles for elements that can't be styled with Tailwind
+/**
+ * Custom inline styles for elements that can't be styled with Tailwind
+ */
 const calendarStyles = {
   bookedDay: {
     backgroundColor: '#fee2e2',
@@ -18,14 +24,29 @@ const calendarStyles = {
   }
 };
 
+/**
+ * Props for the BookingCalendar component
+ */
 interface BookingCalendarProps {
+  /** ID of the venue being booked */
   venueId: string;
+  /** Maximum number of guests allowed */
   maxGuests: number;
+  /** Array of existing bookings to check availability against */
   bookings?: Booking[];
+  /** Price per night in USD */
   price: number;
+  /** Optional custom booking submission handler */
   onBookingSubmit?: (from: Date, to: Date, guests: number) => Promise<void>;
 }
 
+/**
+ * Calendar component that allows users to select dates and book venue stays
+ * Handles date selection, availability checking, and booking submission
+ * 
+ * @param {BookingCalendarProps} props - Component props
+ * @returns {JSX.Element} Rendered booking calendar component
+ */
 const BookingCalendar: React.FC<BookingCalendarProps> = ({
   venueId,
   maxGuests,
@@ -43,7 +64,9 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [newBooking, setNewBooking] = useState<any>(null);
   
-  // Update total price when dates change
+  /**
+   * Update total price when dates change
+   */
   useEffect(() => {
     if (startDate && endDate) {
       const days = Math.max(1, differenceInDays(endDate, startDate));
@@ -53,7 +76,11 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     }
   }, [startDate, endDate, price]);
   
-  // Create an array of dates that are already booked
+  /**
+   * Creates an array of date ranges that are already booked
+   * 
+   * @returns {Array<{start: Date, end: Date}>} Array of booked date ranges
+   */
   const getBookedDateRanges = () => {
     return bookings.map(booking => {
       return {
@@ -63,7 +90,12 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     });
   };
   
-  // Check if a date is within any booked range
+  /**
+   * Checks if a specific date is already booked
+   * 
+   * @param {Date} date - Date to check
+   * @returns {boolean} True if date is booked, false otherwise
+   */
   const isDateBooked = (date: Date) => {
     const bookedRanges = getBookedDateRanges();
     return bookedRanges.some(range => 
@@ -73,7 +105,12 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     );
   };
   
-  // Custom day class for displaying booked dates
+  /**
+   * Custom day class for displaying booked dates in the calendar
+   * 
+   * @param {Date} date - Date to check and apply class to
+   * @returns {string} CSS class name for the date
+   */
   const dayClassName = (date: Date) => {
     if (isDateBooked(date)) {
       return "react-datepicker__day--highlighted-custom";
@@ -81,7 +118,9 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     return "";
   };
 
-  // Add custom inline styles to the DatePicker
+  /**
+   * Add custom inline styles to the DatePicker for booked dates
+   */
   useEffect(() => {
     // Add a custom style tag for the booked days
     const styleTag = document.createElement('style');
@@ -104,7 +143,11 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     };
   }, []);
   
-  // Handle date changes
+  /**
+   * Handles date selection changes and validates availability
+   * 
+   * @param {[Date | null, Date | null]} dates - Array with start and end dates
+   */
   const handleDateChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
     
@@ -131,7 +174,11 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     setError(null);
   };
   
-  // Handle booking submission
+  /**
+   * Handles booking submission and performs API call
+   * 
+   * @param {React.FormEvent} e - Form submit event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -196,7 +243,9 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
     }
   };
   
-  // Reset booking form
+  /**
+   * Resets booking form and success state
+   */
   const handleReset = () => {
     setBookingSuccess(false);
     setNewBooking(null);
@@ -242,6 +291,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
               dayClassName={dayClassName}
               excludeDates={[]}
               showDisabledMonthNavigation
+              aria-label="Select check-in and check-out dates"
             />
             
             <div className="flex items-center mt-2 text-xs text-gray-500 p-2 bg-gray-50 rounded">
@@ -278,6 +328,7 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
               onClick={() => setGuestCount(prev => Math.max(1, prev - 1))}
               className="bg-gray-200 text-gray-700 px-3 py-2 rounded-l"
               disabled={guestCount <= 1}
+              aria-label="Decrease guest count"
             >
               -
             </button>
@@ -289,12 +340,14 @@ const BookingCalendar: React.FC<BookingCalendarProps> = ({
               min={1}
               max={maxGuests}
               className="w-16 text-center py-2 border-t border-b border-gray-300"
+              aria-label={`Number of guests, maximum ${maxGuests}`}
             />
             <button
               type="button"
               onClick={() => setGuestCount(prev => Math.min(maxGuests, prev + 1))}
               className="bg-gray-200 text-gray-700 px-3 py-2 rounded-r"
               disabled={guestCount >= maxGuests}
+              aria-label="Increase guest count"
             >
               +
             </button>
