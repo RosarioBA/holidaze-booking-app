@@ -1,15 +1,33 @@
-// src/components/layout/Header.tsx
-import React, { useState, useEffect } from 'react';
+/**
+ * @file Header.tsx
+ * @description Main navigation header component with responsive design
+ */
+
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getUserAvatar } from '../../utils/avatarUtils';
+import UserAvatar from '../common/UserAvatar';
+import useMobileMenu from '../../hooks/useMobileMenu';
+import useAvatar from '../../hooks/UseAvatar';
 
-const Header = () => {
+/**
+ * Main header component with responsive navigation
+ * Adapts display based on authentication status and user role
+ * 
+ * @returns {JSX.Element} Rendered header component
+ */
+const Header: React.FC = () => {
   const { user, isAuthenticated, isVenueManager, logout } = useAuth();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Function to check if a link is active
+  const [isMobileMenuOpen, toggleMobileMenu, closeMobileMenu] = useMobileMenu('header-mobile-menu');
+  const avatarUrl = useAvatar(user, 'header');
+  
+  /**
+   * Determines if a navigation link is active based on current path
+   * 
+   * @param {string} path - Path to check against current location
+   * @returns {string} CSS class for active state or empty string
+   */
   const isActive = (path: string) => {
     return location.pathname === path ? 'text-primary font-medium' : '';
   };
@@ -23,8 +41,10 @@ const Header = () => {
           
           {/* Mobile Menu Button */}
           <button 
+            id="header-mobile-menu"
+            type="button"
             className="md:hidden text-gray-600"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => toggleMobileMenu()}
             aria-label="Toggle menu"
           >
             <svg 
@@ -33,6 +53,7 @@ const Header = () => {
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
+              aria-hidden="true"
             >
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -90,32 +111,13 @@ const Header = () => {
                       className="hover:text-primary transition-colors flex items-center"
                     >
                       {user?.name && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden mr-2 bg-gray-200 flex items-center justify-center">
-                          {user.name && getUserAvatar(user.name) ? (
-                            <img 
-                              src={getUserAvatar(user.name)} 
-                              alt={user.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/200x200?text=' + (user.name.charAt(0).toUpperCase());
-                              }}
-                            />
-                          ) : user.avatar ? (
-                            <img 
-                              src={user.avatar.url} 
-                              alt={user.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/200x200?text=' + (user.name.charAt(0).toUpperCase());
-                              }}
-                            />
-                          ) : (
-                            <span className="text-[#505E64] font-medium">
-                              {user.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
+                        <div className="mr-2">
+                          <UserAvatar
+                            avatarUrl={avatarUrl}
+                            userName={user.name}
+                            size={32}
+                            useUiAvatars={true}
+                          />
                         </div>
                       )}
                       <span>Profile</span>
@@ -162,7 +164,7 @@ const Header = () => {
                 <Link 
                   to="/" 
                   className={`block hover:text-primary transition-colors ${isActive('/')}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   Home
                 </Link>
@@ -171,7 +173,7 @@ const Header = () => {
                 <Link 
                   to="/venues" 
                   className={`block hover:text-primary transition-colors ${isActive('/venues')}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={closeMobileMenu}
                 >
                   Venues
                 </Link>
@@ -184,7 +186,7 @@ const Header = () => {
                       <Link 
                         to="/venue-manager/dashboard" 
                         className={`block hover:text-primary transition-colors ${isActive('/venue-manager/dashboard')}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={closeMobileMenu}
                       >
                         Manage Venues
                       </Link>
@@ -196,7 +198,7 @@ const Header = () => {
                       className={`block hover:text-primary transition-colors ${
                         isActive(isVenueManager ? "/venue-manager/bookings" : "/customer/trips")
                       }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       {isVenueManager ? "Bookings" : "My Trips"}
                     </Link>
@@ -205,35 +207,16 @@ const Header = () => {
                     <Link 
                       to="/profile" 
                       className="block hover:text-primary transition-colors flex items-center"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       {user?.name && (
-                        <div className="w-6 h-6 rounded-full overflow-hidden mr-2 bg-gray-200 flex items-center justify-center">
-                          {user.name && getUserAvatar(user.name) ? (
-                            <img 
-                              src={getUserAvatar(user.name)} 
-                              alt={user.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/200x200?text=' + (user.name.charAt(0).toUpperCase());
-                              }}
-                            />
-                          ) : user.avatar ? (
-                            <img 
-                              src={user.avatar.url} 
-                              alt={user.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/200x200?text=' + (user.name.charAt(0).toUpperCase());
-                              }}
-                            />
-                          ) : (
-                            <span className="text-[#505E64] font-medium text-xs">
-                              {user.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
+                        <div className="mr-2">
+                          <UserAvatar
+                            avatarUrl={avatarUrl}
+                            userName={user.name}
+                            size={24}
+                            useUiAvatars={true}
+                          />
                         </div>
                       )}
                       <span>Profile</span>
@@ -243,7 +226,7 @@ const Header = () => {
                     <button
                       onClick={() => {
                         logout();
-                        setIsMobileMenuOpen(false);
+                        closeMobileMenu();
                       }}
                       className="w-full text-left block bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
                     >
@@ -257,7 +240,7 @@ const Header = () => {
                     <Link 
                       to="/login" 
                       className={`block hover:text-primary transition-colors ${isActive('/login')}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       Login
                     </Link>
@@ -266,7 +249,7 @@ const Header = () => {
                     <Link 
                       to="/register" 
                       className="block w-full bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors text-center"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={closeMobileMenu}
                     >
                       Register
                     </Link>
