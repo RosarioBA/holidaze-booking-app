@@ -1,10 +1,23 @@
-// src/pages/venue/VenuesPage.tsx
+/**
+ * @file VenuesPage.tsx
+ * @description Page for browsing, searching and filtering venues
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getVenues, searchVenues, filterVenues } from '../../api/venueService';
-import VenueCard from '../../components/venue/VenueCard';
 import { Venue, VenueFilters } from '../../types/venue';
 
+// Components
+import VenueSearch from '../../components/venue/VenueSearch';
+import VenuesGrid from '../../components/venue/VenuesGrid';
+import Pagination from '../../components/common/Pagination';
+
+/**
+ * Page component for browsing, searching and filtering venues
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const VenuesPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -15,6 +28,7 @@ const VenuesPage: React.FC = () => {
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
   const ITEMS_PER_PAGE = 12; // Fixed limit of 12 items per page
 
+  // State for venues data
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,18 +40,21 @@ const VenuesPage: React.FC = () => {
     isLastPage: true
   });
   
-  // Filter states
+  // Search and filter state
   const [search, setSearch] = useState(initialSearchQuery);
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [guests, setGuests] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
-  
-  // State to track if filters are applied
   const [activeFilters, setActiveFilters] = useState<VenueFilters>({});
   const [searchResults, setSearchResults] = useState<Venue[]>([]);
   
-  // Fetch venues on initial load or when pagination changes
+  // Flag to prevent infinite loading
+  const [dataInitialized, setDataInitialized] = useState(false);
+  
+  /**
+   * Fetches venues from API
+   */
   useEffect(() => {
     const fetchVenues = async () => {
       try {
@@ -62,8 +79,12 @@ const VenuesPage: React.FC = () => {
         }));
         
         setVenues(processedVenues);
-        setFilteredVenues(processedVenues);
-        setSearchResults(processedVenues); // Initialize search results with all venues
+        
+        // Only update filtered venues and search results if not already initialized
+        if (!dataInitialized) {
+          setFilteredVenues(processedVenues);
+          setSearchResults(processedVenues);
+        }
         
         // Set pagination data if available
         if (result && typeof result === 'object' && 'meta' in result && result.meta) {
@@ -77,12 +98,20 @@ const VenuesPage: React.FC = () => {
         
         setError(null);
         
-        // If there's an initial search query, immediately filter results
-        if (initialSearchQuery) {
-          handleSearchQuery(initialSearchQuery);
+        // If this is initial load and we have search query, run search
+        if (!dataInitialized && initialSearchQuery) {
+          // Mark as initialized to prevent infinite loop
+          setDataInitialized(true);
+          
+          // Run the search query (outside useEffect to avoid loop)
+          setTimeout(() => {
+            handleSearchQuery(initialSearchQuery);
+          }, 0);
+        } else {
+          // Just mark as initialized
+          setDataInitialized(true);
         }
       } catch (err) {
-        console.error('Error fetching venues:', err);
         setError('Failed to load venues. Please try again later.');
       } finally {
         setLoading(false);
@@ -90,14 +119,23 @@ const VenuesPage: React.FC = () => {
     };
 
     fetchVenues();
-  }, [initialSearchQuery, pagination.currentPage]);
+  }, [pagination.currentPage]);
   
-  // Handle search form submission
+  /**
+   * Handles search form submission
+   * 
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     handleSearchQuery(search);
   };
   
+  /**
+   * Processes a search query
+   * 
+   * @param {string} query - Search query text
+   */
   const handleSearchQuery = async (query: string) => {
     if (!query.trim()) {
       // When clearing search, reset to first page
@@ -168,7 +206,6 @@ const VenuesPage: React.FC = () => {
         }));
       } catch (searchError) {
         // Fallback to client-side filtering if API search fails
-        console.warn('API search failed, falling back to client-side filtering:', searchError);
         const clientSearchResults = venues.filter(venue => {
           const searchLower = query.toLowerCase();
           return (
@@ -198,14 +235,15 @@ const VenuesPage: React.FC = () => {
         }));
       }
     } catch (err) {
-      console.error('Error during search:', err);
       setError('Search failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
   
-  // Apply price and guest filters (client-side)
+  /**
+   * Applies price and guest filters
+   */
   const applyFilters = () => {
     // Build filters object
     const filters: VenueFilters = {};
@@ -222,14 +260,11 @@ const VenuesPage: React.FC = () => {
       filters.maxGuests = parseInt(guests, 10);
     }
     
-    console.log("Applying filters:", filters);
-    
     // Save active filters
     setActiveFilters(filters);
     
     // Apply filters to current search results, not all venues
     const filtered = filterVenues(searchResults, filters);
-    console.log("Filtered results:", filtered.length);
     setFilteredVenues(filtered);
     
     // Reset to first page when filters change
@@ -245,7 +280,9 @@ const VenuesPage: React.FC = () => {
     }));
   };
   
-  // Clear all filters
+  /**
+   * Clears all filters
+   */
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
@@ -268,7 +305,9 @@ const VenuesPage: React.FC = () => {
     }));
   };
   
-  // Reset everything
+  /**
+   * Resets all search and filter settings
+   */
   const resetAll = () => {
     setSearch('');
     setMinPrice('');
@@ -291,7 +330,11 @@ const VenuesPage: React.FC = () => {
     }));
   };
   
-  // Function to handle page change
+  /**
+   * Handles page change
+   * 
+   * @param {number} newPage - New page number
+   */
   const handlePageChange = (newPage: number) => {
     // Update URL with new page
     const params = new URLSearchParams(location.search);
@@ -308,106 +351,25 @@ const VenuesPage: React.FC = () => {
   };
   
   return (
-    <div className="space-y-8 px-4 md:px-6 lg:px-8"> {/* Added padding here */}
-      <section className="bg-[#0081A7] text-white p-6 rounded-lg">
-       <h1 className="text-3xl font-bold mb-6 font-averia">Explore Venues</h1>
-        
-        <form onSubmit={handleSearch} className="space-y-4">
-          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search venues by name or location..."
-                className="w-full p-3 rounded border border-gray-300 text-gray-800"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            
-            <button 
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:w-auto bg-[#13262F] hover:bg-opacity-90 text-white py-3 px-6 rounded font-medium tracking-wide"
-            >
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
-            </button>
-            
-            <button 
-              type="submit"
-              className="md:w-auto bg-white hover:bg-gray-100 text-[#0081A7] py-3 px-6 rounded font-medium tracking-wide"
-            >
-              Search
-            </button>
-          </div>
-          
-          {showFilters && (
-            <div className="bg-[#13262F] p-4 rounded grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-              <label htmlFor="minPrice" className="block text-sm font-medium mb-1 tracking-wide">
-                Min Price ($)
-              </label>
-                <input
-                  type="number"
-                  id="minPrice"
-                  placeholder="0"
-                  className="w-full p-2 rounded border border-gray-300 text-gray-800"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  min="0"
-                />
-              </div>
-              
-              <div>
-              <label htmlFor="maxPrice" className="block text-sm font-medium mb-1 tracking-wide">
-                Max Price ($)
-              </label>
-                <input
-                  type="number"
-                  id="maxPrice"
-                  placeholder="1000"
-                  className="w-full p-2 rounded border border-gray-300 text-gray-800"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  min="0"
-                />
-              </div>
-              
-              <div>
-              <label htmlFor="guests" className="block text-sm font-medium mb-1 tracking-wide">
-                Guests
-              </label>
-                <input
-                  type="number"
-                  id="guests"
-                  placeholder="2"
-                  className="w-full p-2 rounded border border-gray-300 text-gray-800"
-                  value={guests}
-                  onChange={(e) => setGuests(e.target.value)}
-                  min="1"
-                />
-              </div>
-              
-              <div className="md:col-span-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="bg-transparent hover:bg-[#13262F] text-white py-2 px-4 border border-white rounded mr-2"
-                >
-                  Clear Filters
-                </button>
-                <button
-                  type="button"
-                  onClick={applyFilters}
-                  className="bg-white hover:bg-gray-100 text-[#0081A7] py-2 px-4 rounded"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-      </section>
+    <div className="space-y-8 px-4 md:px-6 lg:px-8">
+      {/* Search and Filter Form */}
+      <VenueSearch
+        searchValue={search}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        guests={guests}
+        showFilters={showFilters}
+        onSearchChange={setSearch}
+        onMinPriceChange={setMinPrice}
+        onMaxPriceChange={setMaxPrice}
+        onGuestsChange={setGuests}
+        onSearch={handleSearch}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        onApplyFilters={applyFilters}
+        onClearFilters={clearFilters}
+      />
 
+      {/* Loading, Error and Empty States */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0081A7]"></div>
@@ -427,91 +389,25 @@ const VenuesPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="px-2"> {/* Added padding here too */}
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <p className="text-gray-600 font-light">
-                Showing {Math.min((pagination.currentPage - 1) * ITEMS_PER_PAGE + 1, filteredVenues.length)} - {Math.min(pagination.currentPage * ITEMS_PER_PAGE, filteredVenues.length)} of {filteredVenues.length} venues
-              </p>
-            </div>
-           
-            {/* Show active filters indicator */}
-            {Object.keys(activeFilters).length > 0 && (
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-2">Filters active</span>
-                <button 
-                  onClick={clearFilters}
-                  className="text-[#0081A7] text-sm hover:underline"
-                >
-                  Clear
-                </button>
-              </div>
-            )}
-          </div>
+        <>
+          {/* Venues Grid */}
+          <VenuesGrid
+            venues={filteredVenues}
+            currentPage={pagination.currentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            hasActiveFilters={Object.keys(activeFilters).length > 0}
+            onClearFilters={clearFilters}
+          />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredVenues.map(venue => (
-              <VenueCard key={venue.id} venue={venue} />
-            ))}
-          </div>
-          
-          {/* Pagination controls without page size selector */}
-          <div className="flex justify-center items-center space-x-4 mt-8 pb-8">
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={pagination.isFirstPage}
-              className={`px-3 py-1 rounded ${
-                pagination.isFirstPage 
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
-              }`}
-            >
-              First
-            </button>
-            
-            <button
-              onClick={() => handlePageChange(pagination.currentPage - 1)}
-              disabled={pagination.isFirstPage}
-              className={`px-3 py-1 rounded ${
-                pagination.isFirstPage 
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
-              }`}
-            >
-              Previous
-            </button>
-            
-            <div className="flex items-center">
-              <span className="mx-2 text-gray-700">
-                Page {pagination.currentPage} of {pagination.totalPages}
-              </span>
-            </div>
-            
-            <button
-              onClick={() => handlePageChange(pagination.currentPage + 1)}
-              disabled={pagination.isLastPage}
-              className={`px-3 py-1 rounded ${
-                pagination.isLastPage 
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
-              }`}
-            >
-              Next
-            </button>
-            
-            <button
-              onClick={() => handlePageChange(pagination.totalPages)}
-              disabled={pagination.isLastPage}
-              className={`px-3 py-1 rounded ${
-                pagination.isLastPage 
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
-              }`}
-            >
-              Last
-            </button>
-          </div>
-        </div>
+          {/* Pagination */}
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            isFirstPage={pagination.isFirstPage}
+            isLastPage={pagination.isLastPage}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
     </div>
   );
