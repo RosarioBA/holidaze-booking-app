@@ -1,8 +1,18 @@
-// src/components/layout/Footer.tsx
+/**
+ * @file Footer.tsx
+ * @description Site-wide footer component with navigation links and copyright information
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Footer = () => {
+/**
+ * Footer component displayed at the bottom of all pages
+ * Contains navigation links organized by category and copyright information
+ * 
+ * @returns {JSX.Element} Rendered footer component
+ */
+const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
   return (
