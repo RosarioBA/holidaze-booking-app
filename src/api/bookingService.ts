@@ -1,7 +1,15 @@
-// src/api/bookingService.ts
-import { Booking } from '../types/venue';
-import { fetchFromApi, getUsernameFromToken } from './api';
+/**
+ * @file bookingService.ts
+ * @description Service for managing venue bookings including creating, retrieving, updating, and deleting bookings
+ */
 
+import { Booking } from '../types/venue';
+import { fetchFromApi } from './api';
+
+/**
+ * API response structure with pagination metadata
+ * @template T The type of data contained in the response
+ */
 interface ApiResponse<T> {
   data: T;
   meta: {
@@ -15,6 +23,9 @@ interface ApiResponse<T> {
   };
 }
 
+/**
+ * Data required to create a new booking
+ */
 interface CreateBookingData {
   dateFrom: string;
   dateTo: string;
@@ -22,290 +33,216 @@ interface CreateBookingData {
   venueId: string;
 }
 
+/**
+ * Data for updating an existing booking
+ */
 interface UpdateBookingData {
   dateFrom?: string;
   dateTo?: string;
   guests?: number;
 } 
 
-// Create a new booking
+/**
+ * Creates a new booking for a venue
+ * 
+ * @param {CreateBookingData} bookingData - Data for the booking to be created
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking>} The created booking
+ * @throws {Error} If the booking creation fails or authentication is missing
+ */
 export const createBooking = async (bookingData: CreateBookingData, token: string): Promise<Booking> => {
-  try {
-    if (!token) {
-      throw new Error('Authorization token is required');
-    }
-    
-    const response = await fetchFromApi<ApiResponse<Booking>>('/holidaze/bookings', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(bookingData)
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error creating booking:', error);
-    throw error;
+  if (!token) {
+    throw new Error('Authorization token is required');
   }
-};
-
-// Get bookings for a venue
-// src/api/bookingService.ts
-export const getVenueBookings = async (venueId: string, token: string): Promise<Booking[]> => {
-  try {
-    if (!venueId) {
-      throw new Error('Venue ID is required');
-    }
-    
-    if (!token) {
-      throw new Error('Authorization token is required');
-    }
-    
-    // Since there's no direct endpoint for venue bookings, we need to get ALL bookings
-    // and filter them. This is not ideal but it's what the API provides.
-    const response = await fetchFromApi<ApiResponse<Booking[]>>(
-      `/holidaze/bookings?_venue=true&_customer=true`, 
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-    
-    // Filter bookings to only include those for the specified venue
-    const allBookings = response.data || [];
-    const venueBookings = allBookings.filter(booking => 
-      booking.venue?.id === venueId
-    );
-    
-    return venueBookings;
-  } catch (error) {
-    console.error(`Error getting bookings for venue ${venueId}:`, error);
-    return [];
-  }
-};
-// Get bookings for the current user
-// In bookingService.ts
-
-export const getUserBookings = async (token: string): Promise<Booking[]> => {
-  try {
-    if (!token) {
-      console.warn('No token provided');
-      return getMockBookings();
-    }
-    
-    // Get username from localStorage instead of token
-    const userJSON = localStorage.getItem('user');
-    let username = "rosario99"; // Fallback
-    
-    if (userJSON) {
-      try {
-        const user = JSON.parse(userJSON);
-        username = user.name;
-        console.log("Using username from localStorage:", username);
-      } catch (e) {
-        console.error("Error parsing user from localStorage:", e);
-      }
-    }
-    
-    console.log(`Fetching bookings for user: ${username}`);
-    
-    // Make API request with username
-    const response = await fetchFromApi<ApiResponse<Booking[]>>(
-      `/holidaze/profiles/${username}/bookings?_venue=true`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-    
-    console.log("API returned bookings:", response.data?.length || 0);
-    return response.data || [];
-  } catch (error) {
-    console.error('Error fetching bookings:', error);
-    
-    // Return mock data for development
-    console.log("Returning mock booking data");
-    return getMockBookings();
-  }
-};
-
-export const getProfileBookings = async (profileName: string, token: string): Promise<Booking[]> => {
-  try {
-    if (!token || !profileName) {
-      throw new Error('Authorization token and profile name are required');
-    }
-    
-    const response = await fetchFromApi<ApiResponse<Booking[]>>(
-      `/holidaze/profiles/${profileName}/bookings?_venue=true&_customer=true`, 
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }
-    );
-    
-    console.log(`Profile ${profileName} bookings:`, response.data);
-    return response.data || [];
-  } catch (error) {
-    console.error(`Error fetching bookings for profile ${profileName}:`, error);
-    return [];
-  }
-};
-
-// Mock data to use when API fails
-// Mock data to use when API fails
-function getMockBookings(): Booking[] {
-  return [
-    {
-      id: 'mock-1',
-      dateFrom: '2024-06-15',
-      dateTo: '2024-06-20',
-      guests: 2,
-      created: '2024-05-01',
-      updated: '2024-05-01',
-      venue: {
-        id: 'venue-1',
-        name: 'Seaside Villa',
-        description: 'A beautiful villa by the sea',
-        price: 1500,
-        maxGuests: 6,
-        rating: 4.8,
-        created: '2023-01-01',    // Add these required properties
-        updated: '2023-01-01',    // Add these required properties
-        location: { 
-          city: 'Oslo', 
-          country: 'Norway',
-          address: '123 Ocean Drive',  // Add these required properties
-          zip: '0123',                 // Add these required properties
-          continent: 'Europe',         // Add these required properties
-          lat: 59.9,                   // Add these required properties
-          lng: 10.7                    // Add these required properties
-        },
-        media: [{ url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945', alt: 'Villa' }],
-        meta: {                       // Add the meta object if required
-          wifi: true,
-          parking: true,
-          breakfast: false,
-          pets: false
-        }
-      }
+  
+  const response = await fetchFromApi<ApiResponse<Booking>>('/holidaze/bookings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
     },
+    body: JSON.stringify(bookingData)
+  });
+  
+  return response.data;
+};
+
+/**
+ * Retrieves all bookings for a specific venue
+ * 
+ * @param {string} venueId - ID of the venue to get bookings for
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking[]>} Array of bookings for the venue
+ * @throws {Error} If parameters are missing
+ */
+export const getVenueBookings = async (venueId: string, token: string): Promise<Booking[]> => {
+  if (!venueId) {
+    throw new Error('Venue ID is required');
+  }
+  
+  if (!token) {
+    throw new Error('Authorization token is required');
+  }
+  
+  // Since there's no direct endpoint for venue bookings, we need to get ALL bookings
+  // and filter them based on venue ID
+  const response = await fetchFromApi<ApiResponse<Booking[]>>(
+    `/holidaze/bookings?_venue=true&_customer=true`, 
     {
-      id: 'mock-2',
-      dateFrom: '2024-07-10',
-      dateTo: '2024-07-15',
-      guests: 4,
-      created: '2024-05-05',
-      updated: '2024-05-05',
-      venue: {
-        id: 'venue-2',
-        name: 'Mountain Cabin',
-        description: 'Cozy cabin in the mountains',
-        price: 950,
-        maxGuests: 4,
-        rating: 4.5,
-        created: '2023-02-01',
-        updated: '2023-02-01',
-        location: { 
-          city: 'Bergen', 
-          country: 'Norway',
-          address: '45 Mountain Road',
-          zip: '5020',
-          continent: 'Europe',
-          lat: 60.4,
-          lng: 5.3
-        },
-        media: [{ url: 'https://images.unsplash.com/photo-1542718610-a1d656d1884c', alt: 'Cabin' }],
-        meta: {
-          wifi: true,
-          parking: true,
-          breakfast: false,
-          pets: true
-        }
-      }
-    }
-  ];
-}
-
-// Delete a booking
-// Removed duplicate deleteBooking function to resolve redeclaration error.
-
-// Get a single booking by ID
-export const getBookingById = async (bookingId: string, token: string): Promise<Booking> => {
-  try {
-    if (!bookingId) {
-      throw new Error('Booking ID is required');
-    }
-    
-    if (!token) {
-      throw new Error('Authorization token is required');
-    }
-    
-    const response = await fetchFromApi<ApiResponse<Booking>>(`/holidaze/bookings/${bookingId}?_venue=true`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error(`Error getting booking ${bookingId}:`, error);
-    throw error;
-  }
+    }
+  );
+  
+  // Filter bookings to only include those for the specified venue
+  const allBookings = response.data || [];
+  return allBookings.filter(booking => booking.venue?.id === venueId);
 };
 
-// Update a booking
+/**
+ * Gets bookings for the currently authenticated user
+ * 
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking[]>} User's bookings
+ * @throws {Error} If token is missing or user information cannot be determined
+ */
+export const getUserBookings = async (token: string): Promise<Booking[]> => {
+  if (!token) {
+    throw new Error('Authorization token is required');
+  }
+  
+  // Get username from localStorage
+  const userJSON = localStorage.getItem('user');
+  let username = "";
+  
+  if (userJSON) {
+    try {
+      const user = JSON.parse(userJSON);
+      username = user.name;
+    } catch (e) {
+      throw new Error('Failed to parse user data from localStorage');
+    }
+  }
+  
+  if (!username) {
+    throw new Error('Username could not be determined');
+  }
+  
+  // Make API request with username
+  const response = await fetchFromApi<ApiResponse<Booking[]>>(
+    `/holidaze/profiles/${username}/bookings?_venue=true`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  );
+  
+  return response.data || [];
+};
+
+/**
+ * Gets bookings for a specific user profile
+ * 
+ * @param {string} profileName - Username of the profile to get bookings for
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking[]>} Profile's bookings
+ * @throws {Error} If parameters are missing
+ */
+export const getProfileBookings = async (profileName: string, token: string): Promise<Booking[]> => {
+  if (!token || !profileName) {
+    throw new Error('Authorization token and profile name are required');
+  }
+  
+  const response = await fetchFromApi<ApiResponse<Booking[]>>(
+    `/holidaze/profiles/${profileName}/bookings?_venue=true&_customer=true`, 
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  );
+  
+  return response.data || [];
+};
+
+/**
+ * Gets a single booking by its ID
+ * 
+ * @param {string} bookingId - ID of the booking to retrieve
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking>} The requested booking
+ * @throws {Error} If parameters are missing or booking cannot be found
+ */
+export const getBookingById = async (bookingId: string, token: string): Promise<Booking> => {
+  if (!bookingId) {
+    throw new Error('Booking ID is required');
+  }
+  
+  if (!token) {
+    throw new Error('Authorization token is required');
+  }
+  
+  const response = await fetchFromApi<ApiResponse<Booking>>(`/holidaze/bookings/${bookingId}?_venue=true`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  return response.data;
+};
+
+/**
+ * Updates an existing booking
+ * 
+ * @param {string} bookingId - ID of the booking to update
+ * @param {UpdateBookingData} updateData - New booking data
+ * @param {string} token - Authentication token
+ * @returns {Promise<Booking>} Updated booking
+ * @throws {Error} If parameters are missing or update fails
+ */
 export const updateBooking = async (
   bookingId: string, 
   updateData: UpdateBookingData, 
   token: string
-): Promise<Booking | null> => {
-  try {
-    if (!bookingId) {
-      console.error("Missing bookingId in updateBooking");
-      return null;
-    }
-    
-    if (!token) {
-      console.error("Missing token in updateBooking");
-      return null;
-    }
-    
-    console.log(`Updating booking ${bookingId} with data:`, updateData);
-    
-    const response = await fetchFromApi<ApiResponse<Booking>>(`/holidaze/bookings/${bookingId}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(updateData)
-    });
-    
-    console.log(`Successfully updated booking ${bookingId}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating booking ${bookingId}:`, error);
-    return null;
+): Promise<Booking> => {
+  if (!bookingId) {
+    throw new Error('Booking ID is required');
   }
+  
+  if (!token) {
+    throw new Error('Authorization token is required');
+  }
+  
+  const response = await fetchFromApi<ApiResponse<Booking>>(`/holidaze/bookings/${bookingId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(updateData)
+  });
+  
+  return response.data;
 };
 
+/**
+ * Deletes a booking
+ * 
+ * @param {string} bookingId - ID of the booking to delete
+ * @param {string} token - Authentication token
+ * @returns {Promise<boolean>} True if deletion was successful
+ * @throws {Error} If parameters are missing
+ */
 export const deleteBooking = async (bookingId: string, token: string): Promise<boolean> => {
+  if (!bookingId) {
+    throw new Error('Booking ID is required');
+  }
+  
+  if (!token) {
+    throw new Error('Authorization token is required');
+  }
+  
   try {
-    if (!bookingId) {
-      console.error("Missing bookingId in deleteBooking");
-      return false;
-    }
-    
-    if (!token) {
-      console.error("Missing token in deleteBooking");
-      return false;
-    }
-    
-    console.log(`Deleting booking with ID: ${bookingId}`);
-    
     await fetchFromApi(`/holidaze/bookings/${bookingId}`, {
       method: 'DELETE',
       headers: {
@@ -313,10 +250,8 @@ export const deleteBooking = async (bookingId: string, token: string): Promise<b
       }
     });
     
-    console.log(`Successfully deleted booking ${bookingId}`);
     return true;
   } catch (error) {
-    console.error(`Error deleting booking ${bookingId}:`, error);
-    return false;
+    throw new Error(`Failed to delete booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
