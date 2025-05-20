@@ -1,3 +1,8 @@
+/**
+ * @file VenueManagerBookingsPage.tsx
+ * @description Page for venue managers to view and manage bookings for their venues
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +12,9 @@ import { Venue, Booking } from '../../types/venue';
 import { fetchFromApi } from '../../api/api';
 import { getUserAvatar } from '../../utils/avatarUtils';
 
-// Add this interface for the API response
+/**
+ * API response structure with pagination metadata
+ */
 interface ApiResponse<T> {
   data: T;
   meta: {
@@ -21,26 +28,40 @@ interface ApiResponse<T> {
   };
 }
 
-// Update your VenueBooking interface
-// Instead of extending Booking, create a standalone type for the component
+/**
+ * Structure for venue booking data display
+ */
 interface VenueBooking {
+  id: string;
+  dateFrom: string;
+  dateTo: string;
+  guests: number;
+  created: string;
+  updated: string;
+  venue?: {
     id: string;
-    dateFrom: string;
-    dateTo: string;
-    guests: number;
-    created: string;
-    updated: string;
-    venue?: {
-      id: string;
-      name: string;
-    };
-    customer?: {
-      name: string;
-      email: string;
-      avatar?: { url: string; alt: string };
-    };
-  }
+    name: string;
+  };
+  customer?: {
+    name: string;
+    email: string;
+    avatar?: { url: string; alt: string };
+  };
+}
 
+/**
+ * Booking status type with label and color information
+ */
+interface BookingStatus {
+  label: string;
+  color: string;
+}
+
+/**
+ * Page component for venue managers to view and manage bookings for their venues
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const VenueManagerBookingsPage: React.FC = () => {
   const { user, token } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -50,7 +71,9 @@ const VenueManagerBookingsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
-  // Fetch all venues for this manager
+  /**
+   * Fetches all venues managed by the user and their bookings
+   */
   useEffect(() => {
     const fetchVenuesAndBookings = async () => {
       if (!token || !user) return;
@@ -59,19 +82,12 @@ const VenueManagerBookingsPage: React.FC = () => {
       try {
         // First, get all venues owned by this manager
         const venuesData = await getVenueManagerVenues(user.name, token);
-        console.log("Venues data received:", venuesData);
-        console.log("Manager's venue IDs:", venuesData.map(v => v.id));
         setVenues(venuesData);
         
         // Get bookings from the manager's own profile
         const profileBookings = await getProfileBookings(user.name, token);
-        console.log("Manager's own bookings:", profileBookings);
         
-        // For each venue, we need to check if there's a better endpoint
-        // Since the API doesn't seem to return venue data with all bookings,
-        // we might need to use a different approach
-        
-        // For now, let's try using the venue endpoint with bookings
+        // For each venue, fetch its bookings
         const allBookings: VenueBooking[] = [];
         
         for (const venue of venuesData) {
@@ -86,8 +102,6 @@ const VenueManagerBookingsPage: React.FC = () => {
               }
             );
             
-            console.log(`Venue ${venue.id} response:`, venueResponse);
-            
             if (venueResponse.data?.bookings) {
               // Add venue info to each booking
               const venueBookings = venueResponse.data.bookings.map((booking: any) => ({
@@ -101,11 +115,9 @@ const VenueManagerBookingsPage: React.FC = () => {
               allBookings.push(...venueBookings);
             }
           } catch (err) {
-            console.error(`Error fetching venue ${venue.id}:`, err);
+            // Continue with next venue if there's an error with this one
           }
         }
-        
-        console.log("All bookings found:", allBookings);
         
         // Sort bookings by date (most recent first)  
         allBookings.sort((a, b) => 
@@ -115,7 +127,6 @@ const VenueManagerBookingsPage: React.FC = () => {
         setBookings(allBookings);
         setError(null);
       } catch (err) {
-        console.error('Error fetching venues and bookings:', err);
         setError('Failed to load bookings. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -125,13 +136,23 @@ const VenueManagerBookingsPage: React.FC = () => {
     fetchVenuesAndBookings();
   }, [token, user]);
 
-  // Rest of the component remains the same...
-  // Format date for display
+  /**
+   * Formats a date string to a localized date string
+   * 
+   * @param {string} dateString - ISO date string to format
+   * @returns {string} Formatted date string
+   */
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Calculate duration in nights
+  /**
+   * Calculates the duration in nights between two dates
+   * 
+   * @param {string} checkIn - Check-in date string
+   * @param {string} checkOut - Check-out date string
+   * @returns {number} Number of nights
+   */
   const calculateNights = (checkIn: string, checkOut: string) => {
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
@@ -139,8 +160,14 @@ const VenueManagerBookingsPage: React.FC = () => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Get booking status
-  const getBookingStatus = (checkIn: string, checkOut: string) => {
+  /**
+   * Determines booking status based on check-in and check-out dates
+   * 
+   * @param {string} checkIn - Check-in date string
+   * @param {string} checkOut - Check-out date string
+   * @returns {BookingStatus} Booking status with label and color
+   */
+  const getBookingStatus = (checkIn: string, checkOut: string): BookingStatus => {
     const now = new Date();
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
@@ -154,7 +181,9 @@ const VenueManagerBookingsPage: React.FC = () => {
     }
   };
 
-  // Filter bookings based on selected venue and time filter
+  /**
+   * Filter bookings based on selected venue and time filter
+   */
   const filteredBookings = bookings.filter(booking => {
     // Venue filter
     if (selectedVenue !== 'all' && booking.venue?.id !== selectedVenue) {
@@ -186,9 +215,10 @@ const VenueManagerBookingsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-      <h1 className="text-2xl font-bold mb-2 font-averia">Bookings Management</h1>
-      <p className="text-gray-600 font-light">View and manage all bookings for your venues</p>
+        <h1 className="text-2xl font-bold mb-2 font-averia">Bookings Management</h1>
+        <p className="text-gray-600 font-light">View and manage all bookings for your venues</p>
       </div>
+      
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
@@ -196,60 +226,60 @@ const VenueManagerBookingsPage: React.FC = () => {
       )}
       
       {/* Filters */}
-<div className="mb-6 flex flex-col md:flex-row gap-4">
-  {/* Venue filter */}
-  <div className="flex-1">
-    <label htmlFor="venueFilter" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
-      Filter by Venue
-    </label>
-    <select
-      id="venueFilter"
-      value={selectedVenue}
-      onChange={(e) => setSelectedVenue(e.target.value)}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-    >
-      <option value="all">All Venues</option>
-      {venues.map(venue => (
-        <option key={venue.id} value={venue.id}>
-          {venue.name}
-        </option>
-      ))}
-    </select>
-  </div>
-  
-  {/* Time filter */}
-  <div className="flex items-end gap-2">
-    <button
-       onClick={() => setActiveFilter('all')}
-       className={`px-4 py-2 rounded border ${
-         activeFilter === 'all' 
-           ? 'bg-[#0081A7] text-white border-[#0081A7]' 
-           : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
-       } font-medium tracking-wide`}
-     >
-       All
-     </button>
-    <button
-      onClick={() => setActiveFilter('upcoming')}
-      className={`px-4 py-2 rounded border ${
-        activeFilter === 'upcoming' 
-          ? 'bg-[#0081A7] text-white border-[#0081A7]' 
-          : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
-      }`}
-    >
-      Upcoming
-    </button>
-    <button
-      onClick={() => setActiveFilter('past')}
-      className={`px-4 py-2 rounded border ${
-        activeFilter === 'past' 
-          ? 'bg-[#0081A7] text-white border-[#0081A7]' 
-          : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
-      }`}
-    >
-      Past
-    </button>
-  </div>
+      <div className="mb-6 flex flex-col md:flex-row gap-4">
+        {/* Venue filter */}
+        <div className="flex-1">
+          <label htmlFor="venueFilter" className="block text-sm font-medium text-gray-700 mb-1 tracking-wide">
+            Filter by Venue
+          </label>
+          <select
+            id="venueFilter"
+            value={selectedVenue}
+            onChange={(e) => setSelectedVenue(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="all">All Venues</option>
+            {venues.map(venue => (
+              <option key={venue.id} value={venue.id}>
+                {venue.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Time filter */}
+        <div className="flex items-end gap-2">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-2 rounded border ${
+              activeFilter === 'all' 
+                ? 'bg-[#0081A7] text-white border-[#0081A7]' 
+                : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
+            } font-medium tracking-wide`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setActiveFilter('upcoming')}
+            className={`px-4 py-2 rounded border ${
+              activeFilter === 'upcoming' 
+                ? 'bg-[#0081A7] text-white border-[#0081A7]' 
+                : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
+            }`}
+          >
+            Upcoming
+          </button>
+          <button
+            onClick={() => setActiveFilter('past')}
+            className={`px-4 py-2 rounded border ${
+              activeFilter === 'past' 
+                ? 'bg-[#0081A7] text-white border-[#0081A7]' 
+                : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
+            }`}
+          >
+            Past
+          </button>
+        </div>
       </div>
       
       {/* Bookings table */}
@@ -271,9 +301,9 @@ const VenueManagerBookingsPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Booking Details
-                </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Booking Details
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Venue
                   </th>
@@ -312,44 +342,44 @@ const VenueManagerBookingsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                    {booking.customer ? (
-                        <div className="flex items-center">
-                        {booking.customer.name && getUserAvatar(booking.customer.name) ? (
-                            <img 
-                            src={getUserAvatar(booking.customer.name)} 
-                            alt={booking.customer.name}
-                            className="h-8 w-8 rounded-full mr-2"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
-                            }}
-                            />
-                        ) : booking.customer.avatar?.url ? (
-                            <img 
-                            src={booking.customer.avatar.url} 
-                            alt={booking.customer.name}
-                            className="h-8 w-8 rounded-full mr-2"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
-                            }}
-                            />
-                        ) : null}
-                        <div>
-                        <div className="text-sm font-medium text-gray-900">
-                        <Link to={`/profiles/${booking.customer.name}`} className="text-[#0081A7] hover:underline">
-                            {booking.customer.name}
-                        </Link>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                        {booking.customer.email}
-                        </div>
-                    </div>
-                    </div>
-                ) : (
-                    <span className="text-sm text-gray-500">Unknown customer</span>
-                )}
-                </td>
+                        {booking.customer ? (
+                          <div className="flex items-center">
+                            {booking.customer.name && getUserAvatar(booking.customer.name) ? (
+                              <img 
+                                src={getUserAvatar(booking.customer.name)} 
+                                alt={booking.customer.name}
+                                className="h-8 w-8 rounded-full mr-2"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                                }}
+                              />
+                            ) : booking.customer.avatar?.url ? (
+                              <img 
+                                src={booking.customer.avatar.url} 
+                                alt={booking.customer.name}
+                                className="h-8 w-8 rounded-full mr-2"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = `https://ui-avatars.com/api/?name=${booking.customer?.name || 'U'}`;
+                                }}
+                              />
+                            ) : null}
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                <Link to={`/profiles/${booking.customer.name}`} className="text-[#0081A7] hover:underline">
+                                  {booking.customer.name}
+                                </Link>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {booking.customer.email}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500">Unknown customer</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {formatDate(booking.dateFrom)} - {formatDate(booking.dateTo)}
