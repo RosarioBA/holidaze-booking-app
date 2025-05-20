@@ -1,23 +1,28 @@
 // src/pages/venue/VenuesPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getVenues, searchVenues, filterVenues } from '../../api/venueService';
 import VenueCard from '../../components/venue/VenueCard';
 import { Venue, VenueFilters } from '../../types/venue';
 
 const VenuesPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const initialSearchQuery = searchParams.get('search') || '';
+  
+  // Get page from URL query parameters, fixed limit to 12
+  const initialPage = parseInt(searchParams.get('page') || '1', 10);
+  const ITEMS_PER_PAGE = 12; // Fixed limit of 12 items per page
 
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
-    currentPage: 1,
+    currentPage: initialPage,
     totalPages: 1,
-    isFirstPage: true,
+    isFirstPage: initialPage === 1,
     isLastPage: true
   });
   
@@ -32,12 +37,12 @@ const VenuesPage: React.FC = () => {
   const [activeFilters, setActiveFilters] = useState<VenueFilters>({});
   const [searchResults, setSearchResults] = useState<Venue[]>([]);
   
-  // Fetch venues on initial load
+  // Fetch venues on initial load or when pagination changes
   useEffect(() => {
     const fetchVenues = async () => {
       try {
         setLoading(true);
-        const result = await getVenues();
+        const result = await getVenues(pagination.currentPage, ITEMS_PER_PAGE);
         
         // Extract venues from the result based on its structure
         let venuesList: Venue[] = [];
@@ -63,10 +68,10 @@ const VenuesPage: React.FC = () => {
         // Set pagination data if available
         if (result && typeof result === 'object' && 'meta' in result && result.meta) {
           setPagination({
-            currentPage: result.meta.currentPage || 1,
+            currentPage: result.meta.currentPage || pagination.currentPage,
             totalPages: result.meta.pageCount || 1,
-            isFirstPage: result.meta.isFirstPage || true,
-            isLastPage: result.meta.isLastPage || true
+            isFirstPage: result.meta.isFirstPage || (result.meta.currentPage === 1),
+            isLastPage: result.meta.isLastPage || (result.meta.currentPage === result.meta.pageCount)
           });
         }
         
@@ -85,7 +90,7 @@ const VenuesPage: React.FC = () => {
     };
 
     fetchVenues();
-  }, [initialSearchQuery]);
+  }, [initialSearchQuery, pagination.currentPage]);
   
   // Handle search form submission
   const handleSearch = async (e: React.FormEvent) => {
@@ -95,6 +100,12 @@ const VenuesPage: React.FC = () => {
   
   const handleSearchQuery = async (query: string) => {
     if (!query.trim()) {
+      // When clearing search, reset to first page
+      const params = new URLSearchParams(location.search);
+      params.delete('search');
+      params.set('page', '1');
+      navigate(`${location.pathname}?${params.toString()}`);
+      
       setSearchResults(venues);
       
       // Apply any active filters to the full venue list
@@ -104,11 +115,26 @@ const VenuesPage: React.FC = () => {
       } else {
         setFilteredVenues(venues);
       }
+      
+      // Reset to first page
+      setPagination(prev => ({
+        ...prev,
+        currentPage: 1,
+        isFirstPage: true,
+        isLastPage: prev.totalPages <= 1
+      }));
+      
       return;
     }
     
     try {
       setLoading(true);
+      
+      // Update URL with search query and reset to page 1
+      const params = new URLSearchParams(location.search);
+      params.set('search', query);
+      params.set('page', '1');
+      navigate(`${location.pathname}?${params.toString()}`);
       
       // Try to use the API search endpoint first
       try {
@@ -132,6 +158,14 @@ const VenuesPage: React.FC = () => {
         } else {
           setFilteredVenues(processedResults);
         }
+        
+        // Reset to first page
+        setPagination(prev => ({
+          ...prev,
+          currentPage: 1,
+          isFirstPage: true,
+          isLastPage: Math.ceil(processedResults.length / ITEMS_PER_PAGE) <= 1
+        }));
       } catch (searchError) {
         // Fallback to client-side filtering if API search fails
         console.warn('API search failed, falling back to client-side filtering:', searchError);
@@ -154,6 +188,14 @@ const VenuesPage: React.FC = () => {
         } else {
           setFilteredVenues(clientSearchResults);
         }
+        
+        // Reset to first page
+        setPagination(prev => ({
+          ...prev,
+          currentPage: 1,
+          isFirstPage: true,
+          isLastPage: Math.ceil(clientSearchResults.length / ITEMS_PER_PAGE) <= 1
+        }));
       }
     } catch (err) {
       console.error('Error during search:', err);
@@ -189,6 +231,18 @@ const VenuesPage: React.FC = () => {
     const filtered = filterVenues(searchResults, filters);
     console.log("Filtered results:", filtered.length);
     setFilteredVenues(filtered);
+    
+    // Reset to first page when filters change
+    const params = new URLSearchParams(location.search);
+    params.set('page', '1');
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1,
+      isFirstPage: true,
+      isLastPage: Math.ceil(filtered.length / ITEMS_PER_PAGE) <= 1
+    }));
   };
   
   // Clear all filters
@@ -200,6 +254,18 @@ const VenuesPage: React.FC = () => {
     
     // Reset to search results or all venues if no search
     setFilteredVenues(searchResults);
+    
+    // Reset to first page when clearing filters
+    const params = new URLSearchParams(location.search);
+    params.set('page', '1');
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1,
+      isFirstPage: true,
+      isLastPage: Math.ceil(searchResults.length / ITEMS_PER_PAGE) <= 1
+    }));
   };
   
   // Reset everything
@@ -211,10 +277,38 @@ const VenuesPage: React.FC = () => {
     setActiveFilters({});
     setSearchResults(venues);
     setFilteredVenues(venues);
+    
+    // Reset page to 1 and clear search params
+    const params = new URLSearchParams();
+    params.set('page', '1');
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1,
+      isFirstPage: true,
+      isLastPage: Math.ceil(venues.length / ITEMS_PER_PAGE) <= 1
+    }));
+  };
+  
+  // Function to handle page change
+  const handlePageChange = (newPage: number) => {
+    // Update URL with new page
+    const params = new URLSearchParams(location.search);
+    params.set('page', newPage.toString());
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    // Update pagination state
+    setPagination(prev => ({
+      ...prev,
+      currentPage: newPage,
+      isFirstPage: newPage === 1,
+      isLastPage: newPage === pagination.totalPages
+    }));
   };
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 px-4 md:px-6 lg:px-8"> {/* Added padding here */}
       <section className="bg-[#0081A7] text-white p-6 rounded-lg">
        <h1 className="text-3xl font-bold mb-6 font-averia">Explore Venues</h1>
         
@@ -333,28 +427,89 @@ const VenuesPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div>
+        <div className="px-2"> {/* Added padding here too */}
           <div className="flex justify-between items-center mb-4">
-           <p className="text-gray-600 font-light">{filteredVenues.length} venues found</p>
+            <div>
+              <p className="text-gray-600 font-light">
+                Showing {Math.min((pagination.currentPage - 1) * ITEMS_PER_PAGE + 1, filteredVenues.length)} - {Math.min(pagination.currentPage * ITEMS_PER_PAGE, filteredVenues.length)} of {filteredVenues.length} venues
+              </p>
+            </div>
            
-           {/* Show active filters indicator */}
-           {Object.keys(activeFilters).length > 0 && (
-             <div className="flex items-center">
-               <span className="text-sm text-gray-600 mr-2">Filters active</span>
-               <button 
-                 onClick={clearFilters}
-                 className="text-[#0081A7] text-sm hover:underline"
-               >
-                 Clear
-               </button>
-             </div>
-           )}
+            {/* Show active filters indicator */}
+            {Object.keys(activeFilters).length > 0 && (
+              <div className="flex items-center">
+                <span className="text-sm text-gray-600 mr-2">Filters active</span>
+                <button 
+                  onClick={clearFilters}
+                  className="text-[#0081A7] text-sm hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredVenues.map(venue => (
               <VenueCard key={venue.id} venue={venue} />
             ))}
+          </div>
+          
+          {/* Pagination controls without page size selector */}
+          <div className="flex justify-center items-center space-x-4 mt-8 pb-8">
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={pagination.isFirstPage}
+              className={`px-3 py-1 rounded ${
+                pagination.isFirstPage 
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
+              }`}
+            >
+              First
+            </button>
+            
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.isFirstPage}
+              className={`px-3 py-1 rounded ${
+                pagination.isFirstPage 
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
+              }`}
+            >
+              Previous
+            </button>
+            
+            <div className="flex items-center">
+              <span className="mx-2 text-gray-700">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+            </div>
+            
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.isLastPage}
+              className={`px-3 py-1 rounded ${
+                pagination.isLastPage 
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
+              }`}
+            >
+              Next
+            </button>
+            
+            <button
+              onClick={() => handlePageChange(pagination.totalPages)}
+              disabled={pagination.isLastPage}
+              className={`px-3 py-1 rounded ${
+                pagination.isLastPage 
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                  : 'bg-[#0081A7] text-white hover:bg-[#13262F]'
+              }`}
+            >
+              Last
+            </button>
           </div>
         </div>
       )}

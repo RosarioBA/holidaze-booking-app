@@ -43,7 +43,7 @@ const HomePage = () => {
       <section className="bg-[#505E64] text-white py-16 rounded-t-lg">
         <div className="mx-auto px-2 sm:px-4">
           <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center font-averia">
-            Find your perfect stay in Norway
+            Find your perfect stay with Holidaze
           </h1>
           
           <form onSubmit={handleSearch} className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">

@@ -17,6 +17,7 @@ interface ApiResponse<T> {
 }
 
 // Function to get all venues with optional pagination
+// Update in src/api/venueService.ts
 export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrder = 'desc') => {
   try {
     // Ensure page is a valid number
@@ -33,9 +34,9 @@ export const getVenues = async (page = 1, limit = 100, sort = 'created', sortOrd
     let result: any = {
       venues: [],
       meta: {
-        currentPage: 1,
+        currentPage: validPage,
         pageCount: 1,
-        isFirstPage: true,
+        isFirstPage: validPage === 1,
         isLastPage: true
       }
     };

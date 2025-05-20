@@ -13,7 +13,7 @@ const Footer = () => {
           <div>
             <h2 className="text-2xl font-bold mb-4 font-averia">HOLIDAZE</h2>
             <p className="text-gray-400 mb-4">
-              Find your perfect stay in Norway. From cozy cabins to modern apartments.
+              Find your perfect stay. From cozy cabins to modern apartments.
             </p>
           </div>
           
