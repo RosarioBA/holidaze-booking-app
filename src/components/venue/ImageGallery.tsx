@@ -1,48 +1,87 @@
-// src/components/venue/ImageGallery.tsx
+/**
+ * @file ImageGallery.tsx
+ * @description Responsive image gallery component with modal lightbox functionality
+ */
+
 import React, { useState } from 'react';
 
-// Define the VenueMedia interface here if it's not exported
+/**
+ * Media object structure for venue images
+ */
 interface VenueMedia {
+  /** URL of the image */
   url: string;
+  /** Alternative text for the image (optional) */
   alt?: string;
 }
 
+/**
+ * Props for the ImageGallery component
+ */
 interface ImageGalleryProps {
+  /** Array of images to display in the gallery */
   images: VenueMedia[];
+  /** Name of the venue, used for alt text when not provided */
   name: string;
 }
 
+/**
+ * Component that displays a responsive image gallery with lightbox functionality
+ * Shows a main image with thumbnails and allows full-screen viewing
+ * 
+ * @param {ImageGalleryProps} props - Component props
+ * @returns {JSX.Element} Rendered image gallery
+ */
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   
-  // Use a placeholder if no images are available
-  const hasImages = images && images.length > 0;
+  /**
+   * Default placeholder image to use when no images are available
+   * or when an image fails to load
+   */
   const placeholderImage = {
     url: 'https://placehold.co/800x600?text=No+Image+Available',
     alt: `${name} placeholder image`
   };
   
+  // Check if there are any images available
+  const hasImages = images && images.length > 0;
+  
   // Create an array of images or use placeholder
   const galleryImages = hasImages ? images : [placeholderImage];
   
+  /**
+   * Handles click on an image to open the modal lightbox
+   * 
+   * @param {number} index - Index of the clicked image
+   */
   const handleImageClick = (index: number) => {
     setActiveIndex(index);
     setShowModal(true);
   };
   
+  /**
+   * Navigate to the previous image in the lightbox
+   */
   const handlePrevious = () => {
     setActiveIndex((prevIndex) => 
       prevIndex === 0 ? galleryImages.length - 1 : prevIndex - 1
     );
   };
   
+  /**
+   * Navigate to the next image in the lightbox
+   */
   const handleNext = () => {
     setActiveIndex((prevIndex) => 
       prevIndex === galleryImages.length - 1 ? 0 : prevIndex + 1
     );
   };
   
+  /**
+   * Close the modal lightbox
+   */
   const handleModalClose = () => {
     setShowModal(false);
   };
@@ -89,6 +128,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
             <div 
               className="relative h-24 bg-gray-200 flex items-center justify-center rounded cursor-pointer"
               onClick={() => setShowModal(true)}
+              role="button"
+              aria-label={`View all ${galleryImages.length} photos`}
+              tabIndex={0}
             >
               <span className="text-gray-600 font-medium">
                 +{galleryImages.length - 4} more
@@ -100,14 +142,20 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
       
       {/* Full-screen Modal Gallery */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col p-4">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image gallery"
+        >
           <div className="flex justify-end mb-2">
             <button
               onClick={handleModalClose}
               className="text-white hover:text-gray-300"
               aria-label="Close gallery"
+              type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -118,8 +166,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
               onClick={handlePrevious}
               className="absolute left-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
               aria-label="Previous image"
+              type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -140,8 +189,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
               onClick={handleNext}
               className="absolute right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
               aria-label="Next image"
+              type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -157,23 +207,24 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name }) => {
           {galleryImages.length > 1 && (
             <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
               {galleryImages.map((image, index) => (
-                <div 
+                <button 
                   key={index} 
                   className={`flex-shrink-0 h-16 w-24 overflow-hidden rounded cursor-pointer ${
-                    index === activeIndex ? 'border-2 border-white' : ''
+                  index === activeIndex ? 'border-2 border-white' : ''
                   }`}
                   onClick={() => setActiveIndex(index)}
+                  disabled={index === activeIndex}
                 >
                   <img
-                    src={image.url}
-                    alt={image.alt || `${name} thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = placeholderImage.url;
-                    }}
+                  src={image.url}
+                  alt={image.alt || `${name} thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = placeholderImage.url;
+                  }}
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
