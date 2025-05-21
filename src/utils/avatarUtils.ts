@@ -1,4 +1,9 @@
-// src/utils/avatarUtils.ts
+/**
+ * 
+ * @param username - The username of the user whose avatar is to be retrieved
+ * @returns 
+ */
+
 export const getUserAvatar = (username: string): string | undefined => {
   // Try manager avatar first
   const managerAvatar = localStorage.getItem(`holidaze_avatar_url_${username}_manager`);
