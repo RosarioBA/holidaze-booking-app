@@ -7,6 +7,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 /**
  * User profile information structure
+ * IMPORTANT: Make sure this matches your Profile interface in types/profile.ts
  */
 interface Profile {
   /** User's name/username */
@@ -20,10 +21,24 @@ interface Profile {
     /** Alternative text for the avatar */
     alt: string;
   };
+  /** User's banner image (optional) */
+  banner?: {
+    /** URL of the banner image */
+    url: string;
+    /** Alternative text for the banner */
+    alt: string;
+  };
   /** Whether the user has venue manager privileges */
   venueManager: boolean;
   /** User's biography (optional) */
   bio?: string;
+  /** User's related counts */
+  _count?: {
+    /** Number of venues */
+    venues: number;
+    /** Number of bookings */
+    bookings: number;
+  };
 }
 
 /**

@@ -10,6 +10,14 @@ import { getUserBookings } from '../../api/bookingService';
 import { getVenueManagerVenues } from '../../api/venueService';
 import { fetchFromApi } from '../../api/api';
 import { Profile } from '../../types/profile';
+import { 
+  getUserAvatar, 
+  getUserBanner, 
+  setUserAvatar, 
+  setUserBanner, 
+  fetchProfileFromApi, 
+  updateProfileWithApi 
+} from '../../utils/avatarUtils';
 
 // Components
 import ProfileHeader from '../../components/profile/ProfileHeader';
@@ -58,19 +66,57 @@ const ProfilePage: React.FC = () => {
   };
 
   /**
-   * Loads profile data from localStorage
+   * Fetches profile data from API and updates state and storage
    */
-  useEffect(() => {
+  const fetchProfileData = async () => {
+    if (!user?.name || !token) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Use our utility function to fetch profile and update localStorage
+      const apiProfile = await fetchProfileFromApi(user.name, token);
+      
+      // Update local state
+      setProfile(apiProfile);
+      setFormBio(apiProfile.bio || '');
+      setFormAvatarUrl(apiProfile.avatar?.url || '');
+      setFormBannerUrl(apiProfile.banner?.url || '');
+      
+      // Update localStorage
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(apiProfile));
+      
+      // Update auth context
+      updateUser({
+        bio: apiProfile.bio,
+        avatar: apiProfile.avatar,
+        banner: apiProfile.banner
+      });
+    } catch (error) {
+      console.error('Error loading profile from API:', error);
+      
+      // Try loading from localStorage as fallback
+      loadProfileFromLocalStorage();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Loads profile data from localStorage as fallback
+   */
+  const loadProfileFromLocalStorage = () => {
     if (!user) return;
     
     try {
-      // Check for saved avatar and banner URLs
-      const savedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
-      const savedBannerUrl = localStorage.getItem(BANNER_STORAGE_KEY);
+      // Get avatar and banner using our utility functions
+      const savedAvatarUrl = getUserAvatar(user.name);
+      const savedBannerUrl = getUserBanner(user.name);
       
       const storedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
       if (storedProfile) {
         const parsedProfile = JSON.parse(storedProfile);
+        
         // Only use stored profile if it matches current user
         if (parsedProfile.name === user.name) {
           // Apply saved avatar and banner if they exist
@@ -79,14 +125,6 @@ const ProfilePage: React.FC = () => {
               url: savedAvatarUrl,
               alt: `${user.name}'s avatar`
             };
-            
-            // Also update the auth context
-            updateUser({
-              avatar: {
-                url: savedAvatarUrl,
-                alt: `${user.name}'s avatar`
-              }
-            });
           }
           
           if (savedBannerUrl && (!parsedProfile.banner || parsedProfile.banner.url !== savedBannerUrl)) {
@@ -101,9 +139,7 @@ const ProfilePage: React.FC = () => {
           setFormAvatarUrl(parsedProfile.avatar?.url || savedAvatarUrl || '');
           setFormBannerUrl(parsedProfile.banner?.url || savedBannerUrl || '');
           
-          // Save the updated profile back to localStorage
-          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(parsedProfile));
-          return; // Exit early if we have a stored profile
+          return; // Exit early if we have a valid stored profile
         }
       }
       
@@ -113,18 +149,17 @@ const ProfilePage: React.FC = () => {
         email: user.email,
         venueManager: user.venueManager || false,
         bio: '',
-        avatar: undefined,
         _count: {
           bookings: 0,
           venues: 0
         }
       };
       
-      // Also save this default profile to localStorage
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(defaultProfile));
       setProfile(defaultProfile);
-      
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(defaultProfile));
     } catch (error) {
+      console.error('Error loading profile from localStorage:', error);
+      
       // Create a basic profile even if there's an error
       if (user) {
         const basicProfile = {
@@ -139,10 +174,17 @@ const ProfilePage: React.FC = () => {
         };
         setProfile(basicProfile);
       }
-    } finally {
-      setIsLoading(false);
     }
-  }, [user, updateUser, AVATAR_STORAGE_KEY, BANNER_STORAGE_KEY]);
+  };
+
+  /**
+   * On component mount - fetch profile data
+   */
+  useEffect(() => {
+    if (user && token) {
+      fetchProfileData();
+    }
+  }, [user?.name, token]);
 
   /**
    * Fetches booking data from the API
@@ -230,65 +272,66 @@ const ProfilePage: React.FC = () => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) return;
+    if (!user || !token) return;
     
     try {
       setIsLoading(true);
       
-      // Create updated profile object
-      const updatedProfile: Profile = {
-        name: user.name,
-        email: user.email,
-        venueManager: user.venueManager || false,
-        bio: formBio,
-        _count: profile?._count || {
-          bookings: userBookings.length,
-          venues: 0
-        }
+      // Create update payload
+      const updatePayload: any = {
+        bio: formBio
       };
       
       // Only add avatar if URL provided
       if (formAvatarUrl.trim()) {
-        updatedProfile.avatar = {
+        updatePayload.avatar = {
           url: formAvatarUrl.trim(),
           alt: `${user.name}'s avatar`
         };
-        
-        // Save avatar URL separately for persistence across sessions
-        localStorage.setItem(AVATAR_STORAGE_KEY, formAvatarUrl.trim());
-        
-        // Update auth context with new avatar
-        updateUser({
-          avatar: {
-            url: formAvatarUrl.trim(),
-            alt: `${user.name}'s avatar`
-          }
-        });
       }
       
       // Only add banner if URL provided
       if (formBannerUrl.trim()) {
-        updatedProfile.banner = {
+        updatePayload.banner = {
           url: formBannerUrl.trim(),
           alt: `${user.name}'s banner`
         };
-        
-        // Save banner URL separately for persistence across sessions
-        localStorage.setItem(BANNER_STORAGE_KEY, formBannerUrl.trim());
       }
       
-      // Update state and localStorage
+      // Use our utility function to update profile
+      const updatedProfile = await updateProfileWithApi(user.name, token, updatePayload);
+      
+      // Update local state
       setProfile(updatedProfile);
+      
+      // Update localStorage
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updatedProfile));
       
-      setUpdateSuccess(true);
+      // Ensure avatar and banner are stored in all locations
+      if (updatedProfile.avatar?.url) {
+        setUserAvatar(user.name, updatedProfile.avatar.url, user.venueManager);
+      }
       
-      // Clear success message after 3 seconds
+      if (updatedProfile.banner?.url) {
+        setUserBanner(user.name, updatedProfile.banner.url, user.venueManager);
+      }
+      
+      // Update the auth context
+      updateUser({
+        bio: updatedProfile.bio,
+        avatar: updatedProfile.avatar,
+        banner: updatedProfile.banner
+      });
+      
+      setUpdateSuccess(true);
       setTimeout(() => {
         setUpdateSuccess(false);
       }, 3000);
       
       setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
