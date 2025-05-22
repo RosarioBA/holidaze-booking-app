@@ -1,5 +1,3 @@
-// src/components/venue/VenuesGrid.tsx
-
 /**
  * @file VenuesGrid.tsx
  * @description Grid display for venue cards with filtering indicators
@@ -20,6 +18,8 @@ interface VenuesGridProps {
   hasActiveFilters: boolean;
   /** Function to clear all filters */
   onClearFilters: () => void;
+  /** Optional source parameter to pass to venue cards */
+  source?: string;
 }
 
 /**
@@ -30,14 +30,20 @@ const VenuesGrid: React.FC<VenuesGridProps> = ({
   currentPage,
   itemsPerPage,
   hasActiveFilters,
-  onClearFilters
+  onClearFilters,
+  source
 }) => {
+  // Calculate which venues to show based on pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedVenues = venues.slice(startIndex, endIndex);
+
   return (
     <div className="px-2">
       <div className="flex justify-between items-center mb-4">
         <div>
           <p className="text-gray-600 font-light">
-            Showing {Math.min((currentPage - 1) * itemsPerPage + 1, venues.length)} - {Math.min(currentPage * itemsPerPage, venues.length)} of {venues.length} venues
+            Showing {Math.min(startIndex + 1, venues.length)} - {Math.min(endIndex, venues.length)} of {venues.length} venues
           </p>
         </div>
        
@@ -56,8 +62,8 @@ const VenuesGrid: React.FC<VenuesGridProps> = ({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {venues.map(venue => (
-          <VenueCard key={venue.id} venue={venue} />
+        {paginatedVenues.map(venue => (
+          <VenueCard key={venue.id} venue={venue} source={source} />
         ))}
       </div>
     </div>

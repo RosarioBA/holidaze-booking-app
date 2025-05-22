@@ -57,6 +57,32 @@ const VenueDetailPage = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   /**
+   * Determines the appropriate back navigation based on source parameter
+   */
+  const getBackNavigation = () => {
+    switch (source) {
+      case 'venues':
+        return { path: '/venues', label: 'Back to Venues' };
+      case 'saved':
+        return { path: '/customer/saved', label: 'Back to Saved Venues' };
+      case 'my-trips':
+        return { path: '/customer/trips', label: 'Back to My Trips' };
+      case 'search':
+        // Preserve search parameters if coming from search
+        const searchQuery = queryParams.get('searchQuery');
+        const searchPath = searchQuery ? `/venues?search=${encodeURIComponent(searchQuery)}` : '/venues';
+        return { path: searchPath, label: 'Back to Search Results' };
+      case 'manager-venues':
+        return { path: '/venue-manager/venues', label: 'Back to My Venues' };
+      case 'dashboard':
+        return { path: '/dashboard', label: 'Back to Dashboard' };
+      default:
+        // Default to venues page
+        return { path: '/venues', label: 'Back to Venues' };
+    }
+  };
+
+  /**
    * Fetches ratings data for the venue
    */
   const fetchRatings = async () => {
@@ -193,16 +219,17 @@ const VenueDetailPage = () => {
 
   // Error state
   if (error || !venue) {
+    const backNav = getBackNavigation();
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded mb-6">
           {error || 'Venue not found'}
         </div>
-        <Link to="/venues" className="text-blue-600 hover:underline flex items-center">
+        <Link to={backNav.path} className="text-blue-600 hover:underline flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
           </svg>
-          Back to Venues
+          {backNav.label}
         </Link>
       </div>
     );
@@ -226,6 +253,9 @@ const VenueDetailPage = () => {
   // 3. User is not the owner of the venue
   const canRateVenue = user && !userHasRated && user.name !== owner?.name;
 
+  // Get back navigation info
+  const backNav = getBackNavigation();
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Success Message */}
@@ -237,7 +267,7 @@ const VenueDetailPage = () => {
             </svg>
             <span className="font-medium">Booking Confirmed!</span>
           </div>
-          <p className="mt-1 ml-7">Your reservation has been successfully booked. <Link to="/my-trips" className="text-green-700 underline">View your bookings</Link></p>
+          <p className="mt-1 ml-7">Your reservation has been successfully booked. <Link to="/customer/trips" className="text-green-700 underline">View your bookings</Link></p>
         </div>
       )}
       
@@ -250,13 +280,13 @@ const VenueDetailPage = () => {
       
       {/* Back Button */}
       <Link 
-        to={source === 'my-trips' ? '/my-trips' : '/venues'} 
+        to={backNav.path}
         className="text-blue-600 hover:underline flex items-center mb-6"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
         </svg>
-        {source === 'my-trips' ? 'Back to My Trips' : 'Back to Venues'}
+        {backNav.label}
       </Link>
 
       {/* Venue Header */}
@@ -330,7 +360,7 @@ const VenueDetailPage = () => {
               bookings={bookings}
               price={price}
               onBookingSubmit={handleBookingSubmit}
-              venueOwner={owner} // Add this line to pass the venue owner
+              venueOwner={owner}
             />
           </div>
         </div>

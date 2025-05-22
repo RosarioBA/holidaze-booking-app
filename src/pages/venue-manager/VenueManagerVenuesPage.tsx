@@ -136,7 +136,7 @@ const VenueManagerVenuesPage: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    to={`/venues/${venue.id}`}
+                    to={`/venues/${venue.id}?source=manager-venues`}
                     className="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded hover:bg-gray-200"
                   >
                     View

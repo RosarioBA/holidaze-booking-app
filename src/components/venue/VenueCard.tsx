@@ -3,7 +3,7 @@
  * @description Card component for displaying venue information in a grid or list
  */
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Venue } from '../../types/venue';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -15,6 +15,8 @@ import { getVenueRatingInfo } from '../../api/ratingService';
 interface VenueCardProps {
   /** Venue data to display in the card */
   venue: Venue;
+  /** Optional source parameter to add to the venue detail link */
+  source?: string;
 }
 
 /**
@@ -24,14 +26,43 @@ interface VenueCardProps {
  * @param {VenueCardProps} props - Component props
  * @returns {JSX.Element} Rendered venue card
  */
-const VenueCard: React.FC<VenueCardProps> = ({ venue }) => {
+const VenueCard: React.FC<VenueCardProps> = ({ venue, source }) => {
   const { id, name, media, price, location, maxGuests } = venue;
   const { isAuthenticated } = useAuth();
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const { rating, count } = getVenueRatingInfo(id);
+  const currentLocation = useLocation();
   
   // Check if this venue is favorited
   const isFavorited = isFavorite(id);
+  
+  /**
+   * Determines the appropriate source parameter based on current location or prop
+   */
+  const getSourceParam = () => {
+    if (source) return source;
+    
+    const pathname = currentLocation.pathname;
+    const searchParams = new URLSearchParams(currentLocation.search);
+    const hasSearch = searchParams.get('search');
+    
+    // Determine source based on current location
+    if (pathname.includes('/customer/saved')) {
+      return 'saved';
+    } else if (pathname.includes('/venue-manager/venues')) {
+      return 'manager-venues';
+    } else if (pathname.includes('/customer/trips')) {
+      return 'my-trips';
+    } else if (pathname.includes('/dashboard')) {
+      return 'dashboard';
+    } else if (pathname.includes('/venues') && hasSearch) {
+      return `search&searchQuery=${encodeURIComponent(hasSearch)}`;
+    } else if (pathname.includes('/venues')) {
+      return 'venues';
+    }
+    
+    return 'venues'; // Default fallback
+  };
   
   /**
    * Get the primary image URL or use a placeholder if none exists
@@ -52,16 +83,19 @@ const VenueCard: React.FC<VenueCardProps> = ({ venue }) => {
    * 
    * @param {React.MouseEvent} e - Click event
    */
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
     e.stopPropagation();
     
     if (isFavorited) {
-      removeFavorite(id);
+      await removeFavorite(id);
     } else {
-      addFavorite(id);
+      await addFavorite(id);
     }
   };
+
+  // Build the venue detail link with source parameter
+  const venueDetailLink = `/venues/${id}?source=${getSourceParam()}`;
 
   return (
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative">
@@ -86,7 +120,7 @@ const VenueCard: React.FC<VenueCardProps> = ({ venue }) => {
         </button>
       )}
       
-      <Link to={`/venues/${id}`} className="block" aria-label={`View details for ${name}, ${locationText}, $${price} per night`}>
+      <Link to={venueDetailLink} className="block" aria-label={`View details for ${name}, ${locationText}, $${price} per night`}>
         <div className="h-48 overflow-hidden relative">
           <img 
             src={imageUrl} 

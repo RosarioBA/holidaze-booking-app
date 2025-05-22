@@ -210,7 +210,7 @@ const CustomerSavedPage: React.FC = () => {
           {savedVenues.map(venue => (
             <Link 
               key={venue.id}
-              to={`/venues/${venue.id}`}
+              to={`/venues/${venue.id}?source=saved`}
               className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition relative group"
             >
               <div className="h-48 bg-gray-200 relative">
@@ -253,7 +253,7 @@ const CustomerSavedPage: React.FC = () => {
           {savedVenues.map(venue => (
             <Link 
               key={venue.id}
-              to={`/venues/${venue.id}`}
+              to={`/venues/${venue.id}?source=saved`}
               className="flex bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition relative"
             >
               <div className="w-32 sm:w-48 h-full bg-gray-200 flex-shrink-0">

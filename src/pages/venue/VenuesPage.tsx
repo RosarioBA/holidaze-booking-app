@@ -392,13 +392,14 @@ const VenuesPage: React.FC = () => {
         <>
           {/* Venues Grid */}
           <VenuesGrid
-            venues={filteredVenues}
-            currentPage={pagination.currentPage}
-            itemsPerPage={ITEMS_PER_PAGE}
-            hasActiveFilters={Object.keys(activeFilters).length > 0}
-            onClearFilters={clearFilters}
-          />
-          
+          venues={filteredVenues}
+          currentPage={pagination.currentPage}
+          itemsPerPage={ITEMS_PER_PAGE}
+          hasActiveFilters={Object.keys(activeFilters).length > 0}
+          onClearFilters={clearFilters}
+          source={search ? `search&searchQuery=${encodeURIComponent(search)}` : 'venues'}
+        />
+                  
           {/* Pagination */}
           <Pagination
             currentPage={pagination.currentPage}
