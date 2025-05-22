@@ -52,7 +52,7 @@ const HomePage = () => {
   return (
     <div className="space-y-0">
       {/* Hero Section */}
-      <section className="bg-[#505E64] text-white py-16 rounded-t-lg">
+      <section className="bg-[#505E64] text-white py-16">
         <div className="mx-auto px-2 sm:px-4">
           <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center font-averia">
             Find your perfect stay with Holidaze
@@ -168,7 +168,7 @@ const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary text-white py-16 px-2 sm:px-4 rounded-b-lg">
+      <section className="bg-primary text-white py-16 px-2 sm:px-4">
         <div className="mx-auto text-center max-w-4xl">
           <h2 className="text-2xl font-bold mb-4 font-averia">Own a Property? Become a Host Today!</h2>
           <p className="mb-6 font-light">List your property on Holidaze and start earning income.</p>
