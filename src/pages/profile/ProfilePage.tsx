@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getUserBookings } from '../../api/bookingService';
 import { getVenueManagerVenues } from '../../api/venueService';
 import { fetchFromApi } from '../../api/api';
@@ -34,7 +34,8 @@ const PROFILE_STORAGE_KEY = 'holidaze_profile';
  * @returns {JSX.Element} Rendered component
  */
 const ProfilePage: React.FC = () => {
-  const { user, token, updateUser } = useAuth();
+  const { user, token, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
   const editFormRef = useRef<HTMLDivElement>(null);
   
   // Define user-specific storage keys
@@ -63,6 +64,18 @@ const ProfilePage: React.FC = () => {
       // Smooth scroll to the edit form
       editFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
+  };
+
+  /**
+   * Handles the "Become a Venue Manager" button click
+   * Uses window.location to force navigation and logout
+   */
+  const handleBecomeVenueManager = () => {
+    // Log out first
+    logout();
+    
+    // Use the full path including the base URL
+    window.location.href = '/holidaze-booking-app/register?type=venue-manager';
   };
 
   /**
@@ -428,12 +441,15 @@ const ProfilePage: React.FC = () => {
           <p className="text-gray-700 mb-4 font-light tracking-wide">
             List your property on Holidaze and start earning income from your space.
           </p>
-          <Link
-            to="/register?type=venue-manager"
-            className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F]"
+          <p className="text-gray-600 mb-4 text-sm font-light">
+            Note: You'll need to create a separate venue manager account to list properties.
+          </p>
+          <button
+            onClick={handleBecomeVenueManager}
+            className="inline-block bg-[#0081A7] text-white px-4 py-2 rounded hover:bg-[#13262F] transition-colors"
           >
             Register as Venue Manager
-          </Link>
+          </button>
         </div>
       )}
     </div>

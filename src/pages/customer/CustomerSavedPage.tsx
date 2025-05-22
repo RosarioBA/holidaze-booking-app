@@ -15,7 +15,7 @@ import { getVenues } from '../../api/venueService';
  * @returns {JSX.Element} Rendered component
  */
 const CustomerSavedPage: React.FC = () => {
-  const { favorites, removeFavorite } = useFavorites();
+  const { favorites, removeFavorite, isLoading: favoritesLoading } = useFavorites();
   const [savedVenues, setSavedVenues] = useState<Venue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +26,19 @@ const CustomerSavedPage: React.FC = () => {
    */
   useEffect(() => {
     const fetchSavedVenues = async () => {
+      // Wait for favorites to load before fetching venues
+      if (favoritesLoading) return;
+      
       try {
         setIsLoading(true);
         setError(null);
+
+        // If no favorites, don't make API call
+        if (favorites.length === 0) {
+          setSavedVenues([]);
+          setIsLoading(false);
+          return;
+        }
 
         // Get all venues
         const result = await getVenues();
@@ -47,7 +57,7 @@ const CustomerSavedPage: React.FC = () => {
     };
 
     fetchSavedVenues();
-  }, [favorites]);
+  }, [favorites, favoritesLoading]);
 
   /**
    * Gets image URL with fallback for a venue
@@ -68,10 +78,10 @@ const CustomerSavedPage: React.FC = () => {
    * @param {string} venueId - ID of the venue to remove
    * @param {React.MouseEvent} e - Click event
    */
-  const handleRemoveFavorite = (venueId: string, e: React.MouseEvent) => {
+  const handleRemoveFavorite = async (venueId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    removeFavorite(venueId);
+    await removeFavorite(venueId);
   };
 
   /**
@@ -121,8 +131,8 @@ const CustomerSavedPage: React.FC = () => {
     );
   };
 
-  // Loading state
-  if (isLoading) {
+  // Loading state (either favorites or venues loading)
+  if (isLoading || favoritesLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0081A7]"></div>
