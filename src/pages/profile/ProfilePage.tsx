@@ -29,6 +29,19 @@ import BookingsSummary from '../../components/profile/BookingsSummary';
 const PROFILE_STORAGE_KEY = 'holidaze_profile';
 
 /**
+ * Extracts the actual bio text from a bio that may contain favorites data
+ * @param bioText - The bio text that may contain favorites JSON
+ * @returns The clean bio text without favorites data
+ */
+const extractCleanBio = (bioText: string): string => {
+  if (!bioText) return '';
+  
+  // Remove the favorites data section if it exists
+  const cleanBio = bioText.replace(/\[FAVORITES\].*?\[\/FAVORITES\]$/, '').trim();
+  return cleanBio;
+};
+
+/**
  * Page component for user profile management
  * 
  * @returns {JSX.Element} Rendered component
@@ -92,16 +105,20 @@ const ProfilePage: React.FC = () => {
       
       // Update local state
       setProfile(apiProfile);
-      setFormBio(apiProfile.bio || '');
+      
+      // Extract clean bio for the form display
+      const cleanBio = extractCleanBio(apiProfile.bio || '');
+      setFormBio(cleanBio);
+      
       setFormAvatarUrl(apiProfile.avatar?.url || '');
       setFormBannerUrl(apiProfile.banner?.url || '');
       
       // Update localStorage
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(apiProfile));
       
-      // Update auth context
+      // Update auth context with clean bio
       updateUser({
-        bio: apiProfile.bio,
+        bio: cleanBio,
         avatar: apiProfile.avatar,
         banner: apiProfile.banner
       });
@@ -148,7 +165,11 @@ const ProfilePage: React.FC = () => {
           }
           
           setProfile(parsedProfile);
-          setFormBio(parsedProfile.bio || '');
+          
+          // Extract clean bio for form display
+          const cleanBio = extractCleanBio(parsedProfile.bio || '');
+          setFormBio(cleanBio);
+          
           setFormAvatarUrl(parsedProfile.avatar?.url || savedAvatarUrl || '');
           setFormBannerUrl(parsedProfile.banner?.url || savedBannerUrl || '');
           
@@ -329,9 +350,10 @@ const ProfilePage: React.FC = () => {
         setUserBanner(user.name, updatedProfile.banner.url, user.venueManager);
       }
       
-      // Update the auth context
+      // Update the auth context with clean bio
+      const cleanBio = extractCleanBio(updatedProfile.bio || '');
       updateUser({
-        bio: updatedProfile.bio,
+        bio: cleanBio,
         avatar: updatedProfile.avatar,
         banner: updatedProfile.banner
       });
@@ -405,7 +427,10 @@ const ProfilePage: React.FC = () => {
       
       {/* Profile Information */}
       <ProfileInfo 
-        profile={profile}
+        profile={{
+          ...profile,
+          bio: extractCleanBio(profile.bio || '') || 'No bio provided'
+        }}
         bookingsCount={bookingsCount}
         bookingsLoading={bookingsLoading}
         onEditClick={handleEditClick}
