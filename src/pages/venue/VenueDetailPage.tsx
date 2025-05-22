@@ -323,13 +323,14 @@ const VenueDetailPage = () => {
               averageRating={averageRating}
             />
 
-            {/* Enhanced Booking Calendar Component */}
+           {/* Enhanced Booking Calendar Component */}
             <BookingCalendar
               venueId={id || ''}
               maxGuests={maxGuests}
               bookings={bookings}
               price={price}
               onBookingSubmit={handleBookingSubmit}
+              venueOwner={owner} // Add this line to pass the venue owner
             />
           </div>
         </div>

@@ -181,17 +181,17 @@ const EditVenuePage: React.FC = () => {
       setIsSaving(true);
       setError(null);
       
-      await updateVenue(id, { ...formData, rating: formData.rating ?? undefined }, token);
+      const updatedVenue = await updateVenue(id, { ...formData, rating: formData.rating ?? undefined }, token);
       
       setSuccess('Venue updated successfully!');
       
-      // Clear success message after 3 seconds
+      // Show success message briefly before redirecting
       setTimeout(() => {
-        setSuccess(null);
-      }, 3000);
+        // Redirect to venue details page
+        navigate(`/venues/${id}`);
+      }, 1000);
     } catch (err) {
       setError('Failed to update venue. Please try again.');
-    } finally {
       setIsSaving(false);
     }
   };
