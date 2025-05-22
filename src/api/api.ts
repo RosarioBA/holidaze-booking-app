@@ -5,7 +5,7 @@
 
 // API base URL - Change to use Vite proxy
 export const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://v2.api.noroff.dev/api' 
+  ? 'https://v2.api.noroff.dev' 
   : '/api';
 
 // API key for Noroff API
