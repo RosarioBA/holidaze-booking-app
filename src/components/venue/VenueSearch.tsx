@@ -56,7 +56,7 @@ const VenueSearch: React.FC<VenueSearchProps> = ({
   onClearFilters
 }) => {
   return (
-    <section className="bg-[#0081A7] text-white p-6 rounded-lg -mx-2 md:-mx-4 lg:-mx-6">
+    <section className="bg-[#0081A7] text-white p-6 rounded-lg">
       <h1 className="text-3xl font-bold mb-6 font-averia">Explore Venues</h1>
       
       <form onSubmit={onSearch} className="space-y-4">

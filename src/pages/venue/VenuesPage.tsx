@@ -351,8 +351,9 @@ const VenuesPage: React.FC = () => {
   };
   
   return (
-    <div className="space-y-8 px-4 md:px-6 lg:px-4">
+    <div className="space-y-8">
       {/* Search and Filter Form */}
+      <div className="px-2">
       <VenueSearch
         searchValue={search}
         minPrice={minPrice}
@@ -368,7 +369,9 @@ const VenuesPage: React.FC = () => {
         onApplyFilters={applyFilters}
         onClearFilters={clearFilters}
       />
-
+      </div>
+      <div className="px-4 md:px-6 lg:px-8">
+      {/* Filters Button */}
       {/* Loading, Error and Empty States */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -410,6 +413,7 @@ const VenuesPage: React.FC = () => {
           />
         </>
       )}
+    </div>
     </div>
   );
 };
