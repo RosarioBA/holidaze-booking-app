@@ -57,10 +57,10 @@ const VenuesPage: React.FC = () => {
    */
   useEffect(() => {
     const fetchVenues = async () => {
-      console.log('🔍 Fetching page:', pagination.currentPage, 'with limit:', ITEMS_PER_PAGE);
+      console.log('🔍 Fetching page:', initialPage, 'with limit:', ITEMS_PER_PAGE);
       try {
         setLoading(true);
-        const result = await getVenues(pagination.currentPage, ITEMS_PER_PAGE)
+        const result = await getVenues(initialPage, ITEMS_PER_PAGE)
         
     console.log('📊 API Result:', result);
     console.log('🏠 Venues found:', result?.venues?.length || 0);
@@ -94,7 +94,7 @@ const VenuesPage: React.FC = () => {
         // Set pagination data if available
         if (result && typeof result === 'object' && 'meta' in result && result.meta) {
           setPagination({
-            currentPage: result.meta.currentPage || pagination.currentPage,
+            currentPage: result.meta.currentPage || initialPage,
             totalPages: result.meta.pageCount || 1,
             isFirstPage: result.meta.isFirstPage || (result.meta.currentPage === 1),
             isLastPage: result.meta.isLastPage || (result.meta.currentPage === result.meta.pageCount)
