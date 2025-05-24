@@ -184,7 +184,7 @@ const VenueCard: React.FC<VenueCardProps> = ({ venue, source }) => {
           </div>
           
           <div className="mt-4 flex justify-end">
-            <div className="bg-blue-600 text-white px-4 py-1 rounded text-sm">
+           <div className="bg-primary text-white px-4 py-1 rounded text-sm hover:bg-primary-dark transition-colors">
               View
             </div>
           </div>
