@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { getVenueById } from '../../api/venueService';
 import { createBooking } from '../../api/bookingService';
 import { getVenueRatings, hasUserRatedVenue, calculateAverageRating } from '../../api/ratingService';
@@ -33,7 +33,6 @@ import VenuePriceCard from '../../components/venue/VenuePriceCard';
 const VenueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { token, user } = useAuth();
-  const navigate = useNavigate();
 
   // Get source from query parameters
   const currentLocation = useLocation();
@@ -53,7 +52,6 @@ const VenueDetailPage = () => {
   const [averageRating, setAverageRating] = useState(0);
   const [userHasBooked, setUserHasBooked] = useState(false);
   const [userHasRated, setUserHasRated] = useState(false);
-  const [showRatingForm, setShowRatingForm] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   /**
@@ -336,7 +334,7 @@ const VenueDetailPage = () => {
             averageRating={averageRating}
             ratings={ratings}
             isLoading={ratingsLoading}
-            showRatingForm={showRatingForm}
+            showRatingForm={showRatingModal}
             canRateVenue={canRateVenue ?? false}
             venueId={id || ''}
             onRatingSubmitted={handleRatingSubmitted}

@@ -63,10 +63,6 @@ const CustomerDashboardPage: React.FC = () => {
             const recentlyViewedIds = JSON.parse(recentlyViewedString);
             
             if (Array.isArray(recentlyViewedIds) && recentlyViewedIds.length > 0) {
-              // Filter venues to only include those in recently viewed list
-              const recentVenues = (allVenues.venues as Venue[]).filter(venue => 
-                recentlyViewedIds.includes(venue.id)
-              );
               
               // Sort them according to the order in recentlyViewedIds
               const orderedRecentVenues = [];

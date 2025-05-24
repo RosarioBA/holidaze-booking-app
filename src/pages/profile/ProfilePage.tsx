@@ -48,12 +48,8 @@ const extractCleanBio = (bioText: string): string => {
  */
 const ProfilePage: React.FC = () => {
   const { user, token, updateUser, logout } = useAuth();
-  const navigate = useNavigate();
   const editFormRef = useRef<HTMLDivElement>(null);
   
-  // Define user-specific storage keys
-  const AVATAR_STORAGE_KEY = user ? `holidaze_avatar_url_${user.name}_${user.venueManager ? 'manager' : 'customer'}` : 'holidaze_avatar_url_default';
-  const BANNER_STORAGE_KEY = user ? `holidaze_banner_url_${user.name}_${user.venueManager ? 'manager' : 'customer'}` : 'holidaze_banner_url_default';
   
   // State
   const [profile, setProfile] = useState<Profile | null>(null);
