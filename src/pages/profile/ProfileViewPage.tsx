@@ -15,6 +15,19 @@ import { Profile } from '../../types/profile'; // Import the shared Profile inte
 import ProfileHeader from '../../components/profile/ProfileHeader';
 
 /**
+ * Extracts the actual bio text from a bio that may contain favorites data
+ * @param bioText - The bio text that may contain favorites JSON
+ * @returns The clean bio text without favorites data
+ */
+const extractCleanBio = (bioText: string): string => {
+  if (!bioText) return '';
+  
+  // Remove the favorites data section if it exists
+  const cleanBio = bioText.replace(/\[FAVORITES\].*?\[\/FAVORITES\]$/, '').trim();
+  return cleanBio;
+};
+
+/**
  * Component for a single venue card
  */
 interface VenueCardProps {
@@ -206,7 +219,7 @@ const ProfileViewPage: React.FC = () => {
           <h1 className="text-2xl font-bold font-averia">{profile.name}</h1>
           <p className="text-gray-600 font-light">{profile.email}</p>
           <p className="text-gray-700 mt-2 tracking-wide">
-            {profile.bio || 'No bio provided'}
+           {extractCleanBio(profile.bio || '') || 'No bio provided'}
           </p>
         </div>
       </div>
