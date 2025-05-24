@@ -11,7 +11,7 @@
  * @param {string} venueId - ID of the venue to add
  * @param {string} venueName - Name of the venue (for debugging)
  */
-export const addToRecentlyViewed = (venueId: string, venueName: string) => {
+export const addToRecentlyViewed = (venueId: string) => {
     try {
       // Get existing recently viewed IDs or initialize empty array
       const recentlyViewedString = localStorage.getItem('recentlyViewed');

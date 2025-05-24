@@ -14,7 +14,7 @@ import { getUserAvatar, fetchProfileFromApi } from '../utils/avatarUtils';
  * @param {string} [prefix=''] - Optional prefix for the storage key (e.g., 'header', 'manager')
  * @returns {string | undefined} - The current avatar URL
  */
-const useAvatar = (user: Profile | null, prefix: string = ''): string | undefined => {
+const useAvatar = (user: Profile | null): string | undefined => {
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
   const [token] = useState<string | null>(localStorage.getItem('token'));
   

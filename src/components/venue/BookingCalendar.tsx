@@ -13,17 +13,6 @@ import { Booking } from '../../types/venue';
 import BookingSuccess from './BookingSuccess';
 import { Link } from 'react-router-dom';
 
-/**
- * Custom inline styles for elements that can't be styled with Tailwind
- */
-const calendarStyles = {
-  bookedDay: {
-    backgroundColor: '#fee2e2',
-    borderColor: '#fecaca',
-    color: '#991b1b',
-    cursor: 'not-allowed'
-  }
-};
 
 /**
  * Props for the BookingCalendar component
