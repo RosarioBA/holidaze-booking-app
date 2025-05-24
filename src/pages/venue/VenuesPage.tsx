@@ -119,7 +119,7 @@ const VenuesPage: React.FC = () => {
     };
 
     fetchVenues();
-  }, [pagination.currentPage]);
+  }, [initialPage]);
   
   /**
    * Handles search form submission
@@ -341,15 +341,14 @@ const VenuesPage: React.FC = () => {
     params.set('page', newPage.toString());
     navigate(`${location.pathname}?${params.toString()}`);
     
-    // Update pagination state
+    // Update pagination state - this should trigger the useEffect
     setPagination(prev => ({
       ...prev,
       currentPage: newPage,
       isFirstPage: newPage === 1,
-      isLastPage: newPage === pagination.totalPages
+      isLastPage: newPage === prev.totalPages
     }));
   };
-  
   return (
     <div className="space-y-8">
       {/* Search and Filter Form */}
