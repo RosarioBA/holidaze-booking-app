@@ -1,11 +1,10 @@
 /**
  * @file FavoritesContext.tsx
- * @description Context provider for managing user favorite venues with API persistence
+ * @description Context provider for managing user favorite venues with localStorage persistence only
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { updateProfileWithApi, fetchProfileFromApi } from '../utils/avatarUtils';
 
 /**
  * Interface for the favorites context value
@@ -49,57 +48,22 @@ interface FavoritesProviderProps {
 }
 
 /**
- * Extracts favorites array from bio text that may contain both bio and favorites data
- * 
- * @param {string} bioText - The bio text that may contain favorites JSON
- * @returns {{ bio: string, favorites: string[] }} Separated bio and favorites
- */
-const extractFavoritesFromBio = (bioText: string): { bio: string, favorites: string[] } => {
-  try {
-    // Look for a JSON object at the end of the bio that contains favorites
-    const favoritesMatch = bioText.match(/\[FAVORITES\](.*?)\[\/FAVORITES\]$/);
-    if (favoritesMatch) {
-      const favoritesJson = favoritesMatch[1];
-      const favorites = JSON.parse(favoritesJson);
-      const bio = bioText.replace(/\[FAVORITES\].*?\[\/FAVORITES\]$/, '').trim();
-      return { bio, favorites: Array.isArray(favorites) ? favorites : [] };
-    }
-    return { bio: bioText, favorites: [] };
-  } catch (error) {
-    return { bio: bioText, favorites: [] };
-  }
-};
-
-/**
- * Combines bio text with favorites data for storage
- * 
- * @param {string} bio - The user's bio text
- * @param {string[]} favorites - Array of favorite venue IDs
- * @returns {string} Combined bio and favorites string
- */
-const combineBioWithFavorites = (bio: string, favorites: string[]): string => {
-  const trimmedBio = bio.trim();
-  const favoritesJson = JSON.stringify(favorites);
-  return trimmedBio + `[FAVORITES]${favoritesJson}[/FAVORITES]`;
-};
-
-/**
  * Provider component for managing user favorite venues
- * Handles persistence of favorites both in localStorage and API
+ * Handles persistence of favorites in localStorage only
  * 
  * @param {FavoritesProviderProps} props - Component props
  * @returns {JSX.Element} Provider component with context
  */
 export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Storage key specific to the current user
-  const storageKey = user ? `favoriteVenues_${user.name}` : 'favoriteVenues';
+  const storageKey = user ? `favoriteVenues_${user.name}` : 'favoriteVenues_guest';
   
   /**
-   * Load favorites from localStorage as fallback
+   * Load favorites from localStorage
    */
   const loadFavoritesFromLocalStorage = (): string[] => {
     try {
@@ -128,90 +92,27 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
   };
   
   /**
-   * Load favorites from API when user logs in
+   * Load favorites when user changes or component mounts
    */
   useEffect(() => {
-    const loadFavoritesFromApi = async () => {
-      if (!user || !token) {
-        // If no user, load from localStorage
-        const localFavorites = loadFavoritesFromLocalStorage();
-        setFavorites(localFavorites);
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        setIsLoading(true);
-        
-        // Fetch user profile from API
-        const profile = await fetchProfileFromApi(user.name, token);
-        
-        if (profile.bio) {
-          // Extract favorites from bio
-          const { favorites: apiFavorites } = extractFavoritesFromBio(profile.bio);
-          setFavorites(apiFavorites);
-          
-          // Also save to localStorage for offline access
-          saveFavoritesToLocalStorage(apiFavorites);
-        } else {
-          // No bio data, check localStorage
-          const localFavorites = loadFavoritesFromLocalStorage();
-          setFavorites(localFavorites);
-        }
-      } catch (error) {
-        console.error('Error loading favorites from API:', error);
-        
-        // Fallback to localStorage
-        const localFavorites = loadFavoritesFromLocalStorage();
-        setFavorites(localFavorites);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadFavoritesFromApi();
-  }, [user, token]);
-  
-  /**
-   * Save favorites to both localStorage and API
-   */
-  const saveFavorites = async (newFavorites: string[]) => {
-    // Always save to localStorage immediately for responsive UI
-    saveFavoritesToLocalStorage(newFavorites);
-    setFavorites(newFavorites);
-    
-    // Save to API if user is logged in
-    if (user && token) {
-      try {
-        // Get current profile to preserve existing bio
-        const currentProfile = await fetchProfileFromApi(user.name, token);
-        const { bio: currentBio } = extractFavoritesFromBio(currentProfile.bio || '');
-        
-        // Combine current bio with new favorites
-        const updatedBio = combineBioWithFavorites(currentBio, newFavorites);
-        
-        // Update profile with new bio containing favorites
-        await updateProfileWithApi(user.name, token, {
-          bio: updatedBio
-        });
-      } catch (error) {
-        console.error('Error saving favorites to API:', error);
-        // Don't throw error - localStorage save was successful
-      }
-    }
-  };
+    setIsLoading(true);
+    const localFavorites = loadFavoritesFromLocalStorage();
+    setFavorites(localFavorites);
+    setIsLoading(false);
+  }, [user?.name, storageKey]);
   
   /**
    * Add a venue to the favorites list
    * 
    * @param {string} venueId - ID of the venue to add to favorites
    */
-  const addFavorite = async (venueId: string) => {
+  const addFavorite = (venueId: string) => {
     const newFavorites = favorites.includes(venueId) 
       ? favorites 
       : [...favorites, venueId];
     
-    await saveFavorites(newFavorites);
+    setFavorites(newFavorites);
+    saveFavoritesToLocalStorage(newFavorites);
   };
   
   /**
@@ -219,9 +120,10 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
    * 
    * @param {string} venueId - ID of the venue to remove from favorites
    */
-  const removeFavorite = async (venueId: string) => {
+  const removeFavorite = (venueId: string) => {
     const newFavorites = favorites.filter(id => id !== venueId);
-    await saveFavorites(newFavorites);
+    setFavorites(newFavorites);
+    saveFavoritesToLocalStorage(newFavorites);
   };
   
   /**
