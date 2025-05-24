@@ -180,8 +180,7 @@ const EditVenuePage: React.FC = () => {
     try {
       setIsSaving(true);
       setError(null);
-      
-      const updatedVenue = await updateVenue(id, { ...formData, rating: formData.rating ?? undefined }, token);
+    
       
       setSuccess('Venue updated successfully!');
       

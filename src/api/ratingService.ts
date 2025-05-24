@@ -69,7 +69,7 @@ const saveRatingsToStorage = (ratingsMap: Record<string, Rating[]>): void => {
 export const submitRating = async (
   venueId: string,
   data: { rating: number; comment?: string },
-  token: string,
+  _token: string,
   userName: string = 'Anonymous'
 ): Promise<Rating> => {
   // Load existing ratings

@@ -84,8 +84,7 @@ const VenueManagerBookingsPage: React.FC = () => {
         const venuesData = await getVenueManagerVenues(user.name, token);
         setVenues(venuesData);
         
-        // Get bookings from the manager's own profile
-        const profileBookings = await getProfileBookings(user.name, token);
+  
         
         // For each venue, fetch its bookings
         const allBookings: VenueBooking[] = [];

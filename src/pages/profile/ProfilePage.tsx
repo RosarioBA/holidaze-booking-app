@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getUserBookings } from '../../api/bookingService';
 import { getVenueManagerVenues } from '../../api/venueService';
 import { fetchFromApi } from '../../api/api';
