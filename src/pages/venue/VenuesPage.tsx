@@ -86,11 +86,8 @@ const VenuesPage: React.FC = () => {
         setVenues(processedVenues);
         
         // Only update filtered venues and search results if not already initialized
-        if (!dataInitialized) {
-          setFilteredVenues(processedVenues);
-          setSearchResults(processedVenues);
-        }
-        
+        setFilteredVenues(processedVenues);
+        setSearchResults(processedVenues);
         // Set pagination data if available
         if (result && typeof result === 'object' && 'meta' in result && result.meta) {
           setPagination({
