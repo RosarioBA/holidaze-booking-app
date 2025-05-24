@@ -29,7 +29,7 @@ interface CustomerLayoutProps {
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const avatarUrl = useAvatar(user, 'customer');
+  const avatarUrl = useAvatar(user);
   const [isMobileMenuOpen, toggleMobileMenu, closeMobileMenu] = useMobileMenu();
   
   /**

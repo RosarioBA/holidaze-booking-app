@@ -29,7 +29,7 @@ interface VenueManagerLayoutProps {
 const VenueManagerLayout: React.FC<VenueManagerLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const avatarUrl = useAvatar(user, 'manager');
+  const avatarUrl = useAvatar(user);
   const [isMobileMenuOpen, toggleMobileMenu, closeMobileMenu] = useMobileMenu();
   
   /**

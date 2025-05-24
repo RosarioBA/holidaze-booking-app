@@ -20,7 +20,7 @@ const Header: React.FC = () => {
   const { user, isAuthenticated, isVenueManager, logout } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, toggleMobileMenu, closeMobileMenu] = useMobileMenu('header-mobile-menu');
-  const avatarUrl = useAvatar(user, 'header');
+  const avatarUrl = useAvatar(user);
   
   /**
    * Determines if a navigation link is active based on current path

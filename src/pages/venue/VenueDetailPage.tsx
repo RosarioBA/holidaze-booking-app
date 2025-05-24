@@ -150,7 +150,7 @@ const VenueDetailPage = () => {
         
         // Add this venue to recently viewed (localStorage)
         if (venueData) {
-          addToRecentlyViewed(venueData.id, venueData.name);
+          addToRecentlyViewed(venueData.id);
         }
       } catch (err) {
         setError('Failed to load venue details. Please try again later.');
