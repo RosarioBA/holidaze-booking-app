@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getVenueById, updateVenue, deleteVenue } from '../../api/venueService';
+import { getVenueById, deleteVenue } from '../../api/venueService';
 import { Venue } from '../../types/venue';
 import VenueForm, { VenueFormData } from '../../components/venue/VenueForm';
 
@@ -171,7 +171,7 @@ const EditVenuePage: React.FC = () => {
    * 
    * @param {VenueFormData} formData - Form data from VenueForm
    */
-  const handleSubmit = async (formData: VenueFormData) => {
+  const handleSubmit = async (_formData: VenueFormData) => {
     if (!id || !token) {
       setError('You must be logged in to update a venue');
       return;

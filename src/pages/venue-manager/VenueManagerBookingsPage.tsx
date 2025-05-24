@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getVenueManagerVenues } from '../../api/venueService';
-import { getProfileBookings } from '../../api/bookingService';
 import { Venue } from '../../types/venue';
 import { fetchFromApi } from '../../api/api';
 import { getUserAvatar } from '../../utils/avatarUtils';
