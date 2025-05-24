@@ -204,7 +204,7 @@ const RegisterPage = () => {
             
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition duration-200"
+              className="w-full  bg-primary text-white py-2 px-4 rounded font-medium hover:bg-primary-dark transition duration-200"
               disabled={isLoading}
             >
               {isLoading ? 'Creating Account...' : 'Create An Account'}
