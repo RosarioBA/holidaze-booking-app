@@ -36,8 +36,7 @@ const VenuesGrid: React.FC<VenuesGridProps> = ({
   // Calculate which venues to show based on pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedVenues = venues.slice(startIndex, endIndex);
-
+  const paginatedVenues = venues; // API already returns paginated data
   return (
     <div className="px-2">
       <div className="flex justify-between items-center mb-4">
