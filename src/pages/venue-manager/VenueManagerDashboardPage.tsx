@@ -7,15 +7,6 @@ import { fetchFromApi } from '../../api/api';
 import { Venue, Booking } from '../../types/venue';
 import { getUserAvatar } from '../../utils/avatarUtils';
 
-interface Customer {
-  name: string;
-  email: string;
-  avatar?: {
-    url: string;
-    alt?: string;
-  };
-}
-
 const VenueManagerDashboardPage: React.FC = () => {
   const { user, token } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);

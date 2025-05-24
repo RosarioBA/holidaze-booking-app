@@ -5,8 +5,6 @@
  * @description Search and filter form for venues
  */
 
-import React, { useState } from 'react';
-import { VenueFilters } from '../../types/venue';
 
 interface VenueSearchProps {
   /** Current search query */

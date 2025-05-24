@@ -13,7 +13,6 @@ import { Profile } from '../../types/profile'; // Import the shared Profile inte
 
 // Import shared components
 import ProfileHeader from '../../components/profile/ProfileHeader';
-import ProfileInfo from '../../components/profile/ProfileInfo';
 
 /**
  * Component for a single venue card
