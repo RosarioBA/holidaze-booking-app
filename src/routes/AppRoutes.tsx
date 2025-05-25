@@ -93,9 +93,6 @@ const AppRoutes = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('Route changed:', location.pathname);
-    console.log('User authenticated:', isAuthenticated);
-    console.log('User is venue manager:', isVenueManager);
   }, [location.pathname, isAuthenticated, isVenueManager]);
 
   const DashboardRedirect = () => {

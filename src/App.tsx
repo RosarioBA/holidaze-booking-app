@@ -6,7 +6,6 @@ import ScrollToTop from './components/common/ScrollToTop';
 import './index.css';
 
 function App() {
-  console.log('DEBUG: App component rendering');
 
   // Use the import.meta.env.BASE_URL to get the base path from Vite
   const basePath = import.meta.env.BASE_URL;

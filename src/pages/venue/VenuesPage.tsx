@@ -57,14 +57,9 @@ const VenuesPage: React.FC = () => {
    */
   useEffect(() => {
     const fetchVenues = async () => {
-      console.log('🔍 Fetching page:', initialPage, 'with limit:', ITEMS_PER_PAGE);
       try {
         setLoading(true);
         const result = await getVenues(initialPage, ITEMS_PER_PAGE)
-        
-    console.log('📊 API Result:', result);
-    console.log('🏠 Venues found:', result?.venues?.length || 0);
-    console.log('📄 Meta:', result?.meta);;
         
         // Extract venues from the result based on its structure
         let venuesList: Venue[] = [];
