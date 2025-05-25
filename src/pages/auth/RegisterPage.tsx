@@ -107,7 +107,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-yellow-50 px-4">
+    <div className="w-full flex items-center justify-center bg-yellow-50 px-4 py-20">
       <div className="w-full max-w-md">
       <div className="mb-2 text-xs uppercase tracking-wide text-gray-600 font-averia">HOLIDAZE</div>
       <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
