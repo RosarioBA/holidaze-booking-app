@@ -49,7 +49,7 @@ const VenueDetailPage = () => {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(0);
-  const [userHasBooked, setUserHasBooked] = useState(false);
+  const [setUserHasBooked] = useState(false);
   const [userHasRated, setUserHasRated] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userHasCompletedStay, setUserHasCompletedStay] = useState(false);
@@ -161,7 +161,6 @@ const VenueDetailPage = () => {
         setCannotRateReason('not_stayed');
       }
       
-      setUserHasBooked(completedStayAtVenue);
     } catch (error) {
       console.error('Error checking user booking history:', error);
       setUserHasCompletedStay(false);
@@ -240,10 +239,7 @@ const VenueDetailPage = () => {
       // Refresh venue data to update booking information
       const updatedVenue = await getVenueById(id, true, true);
       setVenue(updatedVenue);
-      
-      // Update userHasBooked state
-      setUserHasBooked(true);
-      
+
       // Scroll to the top to show the success message
       window.scrollTo(0, 0);
     } catch (err: any) {
@@ -353,8 +349,7 @@ const VenueDetailPage = () => {
       <div className="mb-6">
         <ImageGallery images={media} name={name} />
       </div>
-      
-      
+    
 
       {/* Two Column Layout for Details and Booking */}
       <div className="flex flex-col lg:flex-row gap-10">
