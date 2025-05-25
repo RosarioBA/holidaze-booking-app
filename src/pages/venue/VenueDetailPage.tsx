@@ -49,7 +49,6 @@ const VenueDetailPage = () => {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(0);
-  const [setUserHasBooked] = useState(false);
   const [userHasRated, setUserHasRated] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userHasCompletedStay, setUserHasCompletedStay] = useState(false);
