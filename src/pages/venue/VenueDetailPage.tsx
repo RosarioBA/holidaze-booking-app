@@ -16,7 +16,6 @@ import { addToRecentlyViewed } from '../../utils/venueUtils';
 // Components
 import ImageGallery from '../../components/venue/ImageGallery';
 import BookingCalendar from '../../components/venue/BookingCalendar';
-import RatingPrompt from '../../components/venue/RatingPrompt';
 import RatingModal from '../../components/venue/RatingModal';
 import VenueHeader from '../../components/venue/VenueHeader';
 import VenueAmenities from '../../components/venue/VenueAmenities';
@@ -355,13 +354,7 @@ const VenueDetailPage = () => {
         <ImageGallery images={media} name={name} />
       </div>
       
-      {/* Rating Prompt */}
-      <RatingPrompt
-        venueId={id || ''}
-        hasUserBooked={userHasBooked}
-        hasUserRated={userHasRated}
-        onOpenRatingForm={() => setShowRatingModal(true)}
-      />
+      
 
       {/* Two Column Layout for Details and Booking */}
       <div className="flex flex-col lg:flex-row gap-10">
