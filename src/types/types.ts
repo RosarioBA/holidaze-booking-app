@@ -1,5 +1,11 @@
 // src/types/types.ts
 
+/**
+ * @file types.ts 
+ * @description Type definitions for various entities in the application
+ */
+
+
 export interface Media {
     url: string;
     alt: string;

@@ -1,4 +1,8 @@
-// src/pages/booking/BookingDetailPage.tsx
+/**
+ * @file BookingDetailPage.tsx
+ * @description Page component for viewing and managing booking details
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format, parseISO, differenceInDays } from 'date-fns';
@@ -6,8 +10,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import BookingUpdateForm from '../../components/booking/BookingUpdateForm';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import { getBookingById, deleteBooking } from '../../api/bookingService';
-import { Booking } from '../../types/venue'; // Import from the updated types file
+import { Booking } from '../../types/venue';
 
+/**
+ * Page component that displays detailed information about a booking
+ * Allows users to view, modify, or cancel their booking
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const BookingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { token } = useAuth();
@@ -21,6 +31,9 @@ const BookingDetailPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  /**
+   * Fetches booking details on component mount
+   */
   useEffect(() => {
     const fetchBooking = async () => {
       if (!id || !token) return;
@@ -29,11 +42,9 @@ const BookingDetailPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         
-        // Use the bookingService function instead of making a direct API call
         const bookingData = await getBookingById(id, token);
         setBooking(bookingData);
       } catch (err) {
-        console.error('Error fetching booking:', err);
         setError('Failed to load booking details. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -43,6 +54,11 @@ const BookingDetailPage: React.FC = () => {
     fetchBooking();
   }, [id, token]);
 
+  /**
+   * Handles successful booking update
+   * 
+   * @param {Booking} updatedBooking - The updated booking data
+   */
   const handleUpdateSuccess = (updatedBooking: Booking) => {
     setBooking(updatedBooking);
     setIsEditing(false);
@@ -54,19 +70,20 @@ const BookingDetailPage: React.FC = () => {
     }, 5000);
   };
 
+  /**
+   * Handles booking cancellation
+   */
   const handleDeleteBooking = async () => {
     if (!id || !token) return;
     
     try {
       setIsDeleting(true);
       
-      // Use the bookingService function instead of making a direct API call
       await deleteBooking(id, token);
       
       // Navigate to My Trips page after successful deletion
       navigate('/my-trips', { state: { message: 'Booking cancelled successfully' } });
     } catch (err) {
-      console.error('Error deleting booking:', err);
       setError('Failed to cancel booking. Please try again later.');
       setShowDeleteModal(false);
     } finally {
@@ -74,6 +91,7 @@ const BookingDetailPage: React.FC = () => {
     }
   };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -82,6 +100,7 @@ const BookingDetailPage: React.FC = () => {
     );
   }
 
+  // Error state
   if (error || !booking) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -98,6 +117,7 @@ const BookingDetailPage: React.FC = () => {
     );
   }
 
+  // Calculate booking details
   const startDate = parseISO(booking.dateFrom);
   const endDate = parseISO(booking.dateTo);
   const nightsCount = differenceInDays(endDate, startDate);
@@ -107,7 +127,6 @@ const BookingDetailPage: React.FC = () => {
   const isUpcoming = new Date(booking.dateFrom) > new Date();
 
   return (
-    // Removed the AuthenticatedLayout wrapper
     <div className="max-w-4xl mx-auto">
       {/* Success Message */}
       {successMessage && (

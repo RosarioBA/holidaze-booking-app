@@ -1,8 +1,16 @@
-// src/pages/auth/RegisterPage.tsx
+/**
+ * @file RegisterPage.tsx
+ * @description User registration page with account type selection (customer or venue manager)
+ */
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-
+/**
+ * Registration page component that allows users to create new Holidaze accounts
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -13,6 +21,11 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
 
+  /**
+   * Handles the account type selection
+   * 
+   * @param {'customer' | 'venueManager'} type - The account type selected by the user
+   */
   const handleAccountTypeChange = (type: 'customer' | 'venueManager') => {
     if (type === 'customer') {
       setIsCustomer(true);
@@ -23,11 +36,13 @@ const RegisterPage = () => {
     }
   };
 
+  /**
+   * Handles the form submission for user registration
+   * 
+   * @param {React.FormEvent<HTMLFormElement>} e - Form submission event
+   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Add debugging
-    console.log("Registering with account type:", isVenueManager ? "Venue Manager" : "Customer");
     
     // Validate email domain
     if (!email.endsWith('@stud.noroff.no')) {
@@ -45,14 +60,12 @@ const RegisterPage = () => {
       setIsLoading(true);
       setApiError('');
       
-      // Log the registration data being sent
       const registrationData = {
         name,
         email,
         password,
-        venueManager: isVenueManager // Make sure this is a boolean
+        venueManager: isVenueManager
       };
-      console.log("Sending registration data:", registrationData);
       
       const response = await fetch('https://v2.api.noroff.dev/auth/register', {
         method: 'POST',
@@ -63,7 +76,6 @@ const RegisterPage = () => {
       });
       
       const data = await response.json();
-      console.log("Registration response:", data);
       
       if (!response.ok) {
         if (data.errors && Array.isArray(data.errors)) {
@@ -88,7 +100,6 @@ const RegisterPage = () => {
       });
       
     } catch (error: any) {
-      console.error("Registration error:", error);
       setApiError(error.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -193,7 +204,7 @@ const RegisterPage = () => {
             
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition duration-200"
+              className="w-full  bg-primary text-white py-2 px-4 rounded font-medium hover:bg-primary-dark transition duration-200"
               disabled={isLoading}
             >
               {isLoading ? 'Creating Account...' : 'Create An Account'}

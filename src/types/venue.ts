@@ -1,3 +1,9 @@
+/**
+ * @file venue.ts
+ * @description Type definitions for venue-related interfaces
+ * @module venue
+ */
+
 export interface Media {
   url: string;
   alt?: string;

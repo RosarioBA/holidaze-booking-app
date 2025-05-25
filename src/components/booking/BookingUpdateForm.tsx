@@ -1,4 +1,8 @@
-// src/components/booking/BookingUpdateForm.tsx
+/**
+ * @file BookingUpdateForm.tsx
+ * @description Form component for updating booking details including dates and guest count
+ */
+
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -7,12 +11,24 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Booking } from '../../types/venue';
 import { updateBooking } from '../../api/bookingService';
 
+/**
+ * Props for the BookingUpdateForm component
+ */
 interface BookingUpdateFormProps {
+  /** The booking to be updated */
   booking: Booking;
+  /** Function to call when update is cancelled */
   onCancel: () => void;
+  /** Function to call when update is successful */
   onSuccess: (updatedBooking: Booking) => void;
 }
 
+/**
+ * Form component for updating existing bookings
+ * 
+ * @param {BookingUpdateFormProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
   booking,
   onCancel,
@@ -27,12 +43,22 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
   
   const maxGuests = booking.venue?.maxGuests || 1;
   
+  /**
+   * Handles date range selection from the date picker
+   * 
+   * @param {[Date | null, Date | null]} dates - Array containing start and end dates
+   */
   const handleDateChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
   };
   
+  /**
+   * Handles form submission to update the booking
+   * 
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -61,7 +87,6 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
         guests
       };
       
-      // Use the bookingService function instead of direct API call
       const updatedBooking = await updateBooking(booking.id, updateData, token);
 
       if (!updatedBooking) {
@@ -76,7 +101,6 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
       
       onSuccess(completeUpdatedBooking);
     } catch (err: any) {
-      console.error('Error updating booking:', err);
       setError(err.message || 'Failed to update booking. Please try again.');
     } finally {
       setIsLoading(false);
@@ -170,4 +194,3 @@ const BookingUpdateForm: React.FC<BookingUpdateFormProps> = ({
 };
 
 export default BookingUpdateForm;
-

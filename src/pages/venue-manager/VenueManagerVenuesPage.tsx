@@ -1,10 +1,15 @@
 // src/pages/venue-manager/VenueManagerVenuesPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getVenueManagerVenues, deleteVenue } from '../../api/venueService';
 import { Venue } from '../../types/venue';
 
+/**
+ * Displays a list of venues managed by the authenticated venue manager.
+ * Provides functionality to delete or edit existing venues, and create new ones.
+ */
 const VenueManagerVenuesPage: React.FC = () => {
   const { user, token } = useAuth();
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -17,17 +22,19 @@ const VenueManagerVenuesPage: React.FC = () => {
     fetchVenues();
   }, [token, user]);
 
-  const fetchVenues = async () => {
+  /**
+   * Fetches the venues associated with the current venue manager.
+   */
+  const fetchVenues = async (): Promise<void> => {
     if (!token || !user) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const myVenues = await getVenueManagerVenues(user.name, token);
       setVenues(myVenues);
-    } catch (err) {
-      console.error('Error fetching venues:', err);
+    } catch {
       setError('Failed to load venues. Please try again later.');
       setVenues([]);
     } finally {
@@ -35,27 +42,34 @@ const VenueManagerVenuesPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (venueId: string) => {
+  /**
+   * Deletes a venue by its ID and refreshes the list.
+   * @param venueId - The ID of the venue to delete.
+   */
+  const handleDelete = async (venueId: string): Promise<void> => {
     if (!token) return;
-    
+
     setIsDeleting(true);
     setError(null);
-    
+
     try {
       await deleteVenue(venueId, token);
-      // Refresh the venues list after successful deletion
       await fetchVenues();
       setDeleteConfirmId(null);
-    } catch (err) {
-      console.error('Error deleting venue:', err);
+    } catch {
       setError('Failed to delete venue. Please try again.');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const getImageUrl = (venue: Venue) => {
-    if (venue?.media && venue.media.length > 0 && venue.media[0].url) {
+  /**
+   * Retrieves the image URL for a venue, or returns a placeholder if unavailable.
+   * @param venue - The venue object.
+   * @returns The image URL.
+   */
+  const getImageUrl = (venue: Venue): string => {
+    if (venue?.media?.length && venue.media[0].url) {
       return venue.media[0].url;
     }
     return 'https://placehold.co/300x200?text=No+Image';
@@ -80,13 +94,13 @@ const VenueManagerVenuesPage: React.FC = () => {
           Create New Venue
         </Link>
       </div>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
-      
+
       {venues.length === 0 ? (
         <div className="text-center p-12 bg-white rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-4 font-averia">No venues yet</h2>
@@ -100,12 +114,12 @@ const VenueManagerVenuesPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venues.map(venue => (
+          {venues.map((venue) => (
             <div key={venue.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
               <div className="h-48 bg-gray-200">
-                <img 
-                  src={getImageUrl(venue)} 
-                  alt={venue.name} 
+                <img
+                  src={getImageUrl(venue)}
+                  alt={venue.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -122,7 +136,7 @@ const VenueManagerVenuesPage: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    to={`/venues/${venue.id}`}
+                    to={`/venues/${venue.id}?source=manager-venues`}
                     className="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded hover:bg-gray-200"
                   >
                     View
@@ -141,23 +155,22 @@ const VenueManagerVenuesPage: React.FC = () => {
                   </button>
                 </div>
               </div>
-              
-              {/* Delete Confirmation Modal */}
+
               {deleteConfirmId === venue.id && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                   <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                  <h3 className="text-lg font-semibold mb-4 font-averia">Confirm Deletion</h3>
+                    <h3 className="text-lg font-semibold mb-4 font-averia">Confirm Deletion</h3>
                     <p className="text-gray-600 mb-6 font-light">
                       Are you sure you want to delete "{venue.name}"? This action cannot be undone.
                     </p>
                     <div className="flex gap-4">
-                    <button
-                      onClick={() => handleDelete(venue.id)}
-                      disabled={isDeleting}
-                      className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 font-medium tracking-wide"
-                    >
-                      {isDeleting ? 'Deleting...' : 'Yes, Delete'}
-                    </button>
+                      <button
+                        onClick={() => handleDelete(venue.id)}
+                        disabled={isDeleting}
+                        className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50 font-medium tracking-wide"
+                      >
+                        {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                      </button>
                       <button
                         onClick={() => setDeleteConfirmId(null)}
                         disabled={isDeleting}

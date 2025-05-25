@@ -1,30 +1,75 @@
-// src/contexts/AuthContext.tsx
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getUsernameFromToken } from '../api/api';
+/**
+ * @file AuthContext.tsx
+ * @description Authentication context provider for managing user authentication state
+ */
 
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+/**
+ * User profile information structure
+ * IMPORTANT: Make sure this matches your Profile interface in types/profile.ts
+ */
 interface Profile {
+  /** User's name/username */
   name: string;
+  /** User's email address */
   email: string;
+  /** User's avatar image (optional) */
   avatar?: {
+    /** URL of the avatar image */
     url: string;
+    /** Alternative text for the avatar */
     alt: string;
   };
+  /** User's banner image (optional) */
+  banner?: {
+    /** URL of the banner image */
+    url: string;
+    /** Alternative text for the banner */
+    alt: string;
+  };
+  /** Whether the user has venue manager privileges */
   venueManager: boolean;
+  /** User's biography (optional) */
   bio?: string;
+  /** User's related counts */
+  _count?: {
+    /** Number of venues */
+    venues: number;
+    /** Number of bookings */
+    bookings: number;
+  };
 }
 
+/**
+ * Authentication context interface providing auth state and methods
+ */
 interface AuthContextType {
+  /** Currently authenticated user or null if not authenticated */
   user: Profile | null;
+  /** JWT authentication token or null if not authenticated */
   token: string | null;
+  /** Whether a user is currently authenticated */
   isAuthenticated: boolean;
+  /** Whether the current user has venue manager privileges */
   isVenueManager: boolean;
+  /** Function to authenticate a user with token and profile */
   login: (token: string, userProfile: Profile) => void;
+  /** Function to log out the current user */
   logout: () => void;
+  /** Function to update the current user's profile data */
   updateUser: (updatedUserData: Partial<Profile>) => void;
 }
 
+// Create the authentication context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Custom hook to access the authentication context
+ * 
+ * @returns {AuthContextType} The authentication context value
+ * @throws {Error} When used outside of an AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -33,10 +78,21 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * Props for the AuthProvider component
+ */
 interface AuthProviderProps {
+  /** Child components that will have access to the auth context */
   children: ReactNode;
 }
 
+/**
+ * Authentication provider component that manages user authentication state
+ * Handles token validation, persistence, and user information
+ * 
+ * @param {AuthProviderProps} props - Component props
+ * @returns {JSX.Element} Auth provider with context
+ */
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<Profile | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -45,7 +101,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Computed property for role check (explicitly cast to boolean)
   const isVenueManager = user?.venueManager === true;
   
-  // Helper function to check if token is valid
+  /**
+   * Validates if a JWT token is properly formatted and not expired
+   * 
+   * @param {string} token - JWT token to validate
+   * @returns {boolean} Whether the token is valid
+   */
   const isTokenValid = (token: string): boolean => {
     try {
       // Basic check that token is in JWT format
@@ -63,26 +124,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       return true;
     } catch (error) {
-      console.error('Error validating token:', error);
+      // Only log in development environment
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error validating token:', error);
+      }
       return false;
     }
   };
   
-  // Load user data from localStorage on initial render
+  /**
+   * Load authentication state from localStorage on initial render
+   */
   useEffect(() => {
-    console.log('Initializing auth state from localStorage');
     const loadAuth = () => {
       setLoading(true);
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
       
-      console.log('Stored token exists:', !!storedToken);
-      console.log('Stored user exists:', !!storedUser);
-      
       if (storedToken && storedUser) {
-        try {
-          console.log('Validating token and parsing user data');
-          
+        try {          
           if (isTokenValid(storedToken)) {
             const parsedUser = JSON.parse(storedUser);
             
@@ -94,20 +154,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             setToken(storedToken);
             setUser(normalizedUser);
-            console.log('Auth state restored successfully');
-            console.log('Venue Manager status:', normalizedUser.venueManager);
           } else {
-            console.warn('Stored token is invalid or expired');
+            // Token is invalid or expired, clear storage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
           }
         } catch (error) {
-          console.error('Error parsing stored user data:', error);
+          // Error parsing stored data, clear storage
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
-      } else {
-        console.log('No stored authentication data found');
       }
       setLoading(false);
     };
@@ -118,7 +174,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Also set up a listener for storage events to handle multi-tab synchronization
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'token' || event.key === 'user') {
-        console.log('Authentication data changed in another tab, reloading');
         loadAuth();
       }
     };
@@ -131,48 +186,49 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
   }, []);
   
+  /**
+   * Logs in a user with the provided token and profile
+   * 
+   * @param {string} newToken - JWT token for the authenticated user
+   * @param {Profile} userProfile - User profile information
+   */
   const login = (newToken: string, userProfile: Profile) => {
-    console.log('Login called with profile:', userProfile);
-    console.log('Profile venueManager status:', userProfile.venueManager, 'Type:', typeof userProfile.venueManager);
-    
     // Ensure venueManager is a proper boolean
     const normalizedProfile: Profile = {
       ...userProfile,
       venueManager: userProfile.venueManager === true
     };
     
-    console.log('Normalized profile venueManager:', normalizedProfile.venueManager);
-    
     // Save to localStorage
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(normalizedProfile));
     
-    // Verify what was saved
-    const savedUser = localStorage.getItem('user');
-    console.log('Saved user data:', savedUser);
-    
     // Update state
     setToken(newToken);
     setUser(normalizedProfile);
-    console.log('Login successful, auth state updated');
   };
-// In AuthContext.tsx, update the logout function:
+
+  /**
+   * Logs out the current user and clears authentication state
+   */
   const logout = () => {
-  console.log('Logging out');
+    // Clear all authentication and user-specific data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem(`holidaze_avatar_url_${user?.name}`); // Clear user-specific avatar
+    localStorage.removeItem('registered_as_venue_manager');
+    localStorage.removeItem('registered_venue_manager_name');
+    
+    // Update state
+    setToken(null);
+    setUser(null);
+  };
   
-  // Clear all authentication and user-specific data
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  localStorage.removeItem(`holidaze_avatar_url_${user?.name}`); // Clear user-specific avatar
-  localStorage.removeItem('registered_as_venue_manager');
-  localStorage.removeItem('registered_venue_manager_name');
-  
-  // Update state
-  setToken(null);
-  setUser(null);
-  console.log('Logout complete, auth state cleared');
-};
-  
+  /**
+   * Updates the current user's profile information
+   * 
+   * @param {Partial<Profile>} updatedUserData - New user data to merge with existing profile
+   */
   const updateUser = (updatedUserData: Partial<Profile>) => {
     if (!user) return;
     
@@ -180,7 +236,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const updatedUser = { 
       ...user, 
       ...updatedUserData
-      // Remove the venueManager override to allow it to be updated
     };
     
     // Save to localStorage
@@ -188,14 +243,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Update state
     setUser(updatedUser);
-    console.log('User data updated successfully:', updatedUser);
   };
 
+  // Context value to be provided to consumers
   const value = {
     user,
     token,
     isAuthenticated: !!token,
-    isVenueManager, // Use the computed property
+    isVenueManager,
     login,
     logout,
     updateUser,

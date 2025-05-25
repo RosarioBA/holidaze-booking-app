@@ -1,15 +1,36 @@
-// src/contexts/FavoritesContext.tsx
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+/**
+ * @file FavoritesContext.tsx
+ * @description Context provider for managing user favorite venues with localStorage persistence only
+ */
 
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
+
+/**
+ * Interface for the favorites context value
+ */
 interface FavoritesContextType {
-  favorites: string[]; // Array of venue IDs
+  /** Array of venue IDs that are marked as favorites */
+  favorites: string[];
+  /** Function to add a venue to favorites */
   addFavorite: (venueId: string) => void;
+  /** Function to remove a venue from favorites */
   removeFavorite: (venueId: string) => void;
+  /** Function to check if a venue is favorited */
   isFavorite: (venueId: string) => boolean;
+  /** Whether favorites are currently being loaded */
+  isLoading: boolean;
 }
 
+// Create context with undefined default value
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
+/**
+ * Custom hook to access the favorites context
+ * 
+ * @returns {FavoritesContextType} The favorites context value
+ * @throws {Error} When used outside of a FavoritesProvider
+ */
 export const useFavorites = () => {
   const context = useContext(FavoritesContext);
   if (context === undefined) {
@@ -18,77 +39,109 @@ export const useFavorites = () => {
   return context;
 };
 
+/**
+ * Props for the FavoritesProvider component
+ */
 interface FavoritesProviderProps {
+  /** Child components that will have access to the favorites context */
   children: ReactNode;
 }
 
+/**
+ * Provider component for managing user favorite venues
+ * Handles persistence of favorites in localStorage only
+ * 
+ * @param {FavoritesProviderProps} props - Component props
+ * @returns {JSX.Element} Provider component with context
+ */
 export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
-  // Initialize state directly from localStorage to prevent overwriting
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    console.log('DEBUG: Initializing favorites state from localStorage');
+  const { user } = useAuth();
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Storage key specific to the current user
+  const storageKey = user ? `favoriteVenues_${user.name}` : 'favoriteVenues_guest';
+  
+  /**
+   * Load favorites from localStorage
+   */
+  const loadFavoritesFromLocalStorage = (): string[] => {
     try {
-      const storedFavorites = localStorage.getItem('favoriteVenues');
-      console.log('DEBUG: Raw stored favorites:', storedFavorites);
-      
+      const storedFavorites = localStorage.getItem(storageKey);
       if (storedFavorites) {
         const parsedFavorites = JSON.parse(storedFavorites);
-        console.log('DEBUG: Parsed favorites:', parsedFavorites);
         if (Array.isArray(parsedFavorites)) {
           return parsedFavorites;
         }
       }
     } catch (error) {
-      console.error('ERROR: Parsing favorites from localStorage:', error);
+      console.error('Error parsing favorites from localStorage:', error);
     }
-    return []; // Default to empty array if no favorites or error
-  });
+    return [];
+  };
   
-  // Only save to localStorage when favorites change
+  /**
+   * Save favorites to localStorage
+   */
+  const saveFavoritesToLocalStorage = (favoritesToSave: string[]) => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(favoritesToSave));
+    } catch (error) {
+      console.error('Error saving favorites to localStorage:', error);
+    }
+  };
+  
+  /**
+   * Load favorites when user changes or component mounts
+   */
   useEffect(() => {
-    console.log('DEBUG: Saving favorites to localStorage:', favorites);
-    localStorage.setItem('favoriteVenues', JSON.stringify(favorites));
-    // Verify it was saved correctly
-    const savedValue = localStorage.getItem('favoriteVenues');
-    console.log('DEBUG: Verification - saved value:', savedValue);
-  }, [favorites]);
+    setIsLoading(true);
+    const localFavorites = loadFavoritesFromLocalStorage();
+    setFavorites(localFavorites);
+    setIsLoading(false);
+  }, [user?.name, storageKey]);
   
+  /**
+   * Add a venue to the favorites list
+   * 
+   * @param {string} venueId - ID of the venue to add to favorites
+   */
   const addFavorite = (venueId: string) => {
-    console.log('DEBUG: Adding favorite:', venueId);
-    setFavorites(prev => {
-      if (prev.includes(venueId)) {
-        console.log('DEBUG: Venue already in favorites, not adding');
-        return prev;
-      }
-      console.log('DEBUG: Adding venue to favorites');
-      const newFavorites = [...prev, venueId];
-      console.log('DEBUG: New favorites list:', newFavorites);
-      return newFavorites;
-    });
+    const newFavorites = favorites.includes(venueId) 
+      ? favorites 
+      : [...favorites, venueId];
+    
+    setFavorites(newFavorites);
+    saveFavoritesToLocalStorage(newFavorites);
   };
   
+  /**
+   * Remove a venue from the favorites list
+   * 
+   * @param {string} venueId - ID of the venue to remove from favorites
+   */
   const removeFavorite = (venueId: string) => {
-    console.log('DEBUG: Removing favorite:', venueId);
-    setFavorites(prev => {
-      const result = prev.filter(id => id !== venueId);
-      console.log('DEBUG: New favorites after removal:', result);
-      return result;
-    });
+    const newFavorites = favorites.filter(id => id !== venueId);
+    setFavorites(newFavorites);
+    saveFavoritesToLocalStorage(newFavorites);
   };
   
+  /**
+   * Check if a venue is in the favorites list
+   * 
+   * @param {string} venueId - ID of the venue to check
+   * @returns {boolean} True if the venue is favorited, false otherwise
+   */
   const isFavorite = (venueId: string) => {
-    const result = favorites.includes(venueId);
-    // Reduce log spam by only logging true results
-    if (result) {
-      console.log(`DEBUG: Venue ${venueId} is a favorite`);
-    }
-    return result;
+    return favorites.includes(venueId);
   };
   
   const value = {
     favorites,
     addFavorite,
     removeFavorite,
-    isFavorite
+    isFavorite,
+    isLoading
   };
   
   return (

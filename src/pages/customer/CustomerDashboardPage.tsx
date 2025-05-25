@@ -1,4 +1,8 @@
-// src/pages/customer/CustomerDashboardPage.tsx
+/**
+ * @file CustomerDashboardPage.tsx
+ * @description Dashboard page for customer users with upcoming trips, saved venues, and recently viewed venues
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +11,12 @@ import { Venue } from '../../types/venue';
 import { getVenues } from '../../api/venueService';
 import { getUserBookings } from '../../api/bookingService';
 
+/**
+ * Dashboard page component for customer users
+ * Displays personalized content including upcoming trips, saved venues, and recently viewed venues
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
 const CustomerDashboardPage: React.FC = () => {
   const { user, token } = useAuth();
   const { favorites } = useFavorites();
@@ -15,6 +25,9 @@ const CustomerDashboardPage: React.FC = () => {
   const [recentlyViewed, setRecentlyViewed] = useState<Venue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * Fetches all dashboard data on component mount and when dependencies change
+   */
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
@@ -44,19 +57,12 @@ const CustomerDashboardPage: React.FC = () => {
         
         // Get recently viewed venues from localStorage
         const recentlyViewedString = localStorage.getItem('recentlyViewed');
-        console.log("DEBUG Dashboard: Recently viewed from localStorage:", recentlyViewedString);
         
         if (recentlyViewedString) {
           try {
             const recentlyViewedIds = JSON.parse(recentlyViewedString);
-            console.log("DEBUG Dashboard: Recently viewed IDs:", recentlyViewedIds);
             
             if (Array.isArray(recentlyViewedIds) && recentlyViewedIds.length > 0) {
-              // Filter venues to only include those in recently viewed list
-              const recentVenues = (allVenues.venues as Venue[]).filter(venue => 
-                recentlyViewedIds.includes(venue.id)
-              );
-              console.log("DEBUG Dashboard: Recent venues found:", recentVenues.map(v => v.name));
               
               // Sort them according to the order in recentlyViewedIds
               const orderedRecentVenues = [];
@@ -70,21 +76,18 @@ const CustomerDashboardPage: React.FC = () => {
               setRecentlyViewed(orderedRecentVenues.slice(0, 2));
             } else {
               // Fallback to random venues if recently viewed is empty
-              console.log("DEBUG Dashboard: No recently viewed IDs found, using random venues");
               setRecentlyViewed(allVenues.venues.slice(3, 5));
             }
           } catch (error) {
-            console.error('Error parsing recently viewed:', error);
             setRecentlyViewed(allVenues.venues.slice(3, 5));
           }
         } else {
           // No recently viewed in localStorage, use random venues
-          console.log("DEBUG Dashboard: No recently viewed in localStorage, using random venues");
           setRecentlyViewed(allVenues.venues.slice(3, 5));
         }
         
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        // Handle errors silently, dashboard will show empty states
       } finally {
         setIsLoading(false);
       }
@@ -93,7 +96,12 @@ const CustomerDashboardPage: React.FC = () => {
     fetchDashboardData();
   }, [token, favorites]);
 
-  // Venue card for displaying venues in saved and recently viewed sections
+  /**
+   * Venue card component for displaying venues in saved and recently viewed sections
+   * 
+   * @param {{ venue: Venue }} props - Component props
+   * @returns {JSX.Element} Rendered component
+   */
   const VenueCard = ({ venue }: { venue: Venue }) => (
     <div className="bg-[#F5F7DC] rounded-lg overflow-hidden shadow-sm">
       <Link to={`/venues/${venue.id}`}>
@@ -125,7 +133,12 @@ const CustomerDashboardPage: React.FC = () => {
     </div>
   );
 
-  // Trip card for displaying upcoming bookings
+  /**
+   * Trip card component for displaying upcoming bookings
+   * 
+   * @param {{ booking: any }} props - Component props
+   * @returns {JSX.Element} Rendered component
+   */
   const TripCard = ({ booking }: { booking: any }) => (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
       <Link to={`/bookings/${booking.id}`}>
@@ -144,6 +157,7 @@ const CustomerDashboardPage: React.FC = () => {
     </div>
   );
 
+  // Loading state
   if (isLoading) {
     return (
         <div className="flex justify-center items-center h-64">

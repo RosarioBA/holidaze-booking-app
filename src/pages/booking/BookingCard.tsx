@@ -1,18 +1,32 @@
-// src/components/booking/BookingCard.tsx
+/**
+ * @file BookingCard.tsx
+ * @description Card component for displaying booking information in user's booking history
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Booking } from '../../types/venue';
 import { formatDate } from '../../utils/dateUtils';
 import StarRating from '../../components/common/StarRating';
 
+/**
+ * Props for the BookingCard component
+ */
 interface BookingCardProps {
+  /** The booking to display */
   booking: Booking;
+  /** Whether the user has already rated this venue */
   hasRated: boolean;
+  /** Function to call when the rate button is clicked */
   onRateClick: () => void;
 }
 
 /**
  * Card component for a booking in the user's booking history
+ * Displays venue details, booking dates, status, and action buttons
+ * 
+ * @param {BookingCardProps} props - Component props
+ * @returns {JSX.Element|null} Rendered component or null if venue data is missing
  */
 const BookingCard: React.FC<BookingCardProps> = ({ booking, hasRated, onRateClick }) => {
   const { id, dateFrom, dateTo, venue, guests } = booking;

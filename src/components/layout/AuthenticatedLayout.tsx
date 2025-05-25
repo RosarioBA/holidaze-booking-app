@@ -1,16 +1,28 @@
-// src/components/layout/AuthenticatedLayout.tsx
+/**
+ * @file AuthenticatedLayout.tsx
+ * @description Layout component for authenticated users with responsive sidebar navigation
+ */
+
 import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
+/**
+ * Props for the AuthenticatedLayout component
+ */
 interface AuthenticatedLayoutProps {
+  /** Child components to be rendered in the main content area */
   children: ReactNode;
 }
 
-// In AuthenticatedLayout.tsx and CustomerLayout.tsx
-
+/**
+ * Layout component for authenticated users providing navigation sidebar and user controls
+ * Adapts to both mobile and desktop viewports with responsive design
+ * 
+ * @param {AuthenticatedLayoutProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) => {
-  // Set this to false for production
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const AVATAR_STORAGE_KEY = `holidaze_avatar_url_${user?.name}`;
@@ -18,13 +30,9 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(user?.avatar?.url);
 
-  // Add debugging logs
-  console.log("Current user in AuthenticatedLayout:", user);
-  console.log("Is venue manager:", user?.venueManager);
-  console.log("Venue manager type:", typeof user?.venueManager);
- 
-
-  // Check for saved avatar URL whenever the component renders
+  /**
+   * Effect to handle avatar URL management from localStorage and user object
+   */
   useEffect(() => {
     const checkForAvatar = () => {
       const savedAvatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
@@ -51,19 +59,28 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user]);
+  }, [user, AVATAR_STORAGE_KEY]);
 
+  /**
+   * Handles user logout and redirects to homepage
+   */
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  /**
+   * Determines if a navigation link is active based on current path
+   * 
+   * @param {string} path - Path to check against current location
+   * @returns {string} CSS class for active state or empty string
+   */
   const isActive = (path: string) => {
     return location.pathname === path ? 'bg-[#13262F]' : '';
   };
 
-  // Check if user is a venue manager (with force option for testing)
-  const forceVenueManager = false; // Set to true for testing purposes
+  // Configure venue manager status
+  const forceVenueManager = false; // Set to false for production
   const isVenueManager = user?.venueManager === true || forceVenueManager;
 
   return (
@@ -162,11 +179,6 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
           >
             Profile
           </Link>
-          
-          {/* Debug info about venue manager status */}
-          <div className="px-6 py-2 text-gray-400 text-xs">
-            Venue Manager: {isVenueManager ? 'Yes' : 'No'} {forceVenueManager ? '(Forced)' : ''}
-          </div>
         </nav>
         <div className="p-6">
           <button 

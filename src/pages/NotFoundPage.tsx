@@ -1,6 +1,13 @@
 // src/pages/NotFoundPage.tsx
 import { Link } from 'react-router-dom';
 
+/**
+ * NotFoundPage component that displays a 404 error message
+ * when the requested page is not found.
+ * 
+ * @returns {JSX.Element} Rendered component
+ */
+
 const NotFoundPage = () => {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">

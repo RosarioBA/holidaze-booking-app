@@ -1,4 +1,7 @@
-// src/components/booking/EditBookingModal.tsx
+/**
+ * @file EditBookingModal.tsx
+ * @description Modal component for editing existing bookings with date selection and guest count
+ */
 
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
@@ -7,12 +10,24 @@ import { updateBooking } from '../../api/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
 import { Booking, Venue } from '../../types/venue';
 
+/**
+ * Props for the EditBookingModal component
+ */
 interface EditBookingModalProps {
+  /** The booking to be edited */
   booking: Booking;
+  /** Function to call when editing is cancelled */
   onClose: () => void;
+  /** Function to call when update is successful */
   onSuccess: (updatedBooking: Booking) => void;
 }
 
+/**
+ * Modal component for editing booking details such as dates and guest count
+ * 
+ * @param {EditBookingModalProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 const EditBookingModal: React.FC<EditBookingModalProps> = ({
   booking,
   onClose,
@@ -28,12 +43,22 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({
   const venue = booking.venue as Venue;
   const maxGuests = venue?.maxGuests || 1;
   
+  /**
+   * Handles date range selection from the date picker
+   * 
+   * @param {[Date | null, Date | null]} dates - Array containing start and end dates
+   */
   const handleDateChange = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
   };
   
+  /**
+   * Handles form submission to update the booking
+   * 
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -74,7 +99,6 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({
         setError('Failed to update booking. Please try again.');
       }
     } catch (err: any) {
-      console.error('Error updating booking:', err);
       setError(err.message || 'An error occurred while updating your booking');
     } finally {
       setIsLoading(false);

@@ -1,22 +1,25 @@
-// src/routes/AppRoutes.tsx
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
+// Layouts
 import Layout from '../components/layout/Layout';
 import CustomerLayout from '../components/layout/CostumerLayout';
 import VenueManagerLayout from '../components/layout/VenueManagerLayout';
 
-// Pages
+// Public Pages
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import VenuesPage from '../pages/venue/VenuesPage';
 import VenueDetailPage from '../pages/venue/VenueDetailPage';
+import ProfileViewPage from '../pages/profile/ProfileViewPage';
+import NotFoundPage from '../pages/NotFoundPage';
+
+// Shared Auth Pages
 import BookingDetailPage from '../pages/booking/BookingDetailPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
-import NotFoundPage from '../pages/NotFoundPage';
-import ProfileViewPage from '../pages/profile/ProfileViewPage';
 
 // Customer Pages
 import CustomerDashboardPage from '../pages/customer/CustomerDashboardPage';
@@ -26,12 +29,13 @@ import CustomerSavedPage from '../pages/customer/CustomerSavedPage';
 // Venue Manager Pages
 import VenueManagerDashboardPage from '../pages/venue-manager/VenueManagerDashboardPage';
 import CreateVenuePage from '../pages/venue-manager/CreateVenuePage';
-
 import VenueManagerVenuesPage from '../pages/venue-manager/VenueManagerVenuesPage';
 import VenueManagerBookingsPage from '../pages/venue-manager/VenueManagerBookingsPage';
 import EditVenuePage from '../pages/venue-manager/EditVenuePage';
 
-// Role-based Protected Route component
+// ---------------------------
+// Protected Routes
+// ---------------------------
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireVenueManager: boolean;
@@ -40,236 +44,138 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, requireVenueManager }: ProtectedRouteProps) => {
   const { isAuthenticated, isVenueManager } = useAuth();
   const location = useLocation();
-  
-  // Add extra debugging
-  console.log('ProtectedRoute - Path:', location.pathname);
-  console.log('ProtectedRoute - isAuthenticated:', isAuthenticated);
-  console.log('ProtectedRoute - isVenueManager:', isVenueManager);
-  console.log('ProtectedRoute - requireVenueManager:', requireVenueManager);
-  
-  // First check if user is authenticated
+
   if (!isAuthenticated) {
-    console.log('ProtectedRoute - Not authenticated, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
-  // Check if user has appropriate role for this route
+
   const hasCorrectRole = requireVenueManager === isVenueManager;
-  
   if (!hasCorrectRole) {
-    console.log('ProtectedRoute - Incorrect role for this route');
-    // Redirect to the appropriate dashboard
     return <Navigate to={isVenueManager ? "/venue-manager/dashboard" : "/customer/dashboard"} replace />;
   }
-  
-  // User has appropriate permissions
+
   return <>{children}</>;
 };
-// Component for general authenticated routes (accessible by both roles)
+
 const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
-// Component that chooses the correct layout based on which section of the site they're in
+// ---------------------------
+// Conditional Layout
+// ---------------------------
 const ConditionalLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isVenueManager } = useAuth();
-  const location = useLocation();
-  
-  // Check if user is authenticated and their role
+
   if (isAuthenticated) {
-    // If user is a venue manager, use VenueManagerLayout
-    if (isVenueManager) {
-      return <VenueManagerLayout>{children}</VenueManagerLayout>;
-    }
-    // If user is a regular customer, use CustomerLayout
-    else {
-      return <CustomerLayout>{children}</CustomerLayout>;
-    }
+    return isVenueManager ? (
+      <VenueManagerLayout>{children}</VenueManagerLayout>
+    ) : (
+      <CustomerLayout>{children}</CustomerLayout>
+    );
   }
-  
-  // For non-authenticated users, use the standard layout
+
   return <Layout>{children}</Layout>;
 };
+
+// ---------------------------
+// Main App Routes
+// ---------------------------
 const AppRoutes = () => {
   const { isAuthenticated, isVenueManager } = useAuth();
   const location = useLocation();
-  
+
   useEffect(() => {
-    console.log('Route changed:', location.pathname);
-    console.log('User authenticated:', isAuthenticated);
-    console.log('User is venue manager:', isVenueManager);
   }, [location.pathname, isAuthenticated, isVenueManager]);
-  
-  // Redirect based on user type
+
   const DashboardRedirect = () => {
-    if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
-    }
-    
-    if (isVenueManager) {
-      return <Navigate to="/venue-manager/dashboard" replace />;
-    }
-    
-    return <Navigate to="/customer/dashboard" replace />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    return <Navigate to={isVenueManager ? "/venue-manager/dashboard" : "/customer/dashboard"} replace />;
   };
-  
+
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/" element={
-        isAuthenticated ? <DashboardRedirect /> : 
-        <Layout>
-          <HomePage />
-        </Layout>
-      } />
-      
-      {/* Use ConditionalLayout for Venues pages */}
-      <Route path="/venues" element={
-        <ConditionalLayout>
-          <VenuesPage />
-        </ConditionalLayout>
-      } />
-      
-      <Route path="/venues/:id" element={
-        <ConditionalLayout>
-          <VenueDetailPage />
-        </ConditionalLayout>
-      } />
-      
-      <Route path="/login" element={
-        isAuthenticated ? <DashboardRedirect /> :
-        <Layout>
-          <LoginPage />
-        </Layout>
-      } />
-      
-      <Route path="/register" element={
-        isAuthenticated ? <DashboardRedirect /> :
-        <Layout>
-          <RegisterPage />
-        </Layout>
-      } />
-      
-      {/* Dashboard redirect route */}
+      {/* Public Routes */}
+      <Route path="/" element={isAuthenticated ? <DashboardRedirect /> : <Layout><HomePage /></Layout>} />
+      <Route path="/venues" element={<ConditionalLayout><VenuesPage /></ConditionalLayout>} />
+      <Route path="/venues/:id" element={<ConditionalLayout><VenueDetailPage /></ConditionalLayout>} />
+      <Route path="/profiles/:name" element={<ConditionalLayout><ProfileViewPage /></ConditionalLayout>} />
+      <Route path="/login" element={isAuthenticated ? <DashboardRedirect /> : <Layout><LoginPage /></Layout>} />
+      <Route path="/register" element={isAuthenticated ? <DashboardRedirect /> : <Layout><RegisterPage /></Layout>} />
       <Route path="/dashboard" element={<DashboardRedirect />} />
-      
-      {/* Legacy path redirects */}
       <Route path="/my-trips" element={<Navigate to="/customer/trips" replace />} />
       <Route path="/saved" element={<Navigate to="/customer/saved" replace />} />
-      
-      {/* Customer routes */}
+
+      {/* Customer Routes */}
       <Route path="/customer/dashboard" element={
         <ProtectedRoute requireVenueManager={false}>
-          <CustomerLayout>
-            <CustomerDashboardPage />
-          </CustomerLayout>
+          <CustomerLayout><CustomerDashboardPage /></CustomerLayout>
         </ProtectedRoute>
       } />
-      
       <Route path="/customer/trips" element={
         <ProtectedRoute requireVenueManager={false}>
-          <CustomerLayout>
-            <CustomerTripsPage />
-          </CustomerLayout>
+          <CustomerLayout><CustomerTripsPage /></CustomerLayout>
         </ProtectedRoute>
       } />
-      
       <Route path="/customer/saved" element={
         <ProtectedRoute requireVenueManager={false}>
-          <CustomerLayout>
-            <CustomerSavedPage />
-          </CustomerLayout>
+          <CustomerLayout><CustomerSavedPage /></CustomerLayout>
         </ProtectedRoute>
       } />
-      
-      {/* Shared authenticated routes - available to any authenticated user */}
+
+      {/* Shared Auth Routes */}
       <Route path="/bookings/:id" element={
         <AuthenticatedRoute>
-          <ConditionalLayout>
-            <BookingDetailPage />
-          </ConditionalLayout>
+          <ConditionalLayout><BookingDetailPage /></ConditionalLayout>
         </AuthenticatedRoute>
       } />
-      
       <Route path="/settings" element={
         <AuthenticatedRoute>
-          <ConditionalLayout>
-            <SettingsPage />
-          </ConditionalLayout>
+          <ConditionalLayout><SettingsPage /></ConditionalLayout>
         </AuthenticatedRoute>
       } />
-      
       <Route path="/profile" element={
         <AuthenticatedRoute>
-          <ConditionalLayout>
-            <ProfilePage />
-          </ConditionalLayout>
+          <ConditionalLayout><ProfilePage /></ConditionalLayout>
         </AuthenticatedRoute>
       } />
 
-<Route path="/profiles/:name" element={
-  <ConditionalLayout>
-    <ProfileViewPage />
-  </ConditionalLayout>
-} />
-      
       {/* Venue Manager Routes */}
       <Route path="/venue-manager/dashboard" element={
         <ProtectedRoute requireVenueManager={true}>
-          <VenueManagerLayout>
-            <VenueManagerDashboardPage />
-          </VenueManagerLayout>
+          <VenueManagerLayout><VenueManagerDashboardPage /></VenueManagerLayout>
         </ProtectedRoute>
       } />
-      
       <Route path="/venue-manager/create" element={
         <ProtectedRoute requireVenueManager={true}>
-          <VenueManagerLayout>
-            <CreateVenuePage />
-          </VenueManagerLayout>
+          <VenueManagerLayout><CreateVenuePage /></VenueManagerLayout>
         </ProtectedRoute>
       } />
-      
-      {/* These routes need to be added once you create the components */}
-      
       <Route path="/venue-manager/venues" element={
         <ProtectedRoute requireVenueManager={true}>
-          <VenueManagerLayout>
-            <VenueManagerVenuesPage />
-          </VenueManagerLayout>
+          <VenueManagerLayout><VenueManagerVenuesPage /></VenueManagerLayout>
         </ProtectedRoute>
       } />
-      
-    <Route path="/venue-manager/bookings" element={
+      <Route path="/venue-manager/bookings" element={
         <ProtectedRoute requireVenueManager={true}>
-          <VenueManagerLayout>
-            <VenueManagerBookingsPage />
-          </VenueManagerLayout>
+          <VenueManagerLayout><VenueManagerBookingsPage /></VenueManagerLayout>
         </ProtectedRoute>
-      } />  
-      
+      } />
       <Route path="/venue-manager/edit/:id" element={
         <ProtectedRoute requireVenueManager={true}>
-          <VenueManagerLayout>
-            <EditVenuePage />
-          </VenueManagerLayout>
+          <VenueManagerLayout><EditVenuePage /></VenueManagerLayout>
         </ProtectedRoute>
       } />
-      
-      
-      {/* 404 route */}
-      <Route path="*" element={
-        <ConditionalLayout>
-          <NotFoundPage />
-        </ConditionalLayout>
-      } />
+
+      {/* Fallback 404 */}
+      <Route path="*" element={<ConditionalLayout><NotFoundPage /></ConditionalLayout>} />
     </Routes>
   );
 };

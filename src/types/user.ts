@@ -1,4 +1,8 @@
-// src/types/user.ts
+/** 
+  * @file user.ts
+  * @description Type definitions for user-related interfaces
+  */
+
 export interface MediaObject {
     url: string;
     alt: string;

@@ -1,16 +1,36 @@
-// src/components/common/ConfirmationModal.tsx
+/**
+ * @file ConfirmationModal.tsx
+ * @description Reusable confirmation modal component with customizable text and actions
+ */
+
 import React from 'react';
 
+/**
+ * Props for the ConfirmationModal component
+ */
 interface ConfirmationModalProps {
+  /** Title displayed at the top of the modal */
   title: string;
+  /** Main message explaining the confirmation action */
   message: string;
+  /** Text for the confirm button */
   confirmText: string;
+  /** Text for the cancel button */
   cancelText: string;
+  /** Whether an action is currently being processed */
   isLoading?: boolean;
+  /** Function to call when the user confirms the action */
   onConfirm: () => void;
+  /** Function to call when the user cancels the action */
   onCancel: () => void;
 }
 
+/**
+ * Generic confirmation modal for any action that requires user confirmation
+ * 
+ * @param {ConfirmationModalProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   title,
   message,

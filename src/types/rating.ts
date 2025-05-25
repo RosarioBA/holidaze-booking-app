@@ -1,4 +1,10 @@
 // src/types/rating.ts
+
+/**
+ * @file rating.ts
+ * @description Type definitions for rating-related interfaces
+ */
+
 export interface Rating {
     id: string;
     rating: number;

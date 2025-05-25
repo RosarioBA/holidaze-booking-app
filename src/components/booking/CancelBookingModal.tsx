@@ -1,16 +1,32 @@
-// src/components/booking/CancelBookingModal.tsx
+/**
+ * @file CancelBookingModal.tsx
+ * @description Modal component for confirming and processing booking cancellations
+ */
 
 import React, { useState } from 'react';
 import { deleteBooking } from '../../api/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
 
+/**
+ * Props for the CancelBookingModal component
+ */
 interface CancelBookingModalProps {
+  /** ID of the booking to cancel */
   bookingId: string;
+  /** Name of the venue for display in confirmation message */
   venueName: string;
+  /** Function to call when cancellation is aborted */
   onClose: () => void;
+  /** Function to call when cancellation is successful */
   onSuccess: () => void;
 }
 
+/**
+ * Modal component for confirming and processing booking cancellations
+ * 
+ * @param {CancelBookingModalProps} props - Component props
+ * @returns {JSX.Element} Rendered component
+ */
 const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   bookingId,
   venueName,
@@ -21,6 +37,9 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  /**
+   * Handles the booking cancellation process
+   */
   const handleCancel = async () => {
     if (!token) {
       setError('You must be logged in to cancel a booking');
@@ -39,7 +58,6 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
         setError('Failed to cancel booking. Please try again.');
       }
     } catch (err: any) {
-      console.error('Error cancelling booking:', err);
       setError(err.message || 'An error occurred while cancelling your booking');
     } finally {
       setIsLoading(false);
