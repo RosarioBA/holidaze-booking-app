@@ -17,6 +17,8 @@ interface RatingFormProps {
   onRatingSubmitted: () => void;
   /** Whether the user is eligible to rate this venue */
   canRate: boolean;
+  /** Reason why user cannot rate (for better UX) */
+  cannotRateReason?: 'not_stayed' | 'already_rated' | 'not_logged_in' | 'own_venue';
 }
 
 /**
@@ -24,10 +26,15 @@ interface RatingFormProps {
  * Includes star rating selection and optional text review
  * 
  * @param {RatingFormProps} props - Component props
- * @returns {JSX.Element | null} Rendered rating form or null if user cannot rate
+ * @returns {JSX.Element | null} Rendered rating form or appropriate message
  */
-const RatingForm: React.FC<RatingFormProps> = ({ venueId, onRatingSubmitted, canRate }) => {
-  const { token, isAuthenticated } = useAuth();
+const RatingForm: React.FC<RatingFormProps> = ({ 
+  venueId, 
+  onRatingSubmitted, 
+  canRate, 
+  cannotRateReason 
+}) => {
+  const { token, isAuthenticated, user } = useAuth();
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
@@ -68,7 +75,7 @@ const RatingForm: React.FC<RatingFormProps> = ({ venueId, onRatingSubmitted, can
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated || !token || !user) {
       setError('You must be logged in to submit a rating');
       return;
     }
@@ -88,7 +95,8 @@ const RatingForm: React.FC<RatingFormProps> = ({ venueId, onRatingSubmitted, can
           rating,
           comment: comment.trim() || undefined
         },
-        token
+        token,
+        user.name
       );
       
       setSuccess(true);
@@ -110,18 +118,74 @@ const RatingForm: React.FC<RatingFormProps> = ({ venueId, onRatingSubmitted, can
     }
   };
 
-  // Don't render anything if the user can't rate this venue
-  if (!canRate) {
-    return null;
-  }
-
   // Show login prompt if user is not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-center text-gray-700">
-          Please <a href="/login" className="text-[#0081A7] hover:underline">login</a> to rate this venue
-        </p>
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <p className="text-blue-800">
+            Please <a href="/login" className="text-[#0081A7] hover:underline font-medium">login</a> to leave a review
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show appropriate message if user cannot rate
+  if (!canRate) {
+    const getMessage = () => {
+      switch (cannotRateReason) {
+        case 'not_stayed':
+          return {
+            title: "You can only review venues you've stayed at",
+            message: "Book and complete a stay at this venue to leave a review.",
+            icon: "🏨",
+            color: "amber"
+          };
+        case 'already_rated':
+          return {
+            title: "You've already reviewed this venue",
+            message: "You can only leave one review per venue.",
+            icon: "⭐",
+            color: "green"
+          };
+        case 'own_venue':
+          return {
+            title: "You cannot review your own venue",
+            message: "Venue owners cannot leave reviews for their own properties.",
+            icon: "🏠",
+            color: "gray"
+          };
+        default:
+          return {
+            title: "Unable to leave a review",
+            message: "You are not eligible to review this venue at this time.",
+            icon: "ℹ️",
+            color: "blue"
+          };
+      }
+    };
+
+    const { title, message, icon, color } = getMessage();
+    const colorClasses = {
+      amber: "bg-amber-50 border-amber-200 text-amber-800",
+      green: "bg-green-50 border-green-200 text-green-800",
+      gray: "bg-gray-50 border-gray-200 text-gray-800",
+      blue: "bg-blue-50 border-blue-200 text-blue-800"
+    };
+
+    return (
+      <div className={`mt-6 p-4 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}>
+        <div className="flex items-start">
+          <span className="text-2xl mr-3">{icon}</span>
+          <div>
+            <h4 className="font-medium mb-1">{title}</h4>
+            <p className="text-sm">{message}</p>
+          </div>
+        </div>
       </div>
     );
   }

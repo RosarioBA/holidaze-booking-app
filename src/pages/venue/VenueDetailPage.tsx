@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { getVenueById } from '../../api/venueService';
-import { createBooking } from '../../api/bookingService';
+import { createBooking, getUserBookings } from '../../api/bookingService';
 import { getVenueRatings, hasUserRatedVenue, calculateAverageRating } from '../../api/ratingService';
 import { Rating } from '../../types/rating';
 import { Venue } from '../../types/venue';
@@ -53,6 +53,8 @@ const VenueDetailPage = () => {
   const [userHasBooked, setUserHasBooked] = useState(false);
   const [userHasRated, setUserHasRated] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [userHasCompletedStay, setUserHasCompletedStay] = useState(false);
+  const [cannotRateReason, setCannotRateReason] = useState<'not_stayed' | 'already_rated' | 'not_logged_in' | 'own_venue' | null>(null);
 
   /**
    * Determines the appropriate back navigation based on source parameter
@@ -111,21 +113,60 @@ const VenueDetailPage = () => {
   };
 
   /**
-   * Checks if the user is eligible to rate this venue
+   * Checks if the user is eligible to rate this venue based on booking history
    */
-  const checkEligibilityToRate = () => {
-    // In development, allow all authenticated users to rate
-    // For production, uncomment the code below to check booking history
-    
-    if (user && venue && venue.bookings && venue.bookings.length > 0) {
-      const userCompletedBookings = venue.bookings.filter(booking => 
-        booking.customer?.name === user.name && 
-        new Date(booking.dateTo) < new Date()  // Only past bookings
-      );
-      setUserHasBooked(userCompletedBookings.length > 0);
-    } else {
-      // For now, allow all authenticated users to rate
-      setUserHasBooked(false);
+  const checkEligibilityToRate = async () => {
+    if (!user || !venue) {
+      setUserHasCompletedStay(false);
+      setCannotRateReason('not_logged_in');
+      return;
+    }
+
+    // Check if user owns this venue
+    if (user.name === venue.owner?.name) {
+      setUserHasCompletedStay(false);
+      setCannotRateReason('own_venue');
+      return;
+    }
+
+    // Check if user has already rated this venue
+    if (hasUserRatedVenue(venue.id, user.name)) {
+      setUserHasCompletedStay(false);
+      setCannotRateReason('already_rated');
+      setUserHasRated(true);
+      return;
+    }
+
+    try {
+      // Get user's booking history
+      const userBookings = await getUserBookings(token!);
+      const now = new Date();
+      
+      // Check if user has any completed stays at this venue
+      const completedStayAtVenue = userBookings.some(booking => {
+        // Check if booking is for this venue
+        const isThisVenue = booking.venue?.id === venue.id;
+        
+        // Check if the stay has been completed (checkout date has passed)
+        const checkOutDate = new Date(booking.dateTo);
+        const stayCompleted = checkOutDate < now;
+        
+        return isThisVenue && stayCompleted;
+      });
+
+      if (completedStayAtVenue) {
+        setUserHasCompletedStay(true);
+        setCannotRateReason(null);
+      } else {
+        setUserHasCompletedStay(false);
+        setCannotRateReason('not_stayed');
+      }
+      
+      setUserHasBooked(completedStayAtVenue);
+    } catch (error) {
+      console.error('Error checking user booking history:', error);
+      setUserHasCompletedStay(false);
+      setCannotRateReason('not_stayed');
     }
   };
 
@@ -138,15 +179,11 @@ const VenueDetailPage = () => {
       
       try {
         setLoading(true);
-        // Include owner and bookings details when fetching the venue
         const venueData = await getVenueById(id, true, true);
         setVenue(venueData);
         setError(null);
         
-        // Check eligibility to rate
-        checkEligibilityToRate();
-        
-        // Add this venue to recently viewed (localStorage)
+        // Add this venue to recently viewed
         if (venueData) {
           addToRecentlyViewed(venueData.id);
         }
@@ -156,10 +193,19 @@ const VenueDetailPage = () => {
         setLoading(false);
       }
     };
-
-    fetchVenue();
-    fetchRatings();
-  }, [id, user]);
+  
+    const loadData = async () => {
+      await fetchVenue();
+      await fetchRatings();
+      
+      // Check eligibility after venue and user data is loaded
+      if (user && token) {
+        await checkEligibilityToRate();
+      }
+    };
+  
+    loadData();
+  }, [id, user, token]);
 
   /**
    * Handles rating submission completion
@@ -249,7 +295,11 @@ const VenueDetailPage = () => {
   // 1. User is logged in
   // 2. User has not already rated the venue
   // 3. User is not the owner of the venue
-  const canRateVenue = user && !userHasRated && user.name !== owner?.name;
+  // 4. User has completed a stay at this venue
+  const canRateVenue = user && 
+    !userHasRated && 
+    user.name !== owner?.name && 
+    userHasCompletedStay;
 
   // Get back navigation info
   const backNav = getBackNavigation();
@@ -265,7 +315,12 @@ const VenueDetailPage = () => {
             </svg>
             <span className="font-medium">Booking Confirmed!</span>
           </div>
-          <p className="mt-1 ml-7">Your reservation has been successfully booked. <Link to="/customer/trips" className="text-green-700 underline">View your bookings</Link></p>
+          <p className="mt-1 ml-7">
+            Your reservation has been successfully booked. {" "}
+            <Link to="/customer/trips" className="text-green-700 underline">
+              View your bookings
+            </Link>
+          </p>
         </div>
       )}
       
@@ -336,10 +391,12 @@ const VenueDetailPage = () => {
             isLoading={ratingsLoading}
             showRatingForm={showRatingModal}
             canRateVenue={canRateVenue ?? false}
+            cannotRateReason={cannotRateReason}
             venueId={id || ''}
             onRatingSubmitted={handleRatingSubmitted}
           />
         </div>
+        {/* 👆 ADDED MISSING CLOSING DIV TAG HERE */}
 
         {/* Right Column - Booking Calendar */}
         <div className="lg:w-1/3">

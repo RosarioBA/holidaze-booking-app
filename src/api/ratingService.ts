@@ -163,3 +163,68 @@ export const getVenueRatingInfo = (venueId: string): { rating: number; count: nu
     
   return { rating, count };
 };
+
+/**
+ * Checks if a user has completed a stay at a specific venue
+ * 
+ * @param {string} venueId - ID of the venue
+ * @param {string} userName - Username to check
+ * @returns {Promise<boolean>} True if the user has completed a stay at this venue
+ */
+export const hasUserCompletedStayAtVenue = async (venueId: string, userName: string): Promise<boolean> => {
+  try {
+    // Get user's bookings from localStorage or API
+    // First, let's check if we have booking data stored locally
+    const userBookingsKey = `user_bookings_${userName}`;
+    const storedBookings = localStorage.getItem(userBookingsKey);
+    
+    if (storedBookings) {
+      const bookings = JSON.parse(storedBookings);
+      const now = new Date();
+      
+      // Check if user has any completed bookings for this venue
+      const completedStay = bookings.some((booking: any) => {
+        const checkOutDate = new Date(booking.dateTo);
+        const venueMatches = booking.venue?.id === venueId || booking.venueId === venueId;
+        const stayCompleted = checkOutDate < now; // Check-out date has passed
+        
+        return venueMatches && stayCompleted;
+      });
+      
+      return completedStay;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking user stay history:', error);
+    return false;
+  }
+};
+
+/**
+ * Gets user's completed stays for validation purposes
+ * 
+ * @param {string} userName - Username to check
+ * @returns {Array} Array of completed bookings
+ */
+export const getUserCompletedStays = (userName: string): any[] => {
+  try {
+    const userBookingsKey = `user_bookings_${userName}`;
+    const storedBookings = localStorage.getItem(userBookingsKey);
+    
+    if (storedBookings) {
+      const bookings = JSON.parse(storedBookings);
+      const now = new Date();
+      
+      return bookings.filter((booking: any) => {
+        const checkOutDate = new Date(booking.dateTo);
+        return checkOutDate < now; // Only completed stays
+      });
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error getting user completed stays:', error);
+    return [];
+  }
+};

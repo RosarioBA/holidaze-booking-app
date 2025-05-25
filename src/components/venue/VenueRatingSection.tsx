@@ -1,5 +1,3 @@
-// src/components/venue/VenueRatingSection.tsx
-
 /**
  * @file VenueRatingSection.tsx
  * @description Component for venue ratings section including display and form
@@ -25,6 +23,8 @@ interface VenueRatingSectionProps {
   venueId: string;
   /** Handler for rating submission */
   onRatingSubmitted: () => void;
+  /** Reason why user cannot rate (for better UX) */
+  cannotRateReason?: 'not_stayed' | 'already_rated' | 'not_logged_in' | 'own_venue' | null;
 }
 
 /**
@@ -37,7 +37,8 @@ const VenueRatingSection: React.FC<VenueRatingSectionProps> = ({
   showRatingForm,
   canRateVenue,
   venueId,
-  onRatingSubmitted
+  onRatingSubmitted,
+  cannotRateReason
 }) => {
   return (
     <section className="mb-10">
@@ -64,14 +65,13 @@ const VenueRatingSection: React.FC<VenueRatingSectionProps> = ({
         )}
       </div>
       
-      {/* Show rating form if showRatingForm is true */}
-      {(showRatingForm && canRateVenue) && (
-        <RatingForm 
-          venueId={venueId} 
-          onRatingSubmitted={onRatingSubmitted}
-          canRate={true}
-        />
-      )}
+      {/* Always show the rating form component - it will handle its own display logic */}
+      <RatingForm 
+        venueId={venueId} 
+        onRatingSubmitted={onRatingSubmitted}
+        canRate={canRateVenue}
+        cannotRateReason={cannotRateReason || undefined}
+      />
       
       {/* Display ratings list */}
       <div className="mt-6">
