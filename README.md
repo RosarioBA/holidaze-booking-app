@@ -2,7 +2,8 @@
 
 A modern, responsive accommodation booking application built with React and TypeScript for the Noroff Front-End Development exam project.
 
-![Holidaze Screenshot](./src/assets/screenshot.png)
+<img width="945" alt="image" src="https://github.com/user-attachments/assets/e65672e7-8cc7-460b-9b13-cb37b62e7454" />
+
 
 ## 🌟 Overview
 
@@ -71,7 +72,6 @@ This project was built to fulfill the requirements of the Noroff FED2 exam, demo
 - **Responsive Design** - Mobile-first approach
 
 ### Development Tools
-- **ESLint** - Code linting and quality assurance
 - **Git & GitHub** - Version control and collaboration
 - **GitHub Pages** - Automated deployment
 
@@ -164,7 +164,6 @@ src/
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
 - `npm run deploy` - Deploy to GitHub Pages
 
 ## 🔐 Authentication & API
