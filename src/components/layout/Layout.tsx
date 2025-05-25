@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className={`flex-grow ${isHomePage ? 'px-0 py-0' : 'container mx-auto px-0'} py-0 mb-0`}>
+      <main className={`flex-grow ${isHomePage ? 'px-0 py-0' : 'px-0'} py-0 mb-0`}>
         {children}
       </main>
       <Footer />
