@@ -107,7 +107,7 @@ const AppRoutes = () => {
       <Route path="/venues" element={<ConditionalLayout><VenuesPage /></ConditionalLayout>} />
       <Route path="/venues/:id" element={<ConditionalLayout><VenueDetailPage /></ConditionalLayout>} />
       <Route path="/profiles/:name" element={<ConditionalLayout><ProfileViewPage /></ConditionalLayout>} />
-      <Route path="/login" element={isAuthenticated ? <DashboardRedirect /> : <Layout><LoginPage /></Layout>} />
+      <Route path="/login" element={isAuthenticated ? <DashboardRedirect /> : <LoginPage />} />
       <Route path="/register" element={isAuthenticated ? <DashboardRedirect /> : <Layout><RegisterPage /></Layout>} />
       <Route path="/dashboard" element={<DashboardRedirect />} />
       <Route path="/my-trips" element={<Navigate to="/customer/trips" replace />} />
