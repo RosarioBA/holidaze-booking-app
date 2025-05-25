@@ -34,7 +34,6 @@ const VenueRatingSection: React.FC<VenueRatingSectionProps> = ({
   averageRating,
   ratings,
   isLoading,
-  showRatingForm,
   canRateVenue,
   venueId,
   onRatingSubmitted,
